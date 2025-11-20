@@ -20,6 +20,8 @@ import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
 import { AuthProvider } from "./context/AuthContext";
 import RequireRole from "./components/auth/RequireRole";
+import GoogleCallback from "./pages/AuthPages/google-callback";
+import ApprovalPending from "./pages/OtherPage/ApprovalPending";
 
 export default function App() {
   return (
@@ -30,7 +32,8 @@ export default function App() {
           <Routes>
             {/* Dashboard Layout */}
             <Route element={<AppLayout />}>
-              <Route index path="/" element={<RequireRole allowedRoles={["admin"]}><Home /></RequireRole>} />
+              {/* <Route index path="/" element={<RequireRole allowedRoles={["admin"]}><Home /></RequireRole>} /> */}
+              <Route index path="/" element={<Home />} />
 
               {/* Others Page */}
               <Route path="/profile" element={<UserProfiles />} />
@@ -59,6 +62,10 @@ export default function App() {
             {/* Auth Layout */}
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/oauth/google-callback" element={<GoogleCallback />} />
+            <Route path="/pending-approval" element={<ApprovalPending />} />
+
+
 
             {/* Fallback Route */}
             <Route path="*" element={<NotFound />} />

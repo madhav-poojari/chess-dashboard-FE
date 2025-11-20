@@ -5,7 +5,7 @@ import UserAddressCard from "../components/UserProfile/UserAddressCard";
 import PageMeta from "../components/common/PageMeta";
 
 import { useEffect, useState, useCallback } from "react";
-import { userPublicProfile } from "../actions/user";
+import { userPublicProfile } from "../api/user";
 // export default function UserProfiles() {
 //   return (
 //     <>

@@ -4,7 +4,7 @@ import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import { useEffect, useState } from "react";
-import { userPublicProfile } from "../../actions/user";
+import { userPublicProfile } from "../../api/user";
 
 export default function UserInfoCard({user, onUpdate}) {
   const { isOpen, openModal, closeModal } = useModal();
