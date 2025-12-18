@@ -3,25 +3,55 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useState } from "react";
+import { PublicProfile } from "../../models/publicProfile";
 
-export default function UserMetaCard({ user, onUpdate }) {
+interface PlayLinksUpdate {
+  uscf_id: string;
+  fide_id: string;
+  chesscom_username: string;
+  lichess_username: string;
+}
+
+interface UserMetaCardProps {
+  user: PublicProfile;            // Connects to the interface above
+  onUpdate: (data: PlayLinksUpdate) => Promise<void> | void;  // A function that returns nothing
+}
+
+export default function UserMetaCard({ user, onUpdate }: UserMetaCardProps) {
   const { isOpen, openModal, closeModal } = useModal();
   const [form, setForm] = useState({
-    first_name: "",
-    city: "",
-    state: "",
-    country: "",
+    first_name: user.first_name,
+    city: user.city,
+    state: user.state,
+    country: user.country,
   });
-  useEffect(() => {
-    setForm({ first_name: user.first_name, city:user.city, state: user.state, country: user.country })
+  const [playLinks, setplayLinks] = useState({
+    uscfId: user.uscfId,
+    fideId: user.fideId,
+    chessdotcomId: user.chessdotcomId,
+    lichessId: user.lichessId,
   });
 
-  const handleSave = () => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setplayLinks((prev) => ({
+      ...prev,
+      [name]: value, // dynamically update the key
+    }));
+  };
+
+  const lichessUrl = "https://lichess.org/@/" + playLinks.lichessId;
+  const chessDotComUrl = "https://www.chess.com/member/" + playLinks.chessdotcomId;
+
+  const handleSave = async () => {
     // Handle save logic here
-    console.log("Saving changes...");
+    await onUpdate({...user, lichess_username:playLinks.lichessId,chesscom_username: playLinks.chessdotcomId, fide_id: playLinks.fideId, uscf_id: playLinks.uscfId});
+
     closeModal();
   };
+
+
   return (
     <>
       <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
@@ -43,47 +73,23 @@ export default function UserMetaCard({ user, onUpdate }) {
             </div>
             <div className="flex items-center order-2 gap-2 grow xl:order-3 xl:justify-end">
               <a
-                href="https://www.facebook.com/PimjoHQ"
+                href={lichessUrl}
                 target="_blank"
                 rel="noopener"
                 className="flex h-11 w-11 items-center justify-center gap-2 rounded-full border border-gray-300 bg-white text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
               >
-                <svg
-                  className="fill-current"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M11.6666 11.2503H13.7499L14.5833 7.91699H11.6666V6.25033C11.6666 5.39251 11.6666 4.58366 13.3333 4.58366H14.5833V1.78374C14.3118 1.7477 13.2858 1.66699 12.2023 1.66699C9.94025 1.66699 8.33325 3.04771 8.33325 5.58342V7.91699H5.83325V11.2503H8.33325V18.3337H11.6666V11.2503Z"
-                    fill=""
-                  />
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Lichess SVG Icon</title><path fill="currentColor" d="M10.457 6.161a.237.237 0 0 0-.296.165c-.8 2.785 2.819 5.579 5.214 7.428c.653.504 1.216.939 1.591 1.292c1.745 1.642 2.564 2.851 2.733 3.178a.24.24 0 0 0 .275.122c.047-.013 4.726-1.3 3.934-4.574a.3.3 0 0 0-.023-.06L18.204 3.407L18.93.295a.24.24 0 0 0-.262-.293c-1.7.201-3.115.435-4.5 1.425c-4.844-.323-8.718.9-11.213 3.539C.334 7.737-.246 11.515.085 14.128c.763 5.655 5.191 8.631 9.081 9.532c.993.229 1.974.34 2.923.34c3.344 0 6.297-1.381 7.946-3.85a.24.24 0 0 0-.372-.3c-3.411 3.527-9.002 4.134-13.296 1.444c-4.485-2.81-6.202-8.41-3.91-12.749C4.741 4.221 8.801 2.362 13.888 3.31c.056.01.115 0 .165-.029l.335-.197c.926-.546 1.961-1.157 2.873-1.279l-.694 1.993a.24.24 0 0 0 .02.202l6.082 10.192c-.193 2.028-1.706 2.506-2.226 2.611c-.287-.645-.814-1.364-2.306-2.803c-.422-.407-1.21-.941-2.124-1.56c-2.364-1.601-5.937-4.02-5.391-5.984a.24.24 0 0 0-.165-.295" /></svg>
               </a>
 
               <a
-                href="https://x.com/PimjoHQ"
+                href={chessDotComUrl}
                 target="_blank"
                 rel="noopener"
                 className="flex h-11 w-11 items-center justify-center gap-2 rounded-full border border-gray-300 bg-white text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
               >
-                <svg
-                  className="fill-current"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M15.1708 1.875H17.9274L11.9049 8.75833L18.9899 18.125H13.4424L9.09742 12.4442L4.12578 18.125H1.36745L7.80912 10.7625L1.01245 1.875H6.70078L10.6283 7.0675L15.1708 1.875ZM14.2033 16.475H15.7308L5.87078 3.43833H4.23162L14.2033 16.475Z"
-                    fill=""
-                  />
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Chessdotcom SVG Icon</title><path fill="#64af3c" d="M12 0a3.85 3.85 0 0 0-3.875 3.846A3.84 3.84 0 0 0 9.73 6.969l-2.79 1.85c0 .622.144 1.114.434 1.649H9.83c-.014.245-.014.549-.014.925q0 .037.006.071c-.064 1.353-.507 3.472-3.62 5.842c-.816.625-1.423 1.495-1.806 2.533a.3.3 0 0 0-.045.084a8.1 8.1 0 0 0-.39 2.516c0 .1.216 1.561 8.038 1.561s8.038-1.46 8.038-1.561c0-2.227-.824-4.048-2.24-5.133c-4.034-3.08-3.586-5.74-3.644-6.838h2.458c.29-.535.434-1.027.434-1.649l-2.79-1.836a3.86 3.86 0 0 0 1.604-3.123A3.87 3.87 0 0 0 13.445.275c-.004-.002-.01.004-.015.004A3.8 3.8 0 0 0 12 0" /></svg>
               </a>
-
+              {/* 
               <a
                 href="https://www.linkedin.com/company/pimjo"
                 target="_blank"
@@ -124,7 +130,7 @@ export default function UserMetaCard({ user, onUpdate }) {
                     fill=""
                   />
                 </svg>
-              </a>
+              </a> */}
             </div>
           </div>
           <button
@@ -157,7 +163,7 @@ export default function UserMetaCard({ user, onUpdate }) {
               Edit Personal Information
             </h4>
             <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-              Update your details to keep your profile up-to-date.
+              Update your details to keep your user up-to-date.
             </p>
           </div>
           <form className="flex flex-col">
@@ -169,28 +175,38 @@ export default function UserMetaCard({ user, onUpdate }) {
 
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div>
-                    <Label>Lichess</Label>
+                    <Label>Lichess Username</Label>
                     <Input
+                      name="lichessId"
                       type="text"
-                      value="https://www.facebook.com/PimjoHQ"
+                      value={playLinks.lichessId}
+                      onChange={handleChange}
                     />
                   </div>
 
                   <div>
-                    <Label>Chess.com</Label>
-                    <Input type="text" value="https://x.com/PimjoHQ" />
+                    <Label>Chess.com username</Label>
+                    <Input type="text" name="chessdotcomId"
+                      value={playLinks.chessdotcomId} onChange={handleChange}
+                    />
                   </div>
 
                   <div>
-                    <Label>USCF</Label>
+                    <Label>USCF Id</Label>
                     <Input
                       type="text"
-                      value="https://www.linkedin.com/company/pimjo"
+                      name="uscfId"
+                      value={playLinks.uscfId}
+                      onChange={handleChange}
                     />
                   </div>
                   <div>
                     <Label>FIDE</Label>
-                    <Input type="text" value="https://instagram.com/PimjoHQ" />
+                    <Input type="text"
+                      name="fideId"
+                      value={playLinks.fideId}
+                      onChange={handleChange}
+                    />
                   </div>
                 </div>
               </div>

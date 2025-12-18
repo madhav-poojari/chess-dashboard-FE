@@ -3,9 +3,21 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
+import { PublicProfile } from "../../models/publicProfile";
 
-export default function UserAddressCard({user, onUpdate}) {
+interface AddressUpdate {
+  country: string;
+  state: string;
+  postal_code: string;
+  city: string;
+}
+interface UserAddressCardProps {
+  user: PublicProfile;            // Connects to the interface above
+  onUpdate: (data:AddressUpdate) => Promise<void> | void;  // A function that returns nothing
+}
+
+export default function UserAddressCard({user, onUpdate}:UserAddressCardProps) {
   const { isOpen, openModal, closeModal } = useModal();
   const [form, setForm] = useState({
     country:user.country,
@@ -13,7 +25,7 @@ export default function UserAddressCard({user, onUpdate}) {
     state:user.state,
     postal_code:user.postal_code,
   });
-  const handleChange = (e) => {
+  const handleChange = (e:ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
@@ -23,7 +35,7 @@ export default function UserAddressCard({user, onUpdate}) {
   const handleSave = async() => {
     // Handle save logic here
     console.log("Saving changes...");
-    await onUpdate({ country: form.country, state: form.state ,postal_code:form.postal_code,city: form.city });
+    await onUpdate({ ...user,country: form.country, state: form.state ,postal_code:form.postal_code,city: form.city });
     closeModal();
   };
   return (

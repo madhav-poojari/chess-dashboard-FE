@@ -10,5 +10,9 @@ export interface PublicProfile {
     state: string;
     postal_code: string;
     profile_picture_url?: string;
+    lichessId:string;
+    chessdotcomId:string;
+    uscfId:string;
+    fideId:string;
   }
   

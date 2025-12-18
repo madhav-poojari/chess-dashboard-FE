@@ -36,9 +36,13 @@ const GoogleCallback: React.FC = () => {
         if (!res.ok) {
           const text = await res.text();
           const status = res.status;
+          
           window.opener?.postMessage({ type: "oauth", success: false, error: text, state,status }, origin);
         } else {
-          window.opener?.postMessage({ type: "oauth", success: true, state ,status}, origin);
+          const res_json = await res.json();
+          const {data} =res_json ;
+
+          window.opener?.postMessage({ type: "oauth", success: true,data, state ,status}, origin);
         }
       } catch (err: any) {
         window.opener?.postMessage({ type: "oauth", success: false, error: err?.message || "network", state,status:0 }, origin);

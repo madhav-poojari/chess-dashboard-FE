@@ -11,6 +11,10 @@ export interface UserDetails {
     profile_picture_url: string;
     additional_info: Record<string, any>;
     updated_at: string;
+    lichess_username: string;
+    uscf_id: string,
+    chesscom_username: string,
+    fide_id: string,
   }
   
   export interface User {

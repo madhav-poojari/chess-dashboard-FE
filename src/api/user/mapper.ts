@@ -13,4 +13,8 @@ export const toPublicProfile = (u: User): PublicProfile => ({
   state: u.details?.state ?? "",
   postal_code: u.details?.zipcode ?? "",
   profile_picture_url: u.details?.profile_picture_url,
+  lichessId: u.details?.lichess_username,
+  chessdotcomId: u.details?.chesscom_username,
+  uscfId: u.details?.uscf_id,
+  fideId: u.details?.fide_id,
 });

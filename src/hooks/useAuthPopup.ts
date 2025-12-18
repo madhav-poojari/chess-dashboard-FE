@@ -1,7 +1,8 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { tokenStorage } from "../api/tokenStorage";
 
-type OAuthMessage = { type: "oauth"; success: boolean; state?: string; error?: string; status?:number };
+type OAuthMessage = { type: "oauth"; success: boolean; state?: string; error?: string; status?:number ;data?:any};
 
 export default function useAuthPopup() {
   const navigate = useNavigate();
@@ -29,6 +30,10 @@ export default function useAuthPopup() {
       popup?.close();
 
       if (msg.success) {
+        if (msg.data){
+          const {access_token} = msg.data;
+          tokenStorage.set(access_token);
+        }
         // main window redirects to dashboard (backend already set httpOnly cookie)
         navigate("/");
       }

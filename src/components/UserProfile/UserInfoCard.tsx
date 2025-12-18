@@ -3,17 +3,26 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
-import { useEffect, useState } from "react";
-import { userPublicProfile } from "../../api/user";
+import {  useState } from "react";
+import { PublicProfile } from "../../models/publicProfile";
 
-export default function UserInfoCard({user, onUpdate}) {
+interface InfoUpdate{
+  first_name: string;
+  last_name: string;
+  bio: string;
+}
+interface UserInfoCardProps {
+  user: PublicProfile;            // Connects to the interface above
+  onUpdate: (data:InfoUpdate) => Promise<void> | void;  // A function that returns nothing
+}
+export default function UserInfoCard({user, onUpdate}:UserInfoCardProps) {
   const { isOpen, openModal, closeModal } = useModal();
   const [form, setForm] = useState({
-    first_name:"",
-    last_name:"",
-    email:"",
-    uid:"",
-    bio:""
+    first_name:user.first_name,
+    last_name:user.last_name,
+    email:user.email,
+    uid:user.uid,
+    bio:user.bio
   });
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -48,13 +57,11 @@ export default function UserInfoCard({user, onUpdate}) {
   //   };
   // }, []); 
   
-  useEffect(() => {
-    setForm({ first_name: user.first_name, last_name: user.last_name ,bio:user.bio,email:user.email,uid:user.uid});
-  }, [user.first_name, user.last_name]);
+
 
    const handleSave = async () => {
     // Handle save logic here
-    await onUpdate({ first_name: form.first_name, last_name: form.last_name ,bio:form.bio,email:form.email });
+    await onUpdate({...user, first_name: form.first_name, last_name: form.last_name ,bio:form.bio });
 
     closeModal();
   };
@@ -167,7 +174,7 @@ export default function UserInfoCard({user, onUpdate}) {
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Email Address</Label>
-                    <Input type="text" name="last_name" value={form.email} onChange={handleChange}/>
+                    <Input type="text" name="last_name" value={form.email} onChange={handleChange} disabled={true}/>
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
@@ -178,39 +185,6 @@ export default function UserInfoCard({user, onUpdate}) {
                   <div className="col-span-2">
                     <Label>Bio</Label>
                     <Input type="text" name="bio" value={form.bio} onChange={handleChange}/>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Social Links
-                </h5>
-
-                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                  <div>
-                    <Label>Facebook</Label>
-                    <Input
-                      type="text"
-                      value="https://www.facebook.com/PimjoHQ"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>X.com</Label>
-                    <Input type="text" value="https://x.com/PimjoHQ" />
-                  </div>
-
-                  <div>
-                    <Label>Linkedin</Label>
-                    <Input
-                      type="text"
-                      value="https://www.linkedin.com/company/pimjo"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Instagram</Label>
-                    <Input type="text" value="https://instagram.com/PimjoHQ" />
                   </div>
                 </div>
               </div>
