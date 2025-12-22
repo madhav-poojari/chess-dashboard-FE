@@ -3,26 +3,26 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
-import { useState } from "react";
+import {  useState } from "react";
 import { PublicProfile } from "../../models/publicProfile";
 
-interface InfoUpdate {
+interface InfoUpdate{
   first_name: string;
   last_name: string;
   bio: string;
 }
 interface UserInfoCardProps {
   user: PublicProfile;            // Connects to the interface above
-  onUpdate: (data: InfoUpdate) => Promise<void> | void;  // A function that returns nothing
+  onUpdate: (data:InfoUpdate) => Promise<void> | void;  // A function that returns nothing
 }
-export default function UserInfoCard({ user, onUpdate }: UserInfoCardProps) {
+export default function UserInfoCard({user, onUpdate}:UserInfoCardProps) {
   const { isOpen, openModal, closeModal } = useModal();
   const [form, setForm] = useState({
-    first_name: user.first_name,
-    last_name: user.last_name,
-    email: user.email,
-    uid: user.uid,
-    bio: user.bio
+    first_name:user.first_name,
+    last_name:user.last_name,
+    email:user.email,
+    uid:user.uid,
+    bio:user.bio
   });
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,17 +56,17 @@ export default function UserInfoCard({ user, onUpdate }: UserInfoCardProps) {
   //     mounted = false;
   //   };
   // }, []); 
+  
 
 
-
-  const handleSave = async () => {
+   const handleSave = async () => {
     // Handle save logic here
-    await onUpdate({ ...user, first_name: form.first_name, last_name: form.last_name, bio: form.bio });
+    await onUpdate({...user, first_name: form.first_name, last_name: form.last_name ,bio:form.bio });
 
     closeModal();
   };
   if (Object.keys(user).length === 0) return <div>Loading...</div>;
-  return (
+ return (
     <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
@@ -143,7 +143,7 @@ export default function UserInfoCard({ user, onUpdate }: UserInfoCardProps) {
         </button>
       </div>
 
-      <Modal isOpen={isOpen} onClose={closeModal} className="w-full max-w-[700px] mx-4">
+      <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
         <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
           <div className="px-2 pr-14">
             <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
@@ -154,8 +154,8 @@ export default function UserInfoCard({ user, onUpdate }: UserInfoCardProps) {
             </p>
           </div>
           <form className="flex flex-col">
-            <div className="custom-scrollbar max-h-[60vh] overflow-y-auto px-2 pb-3">
-
+            <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
+              
               <div className="">
                 <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
                   Personal Information
@@ -164,17 +164,17 @@ export default function UserInfoCard({ user, onUpdate }: UserInfoCardProps) {
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div className="col-span-2 lg:col-span-1">
                     <Label>First Name</Label>
-                    <Input type="text" name="first_name" value={form.first_name} onChange={handleChange} />
+                    <Input type="text" name="first_name" value={form.first_name} onChange={handleChange}/>
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Last Name</Label>
-                    <Input type="text" name="last_name" value={form.last_name} onChange={handleChange} />
+                    <Input type="text" name="last_name" value={form.last_name} onChange={handleChange}/>
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Email Address</Label>
-                    <Input type="text" name="last_name" value={form.email} onChange={handleChange} disabled={true} />
+                    <Input type="text" name="last_name" value={form.email} onChange={handleChange} disabled={true}/>
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
@@ -184,7 +184,7 @@ export default function UserInfoCard({ user, onUpdate }: UserInfoCardProps) {
 
                   <div className="col-span-2">
                     <Label>Bio</Label>
-                    <Input type="text" name="bio" value={form.bio} onChange={handleChange} />
+                    <Input type="text" name="bio" value={form.bio} onChange={handleChange}/>
                   </div>
                 </div>
               </div>
