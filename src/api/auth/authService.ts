@@ -2,10 +2,10 @@
 import axios from "axios";
 import { tokenStorage } from "../tokenStorage";
 
-const API_BASE = import.meta.env.VITE_API_BASE   as string || "";
+const API_BASE = import.meta.env.VITE_API_BASE as string || "";
 
 export interface RefreshResponse { access_token: string; }
-export interface LoginForm { email:string;password:string}
+export interface LoginForm { email: string; password: string }
 export interface LoginResponse { access_token: string; expires_in?: number; }
 
 let logoutRedirect = () => { window.location.href = "/signin"; };
@@ -21,14 +21,14 @@ export const refreshToken = async (): Promise<string> => {
   return res.data.data.access_token;
 };
 
-export const loginByEmail = async (loginForm:LoginForm):  Promise<LoginResponse> => {
+export const loginByEmail = async (loginForm: LoginForm): Promise<LoginResponse> => {
   // calls backend which reads httpOnly refresh cookie and returns new access token
   const url = `${API_BASE}/api/v1/auth/login`;
 
-  const res = await axios.post(url, loginForm, );
+  const res = await axios.post(url, loginForm,);
   if (!res?.data?.data?.access_token) throw new Error("no_access_token");
   tokenStorage.set(res.data.data.access_token);
-  return { access_token:res.data.data.access_token};
+  return { access_token: res.data.data.access_token };
 };
 export const logout = async () => {
   try {
