@@ -44,8 +44,6 @@ export const createNote = async (note: CreateNotePayload): Promise<Note> => {
     };
 
     const response = await api.post("/api/v1/notes", payload);
-    // Note: If backend response differs from frontend Note type, might need mapping here too.
-    // For now assuming we just need the creation to succeed.
     return response.data.data;
 };
 

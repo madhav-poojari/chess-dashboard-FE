@@ -34,8 +34,7 @@ export const canViewNote = (visibilityLevel: VisibilityLevel, userRole: string):
     return VISIBILITY_ROLES[visibilityLevel].includes(userRole);
 };
 
-// Check if user can edit/delete a note (same rules as viewing)
-// Check if user can edit/delete a note (same rules as viewing)
+// Check if user can edit/delete a note
 export const canEditNote = (visibilityLevel: VisibilityLevel, userRole: string): boolean => {
     return VISIBILITY_ROLES[visibilityLevel].includes(userRole);
 };

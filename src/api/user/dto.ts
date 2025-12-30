@@ -1,3 +1,4 @@
+// src/api/user/dto.ts
 export enum UserRole {
   STUDENT = "student",
   COACH = "coach",

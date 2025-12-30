@@ -22,7 +22,7 @@ export default function App() {
             <Routes>
               {/* Dashboard Layout */}
               <Route element={<AppLayout />}>
-                {/* Dashboard is the main page */}
+              
                 <Route index path="/" element={<Home />} />
                 <Route path="/profile" element={<UserProfiles />} />
 

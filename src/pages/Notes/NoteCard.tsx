@@ -20,7 +20,7 @@ export default function NoteCard({ note, userRole, onEdit, onDelete, userId }: N
     const isOwner = userId && note.user_id === userId;
     const canEditRegularNote = isStudent ? (roleAllowed && isOwner) : roleAllowed;
 
-    // For lesson plans: Only admin, mentor, coach can edit/delete
+    // For lesson plans: Only admins and mentor coaches can edit/delete
     const canEditLessonPlanNote = canManageLessonPlan(userRole);
 
     // Determine if edit/delete buttons should show
