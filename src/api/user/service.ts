@@ -25,7 +25,7 @@ export const updateProfile = async (userProfle: Partial<PublicProfile>): Promise
 };
 
 export const fetchStudents = async (): Promise<User[]> => {
-  const res = await api.get("/api/v1/users/students");
+  const res = await api.get("/api/v1/users/");
   const data: ApiResponse<User[]> = res.data;
   return data.data;
 };

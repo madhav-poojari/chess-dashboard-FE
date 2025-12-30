@@ -4,7 +4,6 @@ import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
 import UserProfiles from "./pages/UserProfiles";
 import Notes from "./pages/Notes/Notes";
-import StudentsList from "./pages/Students/StudentsList";
 import Home from "./pages/Dashboard/Home";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
@@ -30,8 +29,7 @@ export default function App() {
                 {/* Notes */}
                 <Route path="/notes" element={<Notes />} />
 
-                {/* Students */}
-                <Route path="/students" element={<StudentsList />} />
+
               </Route>
 
               {/* Auth Layout */}

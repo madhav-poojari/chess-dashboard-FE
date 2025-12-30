@@ -3,9 +3,9 @@ import { Modal } from '../../components/ui/modal';
 import { useAuth } from '../../context/AuthContext';
 import { fetchStudents } from '../../api/user/service';
 import { User } from '../../api/user/dto';
-import api from '../../api/axiosInstance';
+import { createLessonPlan, updateLessonPlan } from '../../api/notes/noteService';
 
-interface LessonPlan {
+export interface LessonPlan {
     id?: string;
     title: string;
     description: string[];
@@ -43,8 +43,12 @@ export default function CreateLessonPlanModal({ isOpen, onClose, onSuccess, stud
             setError('');
             if (initialData) {
                 // Edit mode
-                setTitle(initialData.title);
-                setDescription(initialData.description.join('\n'));
+                setTitle(initialData.title || '');
+                // Handle description - can be array or string
+                const descriptionText = Array.isArray(initialData.description) 
+                    ? initialData.description.join('\n')
+                    : (initialData.description || '');
+                setDescription(descriptionText);
                 setStartDate(initialData.start_date?.split('T')[0] || '');
                 setEndDate(initialData.end_date?.split('T')[0] || '');
                 setSelectedStudentId(initialData.user_id || '');
@@ -113,16 +117,17 @@ export default function CreateLessonPlanModal({ isOpen, onClose, onSuccess, stud
 
             if (initialData?.id) {
                 // Update existing lesson plan
-                await api.put(`/api/v1/notes/lesson-plans/${initialData.id}`, payload);
+                await updateLessonPlan(initialData.id, payload);
             } else {
                 // Create new lesson plan
-                await api.post('/api/v1/notes/lesson-plans', payload);
+                await createLessonPlan(payload);
             }
             onSuccess();
             onClose();
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Save lesson plan error:", err);
-            const errorMessage = err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to save lesson plan';
+            const error = err as { response?: { data?: { error?: string; message?: string } }; message?: string };
+            const errorMessage = error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to save lesson plan';
             setError(errorMessage);
         } finally {
             setLoading(false);

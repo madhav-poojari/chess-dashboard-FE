@@ -5,9 +5,9 @@ import { useAuth } from "../../context/AuthContext";
 import { Note, canViewNote, getVisibleLevelsForRole, VISIBILITY_DESCRIPTIONS, VISIBILITY_COLORS, canManageLessonPlan } from "./types";
 import NoteCard from "./NoteCard";
 import CreateNoteModal from "./CreateNoteModal";
-import CreateLessonPlanModal from "./CreateLessonPlanModal";
+import CreateLessonPlanModal, { LessonPlan } from "./CreateLessonPlanModal";
 import api from "../../api/axiosInstance";
-import { deleteNote } from "../../api/notes/noteService";
+import { deleteNote, getLessonPlanById } from "../../api/notes/noteService";
 
 export default function Notes() {
     const { user } = useAuth();
@@ -21,16 +21,37 @@ export default function Notes() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isLessonPlanModalOpen, setIsLessonPlanModalOpen] = useState(false);
 
+    // Detailed lesson plan data
+    const [lessonPlanToEdit, setLessonPlanToEdit] = useState<LessonPlan | undefined>(undefined);
+    const [rawLessonPlan, setRawLessonPlan] = useState<LessonPlan | undefined>(undefined);
+
     const loadNotes = async () => {
         setLoading(true);
         try {
-            const response = await api.get('/api/v1/notes/by-role');
+            const userId = studentIdParam || user?.id;
+            if (!userId) {
+                console.error('No user ID available for fetching notes');
+                setNotes([]);
+                setLoading(false);
+                return;
+            }
+            const response = await api.get(`/api/v1/notes/?user_id=${userId}&limit=20&offset=0`);
             const data = response.data;
             if (data.success) {
                 const { notes, lesson_plan } = data.data; // Destructure the new object
 
                 // Map the standard notes
-                const mappedNotes: Note[] = notes.map((item: any) => ({
+                const mappedNotes: Note[] = notes.map((item: {
+                    id: string;
+                    title: string;
+                    description: string;
+                    visibility: number;
+                    created_at: string;
+                    updated_at: string;
+                    user_id: string;
+                    created_by_name?: string;
+                    created_by?: string;
+                }) => ({
                     id: item.id,
                     title: item.title,
                     content: item.description,
@@ -57,6 +78,11 @@ export default function Notes() {
                     };
                     // Add lesson plan to the TOP of the list
                     mappedNotes.unshift(lpNote);
+
+                    // Store raw lesson plan for editing
+                    setRawLessonPlan(lesson_plan);
+                } else {
+                    setRawLessonPlan(undefined);
                 }
 
                 setNotes(mappedNotes);
@@ -76,6 +102,7 @@ export default function Notes() {
         if (user) {
             loadNotes();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
     const userRole = user?.role || '';
@@ -98,9 +125,41 @@ export default function Notes() {
     const lessonPlans = filteredNotes.filter(note => note.type === 'lesson_plan');
     const regularNotes = filteredNotes.filter(note => note.type === 'note');
 
-    const handleEdit = (note: Note) => {
-        setNoteToEdit(note);
-        setIsCreateModalOpen(true);
+    const handleEdit = async (note: Note) => {
+        if (note.type === 'lesson_plan') {
+            // Use the raw lesson plan data if available
+            if (rawLessonPlan && rawLessonPlan.id === note.id) {
+                setLessonPlanToEdit(rawLessonPlan);
+                setIsLessonPlanModalOpen(true);
+            } else if (note.id) {
+                // Fetch the full lesson plan data
+                const lessonPlan = await getLessonPlanById(note.id);
+                if (lessonPlan) {
+                    setLessonPlanToEdit(lessonPlan);
+                    setIsLessonPlanModalOpen(true);
+                } else {
+                    // Fallback: construct LessonPlan from Note data
+                    const fallbackLessonPlan: LessonPlan = {
+                        id: note.id,
+                        title: note.title,
+                        description: note.content ? note.content.split('\n').filter(line => line.trim()) : [],
+                        start_date: '',
+                        end_date: '',
+                        user_id: note.user_id || '',
+                        active: true,
+                        created_by: note.created_by
+                    };
+                    setLessonPlanToEdit(fallbackLessonPlan);
+                    setIsLessonPlanModalOpen(true);
+                    console.warn("Using fallback lesson plan data for edit - dates may be missing");
+                }
+            } else {
+                console.error("Cannot edit lesson plan: missing ID");
+            }
+        } else {
+            setNoteToEdit(note);
+            setIsCreateModalOpen(true);
+        }
     };
 
     const handleDelete = async (note: Note) => {
@@ -108,9 +167,10 @@ export default function Notes() {
             try {
                 await deleteNote(note.id);
                 loadNotes();
-            } catch (error: any) {
-                console.error("Failed to delete note", error.response?.data || error.message);
-                alert(`Failed to delete note: ${error.response?.data?.message || error.message}`);
+            } catch (error: unknown) {
+                const err = error as { response?: { data?: { message?: string } }; message?: string };
+                console.error("Failed to delete note", err.response?.data || err.message);
+                alert(`Failed to delete note: ${err.response?.data?.message || err.message || 'Unknown error'}`);
             }
         }
     };
@@ -260,11 +320,15 @@ export default function Notes() {
 
             <CreateLessonPlanModal
                 isOpen={isLessonPlanModalOpen}
-                onClose={() => setIsLessonPlanModalOpen(false)}
+                onClose={() => {
+                    setIsLessonPlanModalOpen(false);
+                    setLessonPlanToEdit(undefined);
+                }}
                 onSuccess={() => {
                     loadNotes();
                 }}
                 studentId={studentIdParam}
+                initialData={lessonPlanToEdit}
             />
         </>
     );

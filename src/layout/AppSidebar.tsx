@@ -43,7 +43,7 @@ const AppSidebar: React.FC = () => {
   useEffect(() => {
     const loadStudents = async () => {
       // Normalize role comparison
-      const userRole = user?.role?.toLowerCase() || "";
+      const userRole = user?.role?.toLowerCase().trim() || "";
 
       const permittedRoles = [UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN];
 
@@ -91,7 +91,7 @@ const AppSidebar: React.FC = () => {
     {
       icon: <DocsIcon />,
       name: "Notes",
-      path: "/notes",
+      path: "/not es",
 
       allowedRoles: [UserRole.STUDENT]
     },
@@ -179,7 +179,7 @@ const AppSidebar: React.FC = () => {
     <ul className="flex flex-col gap-4">
       {items.map((nav, index) => {
         if (nav.allowedRoles) {
-          const userRole = user?.role?.toLowerCase() || "";
+          const userRole = user?.role?.toLowerCase().trim() || "";
           console.log(`Checking role for ${nav.name}: userRole=${userRole}, allowed=${nav.allowedRoles}`);
           if (!user || !nav.allowedRoles.includes(userRole as UserRole)) {
             return null; // hide this nav item
