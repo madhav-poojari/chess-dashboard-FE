@@ -18,7 +18,7 @@ export const VISIBILITY_DESCRIPTIONS: Record<VisibilityLevel, string> = {
     L1: 'Admins only',
     L2: 'Admins & Mentors',
     L3: 'Admins, Mentors & Coaches',
-    L4: 'Everyone',
+    L4: 'Admins, Mentors, Coaches and Students',
 };
 
 // Role-based visibility access
@@ -61,9 +61,9 @@ export const getVisibleLevelsForRole = (userRole: string): VisibilityLevel[] => 
 };
 
 // Color scheme for visibility levels
-export const VISIBILITY_COLORS: Record<VisibilityLevel, { bg: string; border: string; text: string }> = {
-    L1: { bg: 'bg-red-50 dark:bg-red-900/20', border: 'border-l-red-500', text: 'text-red-600 dark:text-red-400' },
-    L2: { bg: 'bg-purple-50 dark:bg-purple-900/20', border: 'border-l-purple-500', text: 'text-purple-600 dark:text-purple-400' },
-    L3: { bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-l-blue-500', text: 'text-blue-600 dark:text-blue-400' },
-    L4: { bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-l-green-500', text: 'text-green-600 dark:text-green-400' },
+export const VISIBILITY_COLORS: Record<VisibilityLevel, { bg: string; border: string; text: string; dot: string }> = {
+    L1: { bg: 'bg-red-50 dark:bg-red-900/20', border: 'border-l-red-500', text: 'text-red-600 dark:text-red-400', dot: 'bg-red-500' },
+    L2: { bg: 'bg-purple-50 dark:bg-purple-900/20', border: 'border-l-purple-500', text: 'text-purple-600 dark:text-purple-400', dot: 'bg-purple-500' },
+    L3: { bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-l-blue-500', text: 'text-blue-600 dark:text-blue-400', dot: 'bg-blue-500' },
+    L4: { bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-l-green-500', text: 'text-green-600 dark:text-green-400', dot: 'bg-green-500' },
 };

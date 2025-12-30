@@ -35,33 +35,38 @@ export default function Notes() {
                 setLoading(false);
                 return;
             }
-            const response = await api.get(`/api/v1/notes/?user_id=${userId}&limit=20&offset=0`);
+            const response = await api.get(`/api/v1/notes/?user_id=${userId}`);
             const data = response.data;
-            if (data.success) {
-                const { notes, lesson_plan } = data.data; // Destructure the new object
+            if (data.success && data.data) {
+                const { notes, lesson_plan } = data.data;
 
-                // Map the standard notes
-                const mappedNotes: Note[] = notes.map((item: {
-                    id: string;
-                    title: string;
-                    description: string;
-                    visibility: number;
-                    created_at: string;
-                    updated_at: string;
-                    user_id: string;
-                    created_by_name?: string;
-                    created_by?: string;
-                }) => ({
-                    id: item.id,
-                    title: item.title,
-                    content: item.description,
-                    visibility_level: `L${item.visibility}`,
-                    created_at: item.created_at,
-                    updated_at: item.updated_at,
-                    type: 'note',
-                    user_id: item.user_id,
-                    created_by: item.created_by_name || item.created_by
-                }));
+                // Map the standard notes - ensure notes is an array
+                const mappedNotes: Note[] = Array.isArray(notes) ? notes
+                    .filter((item: { visibility: number }) => {
+                        // Filter out invalid visibility levels (should be 1-4)
+                        return item.visibility >= 1 && item.visibility <= 4;
+                    })
+                    .map((item: {
+                        id: string;
+                        title: string;
+                        description: string;
+                        visibility: number;
+                        created_at: string;
+                        updated_at: string;
+                        user_id: string;
+                        created_by_name?: string;
+                        created_by?: string;
+                    }) => ({
+                        id: item.id,
+                        title: item.title,
+                        content: item.description || '',
+                        visibility_level: `L${item.visibility}` as Note['visibility_level'],
+                        created_at: item.created_at,
+                        updated_at: item.updated_at,
+                        type: 'note' as const,
+                        user_id: item.user_id,
+                        created_by: item.created_by_name || item.created_by
+                    })) : [];
 
                 // If there is a lesson plan, add it to the list
                 if (lesson_plan && lesson_plan.active) {
@@ -90,9 +95,15 @@ export default function Notes() {
                 console.error('Failed to fetch notes:', data.message);
                 setNotes([]);
             }
-        } catch (error) {
+        } catch (error: unknown) {
             console.error('Error fetching notes:', error);
-            setNotes([]);
+            // Handle different error types gracefully
+            const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+            if (err.response?.status === 404 || err.response?.status === 403) {
+                setNotes([]);
+            } else {
+                setNotes([]);
+            }
         } finally {
             setLoading(false);
         }
@@ -210,8 +221,9 @@ export default function Notes() {
                     <div className="flex flex-wrap gap-4 text-xs">
                         {visibleLevels.map((level) => (
                             <div key={level} className="flex items-center gap-2">
-                                <span className={`w-3 h-3 rounded ${VISIBILITY_COLORS[level].border.replace('border-l-', 'bg-')}`}></span>
-                                <span className="text-gray-600 dark:text-gray-400">{level} - {VISIBILITY_DESCRIPTIONS[level]}</span>
+                                <span className={`w-3 h-3 rounded ${VISIBILITY_COLORS[level].dot}`}></span>
+                                <span className={`font-medium ${VISIBILITY_COLORS[level].text}`}>{level}</span>
+                                <span className="text-gray-600 dark:text-gray-400">- {VISIBILITY_DESCRIPTIONS[level]}</span>
                             </div>
                         ))}
                     </div>

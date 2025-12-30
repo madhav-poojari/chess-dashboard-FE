@@ -51,9 +51,28 @@ export default function NoteCard({ note, userRole, onEdit, onDelete, userId }: N
         return `${colors.border} ${colors.bg}`;
     };
 
+    // Render content with bullet points for lesson plans
+    const renderContent = () => {
+        if (isLessonPlan) {
+            const lines = note.content.split('\n').filter(line => line.trim());
+            return (
+                <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1 mb-3">
+                    {lines.map((line, index) => (
+                        <li key={index}>{line.trim()}</li>
+                    ))}
+                </ul>
+            );
+        }
+        return (
+            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+                {note.content}
+            </p>
+        );
+    };
+
     return (
         <div
-            className={`rounded-lg border border-gray-200 dark:border-gray-700 border-l-4 ${getCardStyle()} p-4 transition-shadow hover:shadow-md`}
+            className={`rounded-lg border border-gray-200 dark:border-gray-700 border-l-4 ${getCardStyle()} p-4 transition-shadow hover:shadow-md flex flex-col`}
         >
             <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
@@ -68,39 +87,43 @@ export default function NoteCard({ note, userRole, onEdit, onDelete, userId }: N
                             </span>
                         )}
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
-                        {note.content}
-                    </p>
-                    <div className="text-xs text-gray-500 dark:text-gray-500 space-y-0.5">
-                        <div>{formatDate(note.created_at)}</div>
-                        {note.created_by && (
-                            <div className="text-gray-400 dark:text-gray-600">
-                                Created by: {note.created_by}
-                            </div>
-                        )}
-                    </div>
+                    {renderContent()}
                 </div>
 
-                {canEdit && (
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                        {onEdit && (
-                            <button
-                                onClick={() => onEdit(note)}
-                                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
-                                title="Edit note"
-                            >
-                                <PencilIcon className="w-4 h-4" />
-                            </button>
-                        )}
-                        {onDelete && (
-                            <button
-                                onClick={() => onDelete(note)}
-                                className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                                title="Delete note"
-                            >
-                                <TrashBinIcon className="w-4 h-4" />
-                            </button>
-                        )}
+                <div className="flex items-start gap-2 flex-shrink-0">
+                    {canEdit && (
+                        <div className="flex items-center gap-2">
+                            {onEdit && (
+                                <button
+                                    onClick={() => onEdit(note)}
+                                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                                    title="Edit note"
+                                >
+                                    <PencilIcon className="w-4 h-4" />
+                                </button>
+                            )}
+                            {onDelete && (
+                                <button
+                                    onClick={() => onDelete(note)}
+                                    className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                                    title="Delete note"
+                                >
+                                    <TrashBinIcon className="w-4 h-4" />
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+            <div className="flex justify-between items-center mt-2">
+                {!isLessonPlan && (
+                    <div className="text-xs text-gray-500 dark:text-gray-500">
+                        {formatDate(note.created_at)}
+                    </div>
+                )}
+                {note.created_by && (
+                    <div className="text-xs text-gray-500 dark:text-gray-500 ml-auto">
+                        Created by: {note.created_by}
                     </div>
                 )}
             </div>

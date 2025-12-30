@@ -99,9 +99,10 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
             }
             onSuccess();
             onClose();
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Save note error:", err);
-            const errorMessage = err.response?.data?.error || err.message || 'Failed to save note';
+            const error = err as { response?: { data?: { error?: string } }; message?: string };
+            const errorMessage = error.response?.data?.error || error.message || 'Failed to save note';
             setError(errorMessage);
         } finally {
             setLoading(false);
@@ -132,32 +133,8 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Note Type Selector */}
-                    <div className="flex gap-4 mb-4">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="radio"
-                                name="type"
-                                checked={type === 'note'}
-                                onChange={() => setType('note')}
-                                className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                            />
-                            <span className="text-gray-700 dark:text-gray-300">Note</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="radio"
-                                name="type"
-                                checked={type === 'lesson_plan'}
-                                onChange={() => setType('lesson_plan')}
-                                className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                            />
-                            <span className="text-gray-700 dark:text-gray-300">Lesson Plan</span>
-                        </label>
-                    </div>
 
-                    {/* Student Selector (only if not pre-selected via URL and NOT in edit mode - usually we don't change student on edit) */}
-                    {/* If editing, show disabled input or just hidden if we want to lock it */}
+
                     {(!studentId || isEditMode) && (
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">

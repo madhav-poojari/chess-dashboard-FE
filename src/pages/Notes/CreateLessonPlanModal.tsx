@@ -24,6 +24,30 @@ interface CreateLessonPlanModalProps {
     initialData?: LessonPlan;
 }
 
+// Function to generate title from dates in format "Month-Month Year"
+const generateTitleFromDates = (start: string, end: string): string => {
+    if (!start || !end) return '';
+    
+    const startDateObj = new Date(start);
+    const endDateObj = new Date(end);
+    
+    const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    
+    const startMonth = monthNames[startDateObj.getMonth()];
+    const endMonth = monthNames[endDateObj.getMonth()];
+    const year = endDateObj.getFullYear();
+    
+    // If same month, just show "Month Year"
+    if (startMonth === endMonth) {
+        return `${startMonth} ${year}`;
+    }
+    
+    return `${startMonth}-${endMonth} ${year}`;
+};
+
 export default function CreateLessonPlanModal({ isOpen, onClose, onSuccess, studentId, initialData }: CreateLessonPlanModalProps) {
     const { user } = useAuth();
     const [title, setTitle] = useState('');
@@ -37,20 +61,35 @@ export default function CreateLessonPlanModal({ isOpen, onClose, onSuccess, stud
     const [students, setStudents] = useState<User[]>([]);
     const [selectedStudentId, setSelectedStudentId] = useState<string>('');
 
+    // Update title when dates change
+    useEffect(() => {
+        if (startDate && endDate) {
+            const generatedTitle = generateTitleFromDates(startDate, endDate);
+            setTitle(generatedTitle);
+        }
+    }, [startDate, endDate]);
+
     // Reset form when modal opens
     useEffect(() => {
         if (isOpen) {
             setError('');
             if (initialData) {
                 // Edit mode
-                setTitle(initialData.title || '');
                 // Handle description - can be array or string
                 const descriptionText = Array.isArray(initialData.description) 
                     ? initialData.description.join('\n')
                     : (initialData.description || '');
                 setDescription(descriptionText);
-                setStartDate(initialData.start_date?.split('T')[0] || '');
-                setEndDate(initialData.end_date?.split('T')[0] || '');
+                const start = initialData.start_date?.split('T')[0] || '';
+                const end = initialData.end_date?.split('T')[0] || '';
+                setStartDate(start);
+                setEndDate(end);
+                // Generate title from dates
+                if (start && end) {
+                    setTitle(generateTitleFromDates(start, end));
+                } else {
+                    setTitle(initialData.title || '');
+                }
                 setSelectedStudentId(initialData.user_id || '');
             } else {
                 // Create mode
@@ -141,7 +180,7 @@ export default function CreateLessonPlanModal({ isOpen, onClose, onSuccess, stud
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
-            <div className="p-6 max-w-lg">
+            <div className="p-6 max-w-[550px]">
                 {/* Header with blue accent */}
                 <div className="mb-6">
                     <div className="flex items-center gap-3 mb-2">
@@ -194,19 +233,22 @@ export default function CreateLessonPlanModal({ isOpen, onClose, onSuccess, stud
                         </div>
                     )}
 
-                    {/* Title */}
+                    {/* Title - Auto-generated from dates */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Lesson Plan Title <span className="text-red-500">*</span>
+                            Lesson Plan Title
                         </label>
                         <input
                             type="text"
                             required
                             value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white transition-colors"
-                            placeholder="e.g., Opening Fundamentals - Phase 1"
+                            readOnly
+                            className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-gray-900 cursor-not-allowed dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                            placeholder="Title will be generated from dates (e.g., August-September 2026)"
                         />
+                        <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                            Title is automatically generated from the start and end dates
+                        </p>
                     </div>
 
                     {/* Date Range */}
@@ -251,9 +293,6 @@ export default function CreateLessonPlanModal({ isOpen, onClose, onSuccess, stud
                             className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white transition-colors resize-none"
                             placeholder="Enter each goal on a new line:&#10;• Master basic opening principles&#10;• Understand pawn structures&#10;• Practice 3 games per week"
                         />
-                        <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                            Each line will be treated as a separate goal or milestone
-                        </p>
                     </div>
 
                     {/* Action Buttons */}

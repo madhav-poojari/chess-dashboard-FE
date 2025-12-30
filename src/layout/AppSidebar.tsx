@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router";
 
 import {
   ChevronDownIcon,
-  GridIcon,
   HorizontaLDots,
   UserCircleIcon,
   DocsIcon,
@@ -77,12 +76,6 @@ const AppSidebar: React.FC = () => {
   // Memoize navItems to depend on students
   const navItems: NavItem[] = [
     {
-      icon: <GridIcon />,
-      name: "Dashboard",
-      path: "/",
-      allowedRoles: [UserRole.STUDENT, UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
-    },
-    {
       icon: <UserCircleIcon />,
       name: "User Profile",
       path: "/profile",
@@ -91,8 +84,7 @@ const AppSidebar: React.FC = () => {
     {
       icon: <DocsIcon />,
       name: "Notes",
-      path: "/not es",
-
+      path: "/notes",
       allowedRoles: [UserRole.STUDENT]
     },
     {
