@@ -6,7 +6,7 @@ export type User = {
   name: string;
   email?: string;
   // single role per user (as you requested)
-  role: string; // e.g. "admin" | "instructor" | "student"
+  role: string; // e.g. "admin" | "mentor" | "student"
 };
 
 type AuthContextType = {
@@ -17,21 +17,22 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+import { fetchMe } from "../api/user/service";
+
 async function fetchCurrentUser(): Promise<User | null> {
-  // TODO: replace with your real API call, e.g. fetch('/api/me')...
-  // Simulated example (return null if not logged in)
-  return new Promise((res) =>
-    setTimeout(
-      () =>
-        res({
-          id: "u1",
-          name: "Madhava Poojari",
-          email: "madhava@example.com",
-          role: "student", // change for testing
-        }),
-      300
-    )
-  );
+  try {
+    const user = await fetchMe();
+    return {
+      id: user.id,
+      name: `${user.first_name} ${user.last_name}`,
+      email: user.email,
+      role: user.role
+    };
+  } catch (error) {
+    console.error("fetchCurrentUser failed:", error);
+    // If 401/403 or network error, return null
+    return null;
+  }
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
