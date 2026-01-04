@@ -43,7 +43,6 @@ export const createNote = async (note: CreateNotePayload): Promise<Note> => {
         }
     };
 
-    // API_BASE already includes /api/v1
     const response = await api.post("/notes", payload);
     return response.data.data;
 };
@@ -59,32 +58,27 @@ export const updateNote = async (id: string, note: CreateNotePayload): Promise<N
             created_type: note.type
         }
     };
-    // API_BASE already includes /api/v1
     const response = await api.post(`/notes/${id}`, payload);
     return response.data.data;
 };
 
 export const deleteNote = async (id: string): Promise<void> => {
-    // API_BASE already includes /api/v1
     await api.delete(`/notes/${id}`);
 };
 
 // Lesson Plan service functions
 export const createLessonPlan = async (lessonPlan: CreateLessonPlanPayload): Promise<LessonPlan> => {
-    // API_BASE already includes /api/v1
     const response = await api.post("/notes/lesson-plans", lessonPlan);
     return response.data.data;
 };
 
 export const updateLessonPlan = async (id: string, lessonPlan: CreateLessonPlanPayload): Promise<LessonPlan> => {
-    // API_BASE already includes /api/v1
     const response = await api.patch(`/notes/lesson-plans/${id}`, lessonPlan);
     return response.data.data;
 };
 
 export const getLessonPlanById = async (id: string): Promise<LessonPlan | null> => {
     try {
-        // API_BASE already includes /api/v1
         const response = await api.get(`/notes/lesson-plans/${id}`);
         if (response.data.success && response.data.data) {
             return response.data.data;
