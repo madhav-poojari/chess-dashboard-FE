@@ -35,7 +35,8 @@ export default function Notes() {
                 setLoading(false);
                 return;
             }
-            const response = await api.get(`/api/v1/notes/?user_id=${userId}`);
+            // API_BASE already includes /api/v1
+            const response = await api.get(`/notes/?user_id=${userId}`);
             const data = response.data;
             if (data.success && data.data) {
                 const { notes, lesson_plan } = data.data;

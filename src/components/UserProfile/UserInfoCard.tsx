@@ -24,7 +24,7 @@ export default function UserInfoCard({user, onUpdate}:UserInfoCardProps) {
     uid:user.uid,
     bio:user.bio
   });
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,

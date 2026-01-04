@@ -50,16 +50,32 @@ export default function UserProfiles() {
   }, []);
   // callback to update local state and optionally call API
   const handleUpdateUser = useCallback(
-    async (patch: Partial<PublicProfile>) => {
-      // patch is partial object, e.g. { first_name: 'New' }
+    async (patch: Partial<PublicProfile> | { uscf_id?: string; fide_id?: string; chesscom_username?: string; lichess_username?: string }) => {
+      // patch is partial object, e.g. { first_name: 'New' } or PlayLinksUpdate
+      // Convert PlayLinksUpdate format to PublicProfile format if needed
+      let profilePatch: Partial<PublicProfile>;
+      
+      if ('uscf_id' in patch || 'fide_id' in patch || 'chesscom_username' in patch || 'lichess_username' in patch) {
+        // Convert snake_case to camelCase
+        profilePatch = {
+          uscfId: patch.uscf_id,
+          fideId: patch.fide_id,
+          chessdotcomId: patch.chesscom_username,
+          lichessId: patch.lichess_username,
+        };
+      } else {
+        // It's already in PublicProfile format
+        profilePatch = patch as Partial<PublicProfile>;
+      }
+      
       // optimistic update:
-      console.log("liches id -- ",patch.lichessId);
+      console.log("liches id -- ", profilePatch.lichessId);
       setProfile((prev) => {
         if (!prev) return null; // Safety check
-        return { ...prev, ...patch };
+        return { ...prev, ...profilePatch };
       });
       try {
-        await updateProfile(patch); // implement API call
+        await updateProfile(profilePatch); // implement API call
       } catch (err) {
         console.error("Failed to save user:", err);
       }

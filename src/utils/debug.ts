@@ -1,4 +1,4 @@
-export  const logRecursive = (obj, indent = 2) => {
+export  const logRecursive = (obj: any, indent = 2) => {
     try {
       const output = JSON.stringify(obj, null, indent);
       console.log(output);
