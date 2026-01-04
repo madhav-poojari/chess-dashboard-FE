@@ -43,7 +43,8 @@ export const createNote = async (note: CreateNotePayload): Promise<Note> => {
         }
     };
 
-    const response = await api.post("/api/v1/notes", payload);
+    // API_BASE already includes /api/v1
+    const response = await api.post("/notes", payload);
     return response.data.data;
 };
 
@@ -58,28 +59,33 @@ export const updateNote = async (id: string, note: CreateNotePayload): Promise<N
             created_type: note.type
         }
     };
-    const response = await api.post(`/api/v1/notes/${id}`, payload);
+    // API_BASE already includes /api/v1
+    const response = await api.post(`/notes/${id}`, payload);
     return response.data.data;
 };
 
 export const deleteNote = async (id: string): Promise<void> => {
-    await api.delete(`/api/v1/notes/${id}`);
+    // API_BASE already includes /api/v1
+    await api.delete(`/notes/${id}`);
 };
 
 // Lesson Plan service functions
 export const createLessonPlan = async (lessonPlan: CreateLessonPlanPayload): Promise<LessonPlan> => {
-    const response = await api.post("/api/v1/notes/lesson-plans", lessonPlan);
+    // API_BASE already includes /api/v1
+    const response = await api.post("/notes/lesson-plans", lessonPlan);
     return response.data.data;
 };
 
 export const updateLessonPlan = async (id: string, lessonPlan: CreateLessonPlanPayload): Promise<LessonPlan> => {
-    const response = await api.patch(`/api/v1/notes/lesson-plans/${id}`, lessonPlan);
+    // API_BASE already includes /api/v1
+    const response = await api.patch(`/notes/lesson-plans/${id}`, lessonPlan);
     return response.data.data;
 };
 
 export const getLessonPlanById = async (id: string): Promise<LessonPlan | null> => {
     try {
-        const response = await api.get(`/api/v1/notes/lesson-plans/${id}`);
+        // API_BASE already includes /api/v1
+        const response = await api.get(`/notes/lesson-plans/${id}`);
         if (response.data.success && response.data.data) {
             return response.data.data;
         }

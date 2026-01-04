@@ -1,5 +1,5 @@
 // axiosInstance.ts
-import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { tokenStorage } from "./tokenStorage";
 import { refreshToken, logout } from "./auth/authService";
 
@@ -13,12 +13,12 @@ const instance: AxiosInstance = axios.create({
 /**
  * Request interceptor: attach Authorization header if access token present.
  */
-instance.interceptors.request.use((config: AxiosRequestConfig) => {
+instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   console.log("inside request interceptor ")
 
   const token = tokenStorage.get();
   if (token && config && config.headers) {
-    config.headers = { ...config.headers, Authorization: `Bearer ${token}` };
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
@@ -32,7 +32,7 @@ let refreshPromise: Promise<string> | null = null;
 type PendingReq = {
   resolve: (value: AxiosResponse<any> | Promise<AxiosResponse<any>>) => void;
   reject: (err?: any) => void;
-  config: AxiosRequestConfig;
+  config: InternalAxiosRequestConfig;
 };
 const pendingQueue: PendingReq[] = [];
 
@@ -52,7 +52,7 @@ const processQueue = (error: any | null, token?: string) => {
 instance.interceptors.response.use(
   (res) => res,
   async (err: AxiosError) => {
-    const originalConfig = err.config as AxiosRequestConfig & { _retry?: boolean };
+    const originalConfig = err.config as InternalAxiosRequestConfig & { _retry?: boolean };
     console.log("inside response interceptor ")
 
     // If no config or no response -> propagate

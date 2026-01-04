@@ -14,7 +14,8 @@ export const setLogoutRedirect = (fn: () => void) => { logoutRedirect = fn; };
 
 export const refreshToken = async (): Promise<string> => {
   // calls backend which reads httpOnly refresh cookie and returns new access token
-  const url = `${API_BASE}/api/v1/auth/refresh`;
+  // API_BASE already includes /api/v1, so just append the endpoint
+  const url = `${API_BASE}/auth/refresh`;
   const res = await axios.post(url, {}, { withCredentials: true });
   if (!res?.data?.data?.access_token) throw new Error("no_access_token");
   tokenStorage.set(res.data.data.access_token);
@@ -23,7 +24,8 @@ export const refreshToken = async (): Promise<string> => {
 
 export const loginByEmail = async (loginForm: LoginForm): Promise<LoginResponse> => {
   // calls backend which reads httpOnly refresh cookie and returns new access token
-  const url = `${API_BASE}/api/v1/auth/login`;
+  // API_BASE already includes /api/v1, so just append the endpoint
+  const url = `${API_BASE}/auth/login`;
 
   const res = await axios.post(url, loginForm,);
   if (!res?.data?.data?.access_token) throw new Error("no_access_token");
@@ -32,7 +34,8 @@ export const loginByEmail = async (loginForm: LoginForm): Promise<LoginResponse>
 };
 export const logout = async () => {
   try {
-    await axios.post(`${API_BASE}/api/v1/auth/logout`, {}, { withCredentials: true });
+    // API_BASE already includes /api/v1, so just append the endpoint
+    await axios.post(`${API_BASE}/auth/logout`, {}, { withCredentials: true });
   } catch (e) { /* ignore */ }
   tokenStorage.remove();
   logoutRedirect();
