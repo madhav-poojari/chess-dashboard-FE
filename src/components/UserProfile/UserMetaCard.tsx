@@ -20,7 +20,7 @@ interface UserMetaCardProps {
 
 export default function UserMetaCard({ user, onUpdate }: UserMetaCardProps) {
   const { isOpen, openModal, closeModal } = useModal();
-  const [form, setForm] = useState({
+  const [form] = useState({
     first_name: user.first_name,
     city: user.city,
     state: user.state,
