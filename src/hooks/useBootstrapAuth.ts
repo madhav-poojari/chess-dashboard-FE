@@ -8,6 +8,11 @@ export function useBootstrapAuth() {
 
   useEffect(() => {
     const init = async () => {
+      // skipping refresh when already on auth pages
+      const authRoutes = ['/signin', '/signup', '/oauth/google-callback', '/pending-approval'];
+      if (authRoutes.includes(location.pathname)) {
+        return;
+      }
       const token = tokenStorage.get();
       if (token) return; // already have access token
 
