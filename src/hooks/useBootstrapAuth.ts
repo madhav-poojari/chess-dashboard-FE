@@ -1,10 +1,11 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { refreshToken } from "../api/auth/authService";
 import { tokenStorage } from "../api/tokenStorage";
 
 export function useBootstrapAuth() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const init = async () => {
@@ -25,5 +26,5 @@ export function useBootstrapAuth() {
     };
 
     init();
-  }, [navigate]);
+  }, [navigate,location.pathname]);
 }
