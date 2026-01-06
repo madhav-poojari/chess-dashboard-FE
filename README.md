@@ -1,4 +1,2 @@
 
 ## BRS Chess Dashboard
-
-
