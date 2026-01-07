@@ -1,5 +1,6 @@
 // src/context/AuthContext.tsx
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 export type User = {
   id: string;
@@ -38,8 +39,16 @@ async function fetchCurrentUser(): Promise<User | null> {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
 
   useEffect(() => {
+    // Skip fetching user on auth pages to prevent potential refresh loops
+    const authRoutes = ['/signin', '/signup', '/oauth/google-callback', '/pending-approval'];
+    if (authRoutes.includes(location.pathname)) {
+      setLoading(false);
+      return;
+    }
+
     let mounted = true;
     (async () => {
       try {
@@ -58,7 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [location.pathname]);
 
   const value = useMemo(() => ({ user, loading, setUser }), [user, loading]);
 
