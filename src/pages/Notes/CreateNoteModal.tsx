@@ -27,6 +27,8 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
     const [students, setStudents] = useState<User[]>([]);
     const [selectedStudentId, setSelectedStudentId] = useState<string>('');
 
+    const isStudent = user?.role === 'student';
+
     // Reset form when modal opens
     useEffect(() => {
         if (isOpen) {
@@ -44,18 +46,23 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
                 setTitle('');
                 setContent('');
                 setType('note');
-                setVisibility('L3');
-                // If studentId prop is provided, use it
-                if (studentId) {
+                // For students, hardcode visibility to L4
+                setVisibility(isStudent ? 'L4' : 'L3');
+                // For students, set their own ID; otherwise use prop or empty
+                if (isStudent) {
+                    setSelectedStudentId(user?.id || '');
+                } else if (studentId) {
                     setSelectedStudentId(studentId);
                 } else {
                     setSelectedStudentId('');
                 }
             }
-            // Always load students if regex not provided (or even if provided, to show name)
-            loadStudents();
+            // Only load students if not a student (students don't need the dropdown)
+            if (!isStudent) {
+                loadStudents();
+            }
         }
-    }, [isOpen, studentId, initialData]);
+    }, [isOpen, studentId, initialData, isStudent, user?.id]);
 
     const loadStudents = async () => {
         try {
@@ -71,20 +78,26 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
         setError('');
         setLoading(true);
 
-        const targetStudentId = initialData?.user_id || studentId || selectedStudentId;
+        // For students, always use their own ID
+        const targetStudentId = isStudent 
+            ? (initialData?.user_id || user?.id || '')
+            : (initialData?.user_id || studentId || selectedStudentId);
 
         if (!targetStudentId) {
-            setError('Please select a student.');
+            setError(isStudent ? 'Unable to determine student ID.' : 'Please select a student.');
             setLoading(false);
             return;
         }
 
         try {
+            // For students, always use L4 visibility
+            const finalVisibility = isStudent ? 'L4' : visibility;
+            
             if (initialData) {
                 await updateNote(initialData.id, {
                     title,
                     content,
-                    visibility_level: visibility,
+                    visibility_level: finalVisibility,
                     type,
                     studentId: targetStudentId
                 });
@@ -92,7 +105,7 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
                 await createNote({
                     title,
                     content,
-                    visibility_level: visibility,
+                    visibility_level: finalVisibility,
                     type,
                     studentId: targetStudentId
                 });
@@ -134,8 +147,8 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
 
                 <form onSubmit={handleSubmit} className="space-y-4">
 
-
-                    {(!studentId || isEditMode) && (
+                    {/* Student dropdown - hidden for students */}
+                    {!isStudent && (!studentId || isEditMode) && (
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Student
@@ -171,30 +184,33 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Visibility Level
-                        </label>
-                        <select
-                            value={visibility}
-                            onChange={(e) => setVisibility(e.target.value as VisibilityLevel)}
-                            className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2 text-gray-900 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
-                        >
-                            {(Object.keys(VISIBILITY_DESCRIPTIONS) as VisibilityLevel[]).map((level) => (
-                                <option
-                                    key={level}
-                                    value={level}
-                                    disabled={isOptionDisabled(level)}
-                                    className="dark:bg-gray-800"
-                                >
-                                    {level} - {VISIBILITY_DESCRIPTIONS[level]}
-                                </option>
-                            ))}
-                        </select>
-                        <p className="mt-1 text-xs text-gray-500">
-                            Who can see this?
-                        </p>
-                    </div>
+                    {/* Visibility Level - hidden for students */}
+                    {!isStudent && (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Visibility Level
+                            </label>
+                            <select
+                                value={visibility}
+                                onChange={(e) => setVisibility(e.target.value as VisibilityLevel)}
+                                className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2 text-gray-900 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
+                            >
+                                {(Object.keys(VISIBILITY_DESCRIPTIONS) as VisibilityLevel[]).map((level) => (
+                                    <option
+                                        key={level}
+                                        value={level}
+                                        disabled={isOptionDisabled(level)}
+                                        className="dark:bg-gray-800"
+                                    >
+                                        {level} - {VISIBILITY_DESCRIPTIONS[level]}
+                                    </option>
+                                ))}
+                            </select>
+                            <p className="mt-1 text-xs text-gray-500">
+                                Who can see this?
+                            </p>
+                        </div>
+                    )}
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
