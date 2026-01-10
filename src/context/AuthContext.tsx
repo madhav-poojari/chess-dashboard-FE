@@ -39,6 +39,7 @@ async function fetchCurrentUser(): Promise<User | null> {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasFetched, setHasFetched] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -49,25 +50,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
+    // Only fetch user once and not on every route change
+    if (hasFetched) {
+      return;
+    }
+
     let mounted = true;
     (async () => {
       try {
         const u = await fetchCurrentUser();
-        if (!mounted) return;
-        setUser(u);
+        if (mounted) {
+          setUser(u);
+          setHasFetched(true);
+        }
       } catch (err) {
         console.error("Failed to fetch user", err);
-        if (!mounted) return;
-        setUser(null);
+        if (mounted) {
+          setUser(null);
+          setHasFetched(true);
+        }
       } finally {
-        if (!mounted) return;
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     })();
     return () => {
       mounted = false;
     };
-  }, [location.pathname]);
+  }, [location.pathname, hasFetched]);
 
   const value = useMemo(() => ({ user, loading, setUser }), [user, loading]);
 
