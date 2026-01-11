@@ -116,12 +116,10 @@ const AppSidebar: React.FC = () => {
     [location.pathname, location.search]
   );
 
-  // while loading user we can hide role-restricted links
-  console.log("AppSidebar State:", { loading, user });
-  if (loading) return null;
-
-
+  // Effect to auto-open submenu based on current path
   useEffect(() => {
+    if (loading) return; // Skip if still loading
+    
     let submenuMatched = false;
     navItems.forEach((nav, index) => {
       if (nav.subItems) {
@@ -140,7 +138,7 @@ const AppSidebar: React.FC = () => {
     if (!submenuMatched) {
       setOpenSubmenu(null);
     }
-  }, [location, isActive, students]); // Added students dependency
+  }, [location, isActive, students, loading]); // Added loading dependency
 
   useEffect(() => {
     if (openSubmenu !== null) {
@@ -167,12 +165,14 @@ const AppSidebar: React.FC = () => {
     });
   };
 
+  // Show nothing while loading user to avoid role-restricted links flash
+  if (loading) return null;
+
   const renderMenuItems = (items: NavItem[]) => (
     <ul className="flex flex-col gap-4">
       {items.map((nav, index) => {
         if (nav.allowedRoles) {
           const userRole = user?.role?.toLowerCase().trim() || "";
-          console.log(`Checking role for ${nav.name}: userRole=${userRole}, allowed=${nav.allowedRoles}`);
           if (!user || !nav.allowedRoles.includes(userRole as UserRole)) {
             return null; // hide this nav item
           }
