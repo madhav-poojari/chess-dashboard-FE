@@ -169,12 +169,14 @@ const AppSidebar: React.FC = () => {
     });
   };
 
+  // Show nothing while loading user to avoid role-restricted links flash
+  if (loading) return null;
+
   const renderMenuItems = (items: NavItem[]) => (
     <ul className="flex flex-col gap-4">
       {items.map((nav, index) => {
         if (nav.allowedRoles) {
           const userRole = user?.role?.toLowerCase().trim() || "";
-          console.log(`Checking role for ${nav.name}: userRole=${userRole}, allowed=${nav.allowedRoles}`);
           if (!user || !nav.allowedRoles.includes(userRole as UserRole)) {
             return null; // hide this nav item
           }

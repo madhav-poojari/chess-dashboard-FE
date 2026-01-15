@@ -58,7 +58,7 @@ export const updateNote = async (id: string, note: CreateNotePayload): Promise<N
             created_type: note.type
         }
     };
-    const response = await api.post(`/notes/${id}`, payload);
+    const response = await api.patch(`/notes/${id}`, payload);
     return response.data.data;
 };
 

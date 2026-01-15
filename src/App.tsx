@@ -17,8 +17,8 @@ import RequireRole from "./components/auth/RequireRole";
 export default function App() {
   return (
     <>
-      <AuthProvider>
-        <Router>
+      <Router>
+        <AuthProvider>
           <ScrollToTop />
           <AppBootstrap>
             <Routes>
@@ -54,10 +54,8 @@ export default function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppBootstrap>
-
-        </Router>
-      </AuthProvider>
-
+        </AuthProvider>
+      </Router>
     </>
   );
 }
