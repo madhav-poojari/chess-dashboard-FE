@@ -47,6 +47,12 @@ export default function AdminPage() {
       setUnapprovedUsers(unapproved);
       setStudents(studentsData);
       setCoaches(coachesData);
+      // Debug: log coaches with students to check mentor_coach_id
+      console.log("Coaches with assignments:", coachesData.filter(c => c.student_id && !c.student_id.startsWith("T-")).map(c => ({
+        email: c.email,
+        student_id: c.student_id,
+        mentor_coach_id: c.mentor_coach_id
+      })));
     } catch (error) {
       console.error("Error loading admin data:", error);
     } finally {
@@ -87,19 +93,12 @@ export default function AdminPage() {
   const handleAssignMentor = async (coachId: string, mentorCoachId: string) => {
     if (!mentorCoachId) return;
 
-    // Get student ID - if coach already has a student assigned, use that; otherwise prompt
-    const studentId = coaches.find(c => c.id === coachId)?.student_id;
-    
-    if (!studentId) {
-      alert("Please assign the coach to a student first, or the backend API needs to be updated to handle mentor assignment without a student.");
-      return;
-    }
-
     try {
       setAssigningCoachId(coachId);
-      // Assign the selected mentor coach (mentorCoachId) as mentor for the student
-      // The coach in the row (coachId) is the existing coach for the student
-      await assignCoachAsMentor(mentorCoachId, studentId, coachId);
+      // Assign the selected mentor coach (mentorCoachId) to the coach (coachId)
+      // If coach has students, mentor will be applied to all of them
+      // If coach has no students yet, mentor will be applied when students are assigned later
+      await assignCoachAsMentor(mentorCoachId, "", coachId);
       setSelectedMentorForCoach({ ...selectedMentorForCoach, [coachId]: "" });
       await loadData();
     } catch (error) {
@@ -377,7 +376,7 @@ export default function AdminPage() {
                 </TableRow>
               </TableHeader>
               <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                {coaches.length === 0 ? (
+                {coaches.filter(c => c.role === "coach").length === 0 ? (
                   <TableRow>
                     <TableCell
                       colSpan={3}
@@ -387,7 +386,7 @@ export default function AdminPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  coaches.map((coach, index) => (
+                  coaches.filter(c => c.role === "coach").map((coach, index) => (
                     <TableRow key={`${coach.id}-${index}`}>
                       <TableCell className="px-5 py-4 text-start">
                         <div>
@@ -406,10 +405,20 @@ export default function AdminPage() {
                               {coach.is_mentor && " (as Mentor)"}
                             </div>
                           )}
+                          {coach.mentor_coach_id && (
+                            <div className="text-gray-500 text-theme-xs dark:text-gray-400 mt-1">
+                              Mentor: {(() => {
+                                const mentor = coaches.find(m => m.id === coach.mentor_coach_id);
+                                return mentor 
+                                  ? `${mentor.first_name} ${mentor.last_name}` 
+                                  : coach.mentor_coach_id;
+                              })()}
+                            </div>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell className="px-5 py-4 text-start">
-                        {coach.student_id ? (
+                        {(coach.student_id && !coach.student_id.startsWith("T-")) || coach.mentor_coach_id ? (
                           <Badge size="sm" color="success">
                             Assigned
                           </Badge>
@@ -421,28 +430,34 @@ export default function AdminPage() {
                       </TableCell>
                       <TableCell className="px-5 py-4 text-start">
                         {!coach.is_mentor && coach.role === "coach" ? (
-                          <div className="flex items-center gap-2">
-                            <div className="flex-1 min-w-[200px]">
-                              <Select
-                                options={getAvailableMentorCoaches()}
-                                placeholder="Select Mentor"
-                                onChange={(mentorCoachId) => setSelectedMentorForCoach({ ...selectedMentorForCoach, [coach.id]: mentorCoachId })}
-                                className="text-theme-xs"
-                              />
+                          coach.mentor_coach_id ? (
+                            <span className="text-gray-500 text-theme-xs">
+                              Mentor assigned
+                            </span>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 min-w-[200px]">
+                                <Select
+                                  options={getAvailableMentorCoaches()}
+                                  placeholder="Select Mentor"
+                                  onChange={(mentorCoachId) => setSelectedMentorForCoach({ ...selectedMentorForCoach, [coach.id]: mentorCoachId })}
+                                  className="text-theme-xs"
+                                />
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() =>
+                                  handleAssignMentor(coach.id, selectedMentorForCoach[coach.id] || "")
+                                }
+                                disabled={assigningCoachId === coach.id || !selectedMentorForCoach[coach.id]}
+                              >
+                                {assigningCoachId === coach.id
+                                  ? "Assigning..."
+                                  : "Assign to Mentor"}
+                              </Button>
                             </div>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() =>
-                                handleAssignMentor(coach.id, selectedMentorForCoach[coach.id] || "")
-                              }
-                              disabled={assigningCoachId === coach.id || !selectedMentorForCoach[coach.id]}
-                            >
-                              {assigningCoachId === coach.id
-                                ? "Assigning..."
-                                : "Assign to Mentor"}
-                            </Button>
-                          </div>
+                          )
                         ) : (
                           <span className="text-gray-500 text-theme-xs">
                             {coach.is_mentor ? "Already a mentor" : "N/A"}

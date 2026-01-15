@@ -10,6 +10,7 @@ export interface StudentWithAssignment extends User {
 export interface CoachWithAssignment extends User {
   student_id?: string;
   is_mentor: boolean;
+  mentor_coach_id?: string;
   assigned_at?: string;
 }
 
