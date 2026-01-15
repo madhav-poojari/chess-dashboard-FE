@@ -23,6 +23,7 @@ export default function AuthLayout({
                   height={48}
                   src="/images/brs-logo/brs-flat.png"
                   alt="BRS Chess Logo"
+                  className="dark:opacity-100"
                 />
               </Link>
               <p className="text-center text-gray-400 dark:text-white/60">
