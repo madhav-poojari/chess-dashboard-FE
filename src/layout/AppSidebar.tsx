@@ -123,8 +123,11 @@ const AppSidebar: React.FC = () => {
     [location.pathname, location.search]
   );
 
-  // Auto-open submenu when location matches a submenu item
+  // Effect to auto-open submenu based on current path
   useEffect(() => {
+    if (loading) return; // Skip if still loading
+
+    let submenuMatched = false;
     navItems.forEach((nav, index) => {
       if (nav.subItems) {
         nav.subItems.forEach((subItem) => {
@@ -133,12 +136,17 @@ const AppSidebar: React.FC = () => {
               type: "main",
               index,
             });
+            submenuMatched = true;
           }
         });
       }
     });
+
+    if (!submenuMatched) {
+      setOpenSubmenu(null);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname, location.search]); // Only run on location change, not on submenu state changes
+  }, [location, isActive, students, loading]); // Added loading dependency
 
   useEffect(() => {
     if (openSubmenu !== null) {
