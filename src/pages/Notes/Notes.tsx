@@ -8,6 +8,7 @@ import CreateNoteModal from "./CreateNoteModal";
 import CreateLessonPlanModal, { LessonPlan } from "./CreateLessonPlanModal";
 import api from "../../api/axiosInstance";
 import { deleteNote, getLessonPlanById } from "../../api/notes/noteService";
+import UserProfiles from "../UserProfiles";
 
 export default function Notes() {
     const { user } = useAuth();
@@ -15,6 +16,7 @@ export default function Notes() {
     const [loading, setLoading] = useState(true);
     const [searchParams] = useSearchParams();
     const studentIdParam = searchParams.get('studentId');
+    const [activeTab, setActiveTab] = useState<"profile" | "notes">("profile");
 
     // Edit state
     const [noteToEdit, setNoteToEdit] = useState<Note | undefined>(undefined);
@@ -115,9 +117,10 @@ export default function Notes() {
             loadNotes();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user]);
+    }, [user, studentIdParam]);
 
     const userRole = user?.role || '';
+    const isViewingStudent = !!studentIdParam && userRole !== 'student';
 
     // Get visibility levels that this role can see (for legend display)
     const visibleLevels = getVisibleLevelsForRole(userRole);
@@ -194,6 +197,175 @@ export default function Notes() {
         setNoteToEdit(undefined);
     };
 
+    // Reset to profile tab when studentIdParam changes
+    useEffect(() => {
+        if (isViewingStudent) {
+            setActiveTab("profile");
+        }
+    }, [studentIdParam, isViewingStudent]);
+
+    // If viewing a student, show tabs
+    if (isViewingStudent) {
+        return (
+            <>
+                <PageMeta
+                    title="Student Details | BRS Academy"
+                    description="View student profile and notes"
+                />
+
+                <div className="mb-6">
+                    <h2 className="text-title-md2 font-semibold text-black dark:text-white">
+                        Student Details
+                    </h2>
+                </div>
+
+                {/* Tabs */}
+                <div className="mb-6">
+                    <div className="flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5 dark:bg-gray-900 max-w-2xl">
+                        <button
+                            onClick={() => setActiveTab("profile")}
+                            className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${
+                                activeTab === "profile"
+                                    ? "shadow-theme-xs text-gray-900 dark:text-white bg-white dark:bg-gray-800"
+                                    : "text-gray-500 dark:text-gray-400"
+                            }`}
+                        >
+                            User Profile
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("notes")}
+                            className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${
+                                activeTab === "notes"
+                                    ? "shadow-theme-xs text-gray-900 dark:text-white bg-white dark:bg-gray-800"
+                                    : "text-gray-500 dark:text-gray-400"
+                            }`}
+                        >
+                            Notes
+                        </button>
+                    </div>
+                </div>
+
+                {/* Tab Content */}
+                {activeTab === "profile" ? (
+                    <div key={studentIdParam}>
+                        <UserProfiles studentId={studentIdParam} readOnly={true} />
+                    </div>
+                ) : (
+                    <NotesContent
+                        notes={notes}
+                        loading={loading}
+                        studentIdParam={studentIdParam}
+                        user={user}
+                        userRole={userRole}
+                        visibleLevels={getVisibleLevelsForRole(userRole)}
+                        lessonPlans={lessonPlans}
+                        regularNotes={regularNotes}
+                        canCreateNote={['admin', 'mentor', 'coach', 'student'].includes(userRole)}
+                        canManageLessonPlan={canManageLessonPlan(userRole)}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        setIsCreateModalOpen={setIsCreateModalOpen}
+                        setNoteToEdit={setNoteToEdit}
+                        setIsLessonPlanModalOpen={setIsLessonPlanModalOpen}
+                        noteToEdit={noteToEdit}
+                        isCreateModalOpen={isCreateModalOpen}
+                        isLessonPlanModalOpen={isLessonPlanModalOpen}
+                        lessonPlanToEdit={lessonPlanToEdit}
+                        loadNotes={loadNotes}
+                        handleCloseModal={handleCloseModal}
+                    />
+                )}
+            </>
+        );
+    }
+
+    // Regular notes view (for students or when not viewing a specific student)
+    return (
+        <>
+            <PageMeta
+                title="Notes | BRS Academy"
+                description="View your lesson plans and notes"
+            />
+
+            <div className="mb-6">
+                <h2 className="text-title-md2 font-semibold text-black dark:text-white">
+                    Notes
+                </h2>
+            </div>
+
+            <NotesContent
+                notes={notes}
+                loading={loading}
+                studentIdParam={studentIdParam}
+                user={user}
+                userRole={userRole}
+                visibleLevels={getVisibleLevelsForRole(userRole)}
+                lessonPlans={lessonPlans}
+                regularNotes={regularNotes}
+                canCreateNote={['admin', 'mentor', 'coach', 'student'].includes(userRole)}
+                canManageLessonPlan={canManageLessonPlan(userRole)}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                setIsCreateModalOpen={setIsCreateModalOpen}
+                setNoteToEdit={setNoteToEdit}
+                setIsLessonPlanModalOpen={setIsLessonPlanModalOpen}
+                noteToEdit={noteToEdit}
+                isCreateModalOpen={isCreateModalOpen}
+                isLessonPlanModalOpen={isLessonPlanModalOpen}
+                lessonPlanToEdit={lessonPlanToEdit}
+                loadNotes={loadNotes}
+                handleCloseModal={handleCloseModal}
+            />
+        </>
+    );
+}
+
+// Extract notes content into a separate component
+function NotesContent({
+    notes,
+    loading,
+    studentIdParam,
+    user,
+    userRole,
+    visibleLevels,
+    lessonPlans,
+    regularNotes,
+    canCreateNote,
+    canManageLessonPlan,
+    onEdit,
+    onDelete,
+    setIsCreateModalOpen,
+    setNoteToEdit,
+    setIsLessonPlanModalOpen,
+    noteToEdit,
+    isCreateModalOpen,
+    isLessonPlanModalOpen,
+    lessonPlanToEdit,
+    loadNotes,
+    handleCloseModal,
+}: {
+    notes: Note[];
+    loading: boolean;
+    studentIdParam: string | null;
+    user: any;
+    userRole: string;
+    visibleLevels: string[];
+    lessonPlans: Note[];
+    regularNotes: Note[];
+    canCreateNote: boolean;
+    canManageLessonPlan: boolean;
+    onEdit: (note: Note) => void;
+    onDelete: (note: Note) => void;
+    setIsCreateModalOpen: (open: boolean) => void;
+    setNoteToEdit: (note: Note | undefined) => void;
+    setIsLessonPlanModalOpen: (open: boolean) => void;
+    noteToEdit: Note | undefined;
+    isCreateModalOpen: boolean;
+    isLessonPlanModalOpen: boolean;
+    lessonPlanToEdit: LessonPlan | undefined;
+    loadNotes: () => void;
+    handleCloseModal: () => void;
+}) {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[200px]">
@@ -204,17 +376,6 @@ export default function Notes() {
 
     return (
         <>
-            <PageMeta
-                title="Notes | BRS Academy"
-                description="View your lesson plans and notes"
-            />
-
-            <div className="mb-6">
-                <h2 className="text-title-md2 font-semibold text-black dark:text-white">
-                    Notes & Lesson Plans
-                </h2>
-            </div>
-
             {/* Only show visibility legend for non-students */}
             {visibleLevels.length > 0 && (
                 <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50 p-4">
@@ -237,7 +398,7 @@ export default function Notes() {
                     <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
                         Lesson Plans
                     </h3>
-                    {canManageLessonPlan(userRole) && (
+                    {canManageLessonPlan && (
                         <button
                             onClick={() => setIsLessonPlanModalOpen(true)}
                             className="inline-flex items-center justify-center rounded-lg bg-blue-600 hover:bg-blue-700 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors"
@@ -266,8 +427,8 @@ export default function Notes() {
                                 note={note}
                                 userRole={userRole}
                                 userId={user?.id}
-                                onEdit={handleEdit}
-                                onDelete={handleDelete}
+                                onEdit={onEdit}
+                                onDelete={onDelete}
                             />
                         ))}
                     </div>
@@ -313,8 +474,8 @@ export default function Notes() {
                                 note={note}
                                 userRole={userRole}
                                 userId={user?.id}
-                                onEdit={handleEdit}
-                                onDelete={handleDelete}
+                                onEdit={onEdit}
+                                onDelete={onDelete}
                             />
                         ))}
                     </div>
@@ -335,7 +496,6 @@ export default function Notes() {
                 isOpen={isLessonPlanModalOpen}
                 onClose={() => {
                     setIsLessonPlanModalOpen(false);
-                    setLessonPlanToEdit(undefined);
                 }}
                 onSuccess={() => {
                     loadNotes();

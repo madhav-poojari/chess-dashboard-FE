@@ -54,3 +54,33 @@ export const assignCoachAsMentor = async (
     coach_id: coachId || "",
   });
 };
+
+export const updateStudentAssignment = async (
+  studentId: string,
+  coachId: string
+): Promise<void> => {
+  await api.put("/admin/update-student-assignment", {
+    student_id: studentId,
+    coach_id: coachId,
+  });
+};
+
+export const updateCoachMentorAssignment = async (
+  coachId: string,
+  mentorCoachId: string
+): Promise<void> => {
+  await api.put("/admin/update-coach-mentor", {
+    coach_id: coachId,
+    mentor_coach_id: mentorCoachId,
+  });
+};
+
+export const resetUserPassword = async (
+  userId: string,
+  newPassword: string
+): Promise<void> => {
+  await api.post("/admin/reset-password", {
+    user_id: userId,
+    password: newPassword,
+  });
+};
