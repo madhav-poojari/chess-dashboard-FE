@@ -3,9 +3,22 @@ import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { Link } from "react-router";
 import { useAuth } from "../../context/AuthContext";
+import { resetOwnPassword } from "../../api/user/service";
+import Button from "../ui/button/Button";
+import Input from "../form/input/InputField";
+import Label from "../form/Label";
+import { Modal } from "../ui/modal";
+import { EyeCloseIcon, EyeIcon, LockIcon } from "../../icons";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
   function toggleDropdown() {
@@ -15,6 +28,46 @@ export default function UserDropdown() {
   function closeDropdown() {
     setIsOpen(false);
   }
+
+  const handleResetPasswordClick = () => {
+    setIsResetPasswordModalOpen(true);
+    setIsOpen(false);
+    setNewPassword("");
+    setConfirmPassword("");
+    setError(null);
+  };
+
+  const handleResetPassword = async () => {
+    if (!newPassword || !confirmPassword) {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    try {
+      setIsResetting(true);
+      setError(null);
+      await resetOwnPassword(newPassword);
+      setIsResetPasswordModalOpen(false);
+      setNewPassword("");
+      setConfirmPassword("");
+      alert("Password reset successfully!");
+    } catch (err: any) {
+      console.error("Error resetting password:", err);
+      setError(err?.response?.data?.message || err?.message || "Failed to reset password");
+    } finally {
+      setIsResetting(false);
+    }
+  };
   return (
     <div className="relative">
       <button
@@ -137,9 +190,16 @@ export default function UserDropdown() {
             </DropdownItem>
           </li>
         </ul>
+        <button
+          onClick={handleResetPasswordClick}
+          className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+        >
+          <LockIcon className="fill-gray-500 group-hover:fill-gray-700 dark:group-hover:fill-gray-300 w-6 h-6" />
+          Reset Password
+        </button>
         <Link
           to="/signin"
-          className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+          className="flex items-center gap-3 px-3 py-2 mt-1 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
         >
           <svg
             className="fill-gray-500 group-hover:fill-gray-700 dark:group-hover:fill-gray-300"
@@ -159,6 +219,107 @@ export default function UserDropdown() {
           Sign out
         </Link>
       </Dropdown>
+
+      {/* Reset Password Modal */}
+      <Modal isOpen={isResetPasswordModalOpen} onClose={() => {
+        setIsResetPasswordModalOpen(false);
+        setNewPassword("");
+        setConfirmPassword("");
+        setError(null);
+      }} className="max-w-md m-4">
+        <div className="relative w-full max-w-md overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
+          <div className="px-2 pr-14">
+            <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
+              Reset Password
+            </h4>
+            <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
+              Enter your new password below.
+            </p>
+          </div>
+          <form className="flex flex-col" onSubmit={(e) => {
+            e.preventDefault();
+            handleResetPassword();
+          }}>
+            <div className="px-2 pb-3 space-y-4">
+              <div>
+                <Label>
+                  New Password <span className="text-error-500">*</span>
+                </Label>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Enter new password"
+                    required
+                    minLength={6}
+                  />
+                  <span
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
+                  >
+                    {showPassword ? (
+                      <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                    ) : (
+                      <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                    )}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <Label>
+                  Confirm Password <span className="text-error-500">*</span>
+                </Label>
+                <div className="relative">
+                  <Input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm new password"
+                    required
+                    minLength={6}
+                  />
+                  <span
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                    ) : (
+                      <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                    )}
+                  </span>
+                </div>
+              </div>
+
+              {error && (
+                <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/20 dark:text-red-400 dark:border-red-800">
+                  {error}
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
+              <Button
+                size="sm"
+                variant="outline"
+                type="button"
+                onClick={() => {
+                  setIsResetPasswordModalOpen(false);
+                  setNewPassword("");
+                  setConfirmPassword("");
+                  setError(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button size="sm" type="submit" disabled={isResetting}>
+                {isResetting ? "Resetting..." : "Reset Password"}
+              </Button>
+            </div>
+          </form>
+        </div>
+      </Modal>
     </div>
   );
 }

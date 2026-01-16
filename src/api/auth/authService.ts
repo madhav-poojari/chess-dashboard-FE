@@ -7,6 +7,14 @@ const API_BASE = import.meta.env.VITE_API_BASE as string || "";
 export interface RefreshResponse { access_token: string; }
 export interface LoginForm { email: string; password: string }
 export interface LoginResponse { access_token: string; expires_in?: number; }
+export interface SignupForm { 
+  email: string; 
+  password: string; 
+  first_name: string; 
+  last_name: string; 
+  role?: string; 
+}
+export interface SignupResponse { user_id: string; role?: string; }
 
 let logoutRedirect = () => { 
   // Prevent reload if already on signin page to avoid refresh loops
@@ -36,6 +44,16 @@ export const loginByEmail = async (loginForm: LoginForm): Promise<LoginResponse>
   tokenStorage.set(res.data.data.access_token);
   return { access_token: res.data.data.access_token };
 };
+export const signup = async (signupForm: SignupForm): Promise<SignupResponse> => {
+  const url = `${API_BASE}/auth/signup`;
+  const res = await axios.post(url, signupForm);
+  if (!res?.data?.data?.user_id) throw new Error("signup_failed");
+  return { 
+    user_id: res.data.data.user_id,
+    role: res.data.data.role 
+  };
+};
+
 export const logout = async () => {
   try {
     await axios.post(`${API_BASE}/auth/logout`, {}, { withCredentials: true });

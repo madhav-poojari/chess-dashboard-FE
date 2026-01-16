@@ -30,4 +30,16 @@ export const fetchStudents = async (): Promise<User[]> => {
   return data.data;
 };
 
+export const fetchUserById = async (userId: string): Promise<User> => {
+  const res = await api.get(`/users/${userId}`);
+  const data: ApiResponse<User> = res.data;
+  return data.data;
+};
+
+export const resetOwnPassword = async (newPassword: string): Promise<void> => {
+  await api.post("/users/reset-password", {
+    new_password: newPassword,
+  });
+};
+
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import {
@@ -8,6 +8,8 @@ import {
   approveUser,
   assignStudentToCoach,
   assignCoachAsMentor,
+  updateStudentAssignment,
+  updateCoachMentorAssignment,
   StudentWithAssignment,
   CoachWithAssignment,
 } from "../../api/admin/service";
@@ -22,10 +24,14 @@ import {
 } from "../../components/ui/table";
 import Badge from "../../components/ui/badge/Badge";
 import Select from "../../components/form/Select";
+import { MoreDotIcon } from "../../icons";
+import { useAuth } from "../../context/AuthContext";
 
 type TabType = "pending" | "students" | "coaches";
 
 export default function AdminPage() {
+  const { user } = useAuth();
+  const isAdmin = user?.role?.toLowerCase() === "admin";
   const [activeTab, setActiveTab] = useState<TabType>("pending");
   const [unapprovedUsers, setUnapprovedUsers] = useState<User[]>([]);
   const [students, setStudents] = useState<StudentWithAssignment[]>([]);
@@ -35,6 +41,13 @@ export default function AdminPage() {
   const [assigningCoachId, setAssigningCoachId] = useState<string | null>(null);
   const [selectedCoachForStudent, setSelectedCoachForStudent] = useState<Record<string, string>>({});
   const [selectedMentorForCoach, setSelectedMentorForCoach] = useState<Record<string, string>>({});
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [updateType, setUpdateType] = useState<"student" | "coach" | null>(null);
+  const [updateTargetId, setUpdateTargetId] = useState<string | null>(null);
+  const [updateSelectedCoach, setUpdateSelectedCoach] = useState<string>("");
+  const [updateSelectedMentor, setUpdateSelectedMentor] = useState<string>("");
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const loadData = async () => {
     try {
@@ -108,6 +121,73 @@ export default function AdminPage() {
       setAssigningCoachId(null);
     }
   };
+
+  const handleUpdateAssignment = (type: "student" | "coach", id: string) => {
+    setUpdateType(type);
+    setUpdateTargetId(id);
+    setUpdateModalOpen(true);
+    setOpenMenuId(null);
+    
+    if (type === "student") {
+      const student = students.find(s => s.id === id);
+      setUpdateSelectedCoach(student?.coach_id || "");
+    } else {
+      const coach = coaches.find(c => c.id === id && c.role === "coach");
+      setUpdateSelectedMentor(coach?.mentor_coach_id || "");
+    }
+  };
+
+  const handleSaveUpdate = async () => {
+    if (!updateTargetId || !updateType) return;
+
+    try {
+      if (updateType === "student") {
+        await updateStudentAssignment(updateTargetId, updateSelectedCoach);
+      } else {
+        await updateCoachMentorAssignment(updateTargetId, updateSelectedMentor);
+      }
+      setUpdateModalOpen(false);
+      setUpdateType(null);
+      setUpdateTargetId(null);
+      setUpdateSelectedCoach("");
+      setUpdateSelectedMentor("");
+      await loadData();
+    } catch (error) {
+      console.error("Error updating assignment:", error);
+      alert("Failed to update assignment");
+    }
+  };
+
+  const handleRemoveAssignment = async (type: "student" | "coach", id: string) => {
+    if (!confirm(`Are you sure you want to remove this assignment?`)) return;
+
+    try {
+      if (type === "student") {
+        await updateStudentAssignment(id, "");
+      } else {
+        await updateCoachMentorAssignment(id, "");
+      }
+      setOpenMenuId(null);
+      await loadData();
+    } catch (error) {
+      console.error("Error removing assignment:", error);
+      alert("Failed to remove assignment");
+    }
+  };
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpenMenuId(null);
+      }
+    };
+
+    if (openMenuId) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [openMenuId]);
 
   // Get available coaches for dropdown
   const getAvailableCoaches = () => {
@@ -264,13 +344,20 @@ export default function AdminPage() {
                   >
                     Action
                   </TableCell>
+                  {isAdmin && (
+                    <TableCell
+                      isHeader
+                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400 w-12"
+                    >
+                    </TableCell>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
                 {students.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={3}
+                      colSpan={isAdmin ? 4 : 3}
                       className="px-5 py-8 text-center text-gray-500 text-theme-sm"
                     >
                       No students found
@@ -334,6 +421,38 @@ export default function AdminPage() {
                           <span className="text-gray-500 text-theme-xs">Assigned</span>
                         )}
                       </TableCell>
+                      {isAdmin && (
+                        <TableCell className="px-5 py-4 text-start relative">
+                          <div className="relative" ref={openMenuId === `student-${student.id}` ? menuRef : null}>
+                            <button
+                              onClick={() => setOpenMenuId(openMenuId === `student-${student.id}` ? null : `student-${student.id}`)}
+                              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
+                            >
+                              <MoreDotIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                            </button>
+                            {openMenuId === `student-${student.id}` && (
+                              <div className="absolute right-0 mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
+                                {student.coach_id && (
+                                  <>
+                                    <button
+                                      onClick={() => handleUpdateAssignment("student", student.id)}
+                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    >
+                                      Update Assignment
+                                    </button>
+                                    <button
+                                      onClick={() => handleRemoveAssignment("student", student.id)}
+                                      className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    >
+                                      Remove Assignment
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))
                 )}
@@ -373,13 +492,20 @@ export default function AdminPage() {
                   >
                     Action
                   </TableCell>
+                  {isAdmin && (
+                    <TableCell
+                      isHeader
+                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400 w-12"
+                    >
+                    </TableCell>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
                 {coaches.filter(c => c.role === "coach").length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={3}
+                      colSpan={isAdmin ? 4 : 3}
                       className="px-5 py-8 text-center text-gray-500 text-theme-sm"
                     >
                       No coaches found
@@ -464,6 +590,38 @@ export default function AdminPage() {
                           </span>
                         )}
                       </TableCell>
+                      {isAdmin && (
+                        <TableCell className="px-5 py-4 text-start relative">
+                          <div className="relative" ref={openMenuId === `coach-${coach.id}` ? menuRef : null}>
+                            <button
+                              onClick={() => setOpenMenuId(openMenuId === `coach-${coach.id}` ? null : `coach-${coach.id}`)}
+                              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
+                            >
+                              <MoreDotIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                            </button>
+                            {openMenuId === `coach-${coach.id}` && (
+                              <div className="absolute right-0 mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
+                                {coach.mentor_coach_id && (
+                                  <>
+                                    <button
+                                      onClick={() => handleUpdateAssignment("coach", coach.id)}
+                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    >
+                                      Update Assignment
+                                    </button>
+                                    <button
+                                      onClick={() => handleRemoveAssignment("coach", coach.id)}
+                                      className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    >
+                                      Remove Assignment
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))
                 )}
@@ -473,6 +631,69 @@ export default function AdminPage() {
         </div>
         )}
       </div>
+
+      {/* Update Assignment Modal */}
+      {updateModalOpen && updateType && updateTargetId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+              Update Assignment
+            </h3>
+            {updateType === "student" ? (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Select Coach
+                  </label>
+                  <Select
+                    options={[
+                      { value: "", label: "None (Remove Assignment)" },
+                      ...getAvailableCoaches()
+                    ]}
+                    placeholder="Select Coach"
+                    onChange={(coachId) => setUpdateSelectedCoach(coachId)}
+                    className="text-theme-xs"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Select Mentor Coach
+                  </label>
+                  <Select
+                    options={[
+                      { value: "", label: "None (Remove Assignment)" },
+                      ...getAvailableMentorCoaches()
+                    ]}
+                    placeholder="Select Mentor"
+                    onChange={(mentorId) => setUpdateSelectedMentor(mentorId)}
+                    className="text-theme-xs"
+                  />
+                </div>
+              </div>
+            )}
+            <div className="flex gap-3 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setUpdateModalOpen(false);
+                  setUpdateType(null);
+                  setUpdateTargetId(null);
+                  setUpdateSelectedCoach("");
+                  setUpdateSelectedMentor("");
+                }}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleSaveUpdate}>
+                Save
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
