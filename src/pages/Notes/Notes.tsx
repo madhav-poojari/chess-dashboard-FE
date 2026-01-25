@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
 import { useAuth } from "../../context/AuthContext";
-import { Note, canViewNote, getVisibleLevelsForRole, VISIBILITY_DESCRIPTIONS, VISIBILITY_COLORS, canManageLessonPlan } from "./types";
+import { Note, VisibilityLevel, canViewNote, getVisibleLevelsForRole, VISIBILITY_DESCRIPTIONS, VISIBILITY_COLORS, canManageLessonPlan } from "./types";
 import NoteCard from "./NoteCard";
 import CreateNoteModal from "./CreateNoteModal";
 import CreateLessonPlanModal, { LessonPlan } from "./CreateLessonPlanModal";
@@ -122,9 +122,6 @@ export default function Notes() {
     const userRole = user?.role || '';
     const isViewingStudent = !!studentIdParam && userRole !== 'student';
 
-    // Get visibility levels that this role can see (for legend display)
-    const visibleLevels = getVisibleLevelsForRole(userRole);
-
     const filteredNotes = notes
         .filter(note => {
             // Lesson plans are always visible when viewing a specific student
@@ -190,8 +187,6 @@ export default function Notes() {
         }
     };
 
-    const canCreateNote = ['admin', 'mentor', 'coach', 'student'].includes(userRole);
-
     const handleCloseModal = () => {
         setIsCreateModalOpen(false);
         setNoteToEdit(undefined);
@@ -252,7 +247,6 @@ export default function Notes() {
                     </div>
                 ) : (
                     <NotesContent
-                        notes={notes}
                         loading={loading}
                         studentIdParam={studentIdParam}
                         user={user}
@@ -294,7 +288,6 @@ export default function Notes() {
             </div>
 
             <NotesContent
-                notes={notes}
                 loading={loading}
                 studentIdParam={studentIdParam}
                 user={user}
@@ -322,7 +315,6 @@ export default function Notes() {
 
 // Extract notes content into a separate component
 function NotesContent({
-    notes,
     loading,
     studentIdParam,
     user,
@@ -344,12 +336,11 @@ function NotesContent({
     loadNotes,
     handleCloseModal,
 }: {
-    notes: Note[];
     loading: boolean;
     studentIdParam: string | null;
     user: any;
     userRole: string;
-    visibleLevels: string[];
+    visibleLevels: VisibilityLevel[];
     lessonPlans: Note[];
     regularNotes: Note[];
     canCreateNote: boolean;

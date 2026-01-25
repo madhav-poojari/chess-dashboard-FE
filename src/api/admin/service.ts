@@ -33,54 +33,28 @@ export const fetchCoachesWithAssignments = async (): Promise<CoachWithAssignment
 };
 
 export const approveUser = async (userId: string): Promise<void> => {
-  await api.post(`/admin/user/${userId}/approve`);
+  // Approval is just a user status update now.
+  await api.put(`/admin/user/${userId}`, { approved: true });
 };
 
-export const assignStudentToCoach = async (coachId: string, studentId: string): Promise<void> => {
-  await api.post("/admin/assign-student", {
-    coach_id: coachId,
-    student_id: studentId,
-  });
-};
-
-export const assignCoachAsMentor = async (
-  mentorCoachId: string,
-  studentId: string,
-  coachId?: string
-): Promise<void> => {
-  await api.post("/admin/assign-mentor", {
-    mentor_coach_id: mentorCoachId,
-    student_id: studentId,
-    coach_id: coachId || "",
-  });
-};
-
-export const updateStudentAssignment = async (
+export const setStudentCoachAssignment = async (
   studentId: string,
   coachId: string
 ): Promise<void> => {
-  await api.put("/admin/update-student-assignment", {
+  await api.put("/admin/assignments", {
+    assignment_type: "student_coach",
     student_id: studentId,
-    coach_id: coachId,
+    coach_id: coachId, // empty string removes assignment
   });
 };
 
-export const updateCoachMentorAssignment = async (
+export const setCoachMentorAssignment = async (
   coachId: string,
   mentorCoachId: string
 ): Promise<void> => {
-  await api.put("/admin/update-coach-mentor", {
+  await api.put("/admin/assignments", {
+    assignment_type: "coach_mentor",
     coach_id: coachId,
-    mentor_coach_id: mentorCoachId,
-  });
-};
-
-export const resetUserPassword = async (
-  userId: string,
-  newPassword: string
-): Promise<void> => {
-  await api.post("/admin/reset-password", {
-    user_id: userId,
-    password: newPassword,
+    mentor_coach_id: mentorCoachId, // empty string removes mentor assignment
   });
 };
