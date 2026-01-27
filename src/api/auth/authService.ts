@@ -57,7 +57,7 @@ export const signup = async (signupForm: SignupForm): Promise<SignupResponse> =>
 export const logout = async () => {
   try {
     await axios.post(`${API_BASE}/auth/logout`, {}, { withCredentials: true });
-  } catch (e) { /* ignore */ }
+  } catch { /* ignore */ }
   tokenStorage.remove();
   logoutRedirect();
 };

@@ -36,7 +36,9 @@ export default function UserAddressCard({user, onUpdate, readOnly = false}:UserA
   const handleSave = async() => {
     // Handle save logic here
     console.log("Saving changes...");
-    await onUpdate({ ...user,country: form.country, state: form.state ,postal_code:form.postal_code,city: form.city });
+    if (onUpdate) {
+      await onUpdate({ ...user,country: form.country, state: form.state ,postal_code:form.postal_code,city: form.city });
+    }
     closeModal();
   };
   return (

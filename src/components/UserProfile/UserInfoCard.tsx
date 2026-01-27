@@ -62,7 +62,9 @@ export default function UserInfoCard({user, onUpdate, readOnly = false}:UserInfo
 
    const handleSave = async () => {
     // Handle save logic here
-    await onUpdate({...user, first_name: form.first_name, last_name: form.last_name ,bio:form.bio });
+    if (onUpdate) {
+      await onUpdate({...user, first_name: form.first_name, last_name: form.last_name ,bio:form.bio });
+    }
 
     closeModal();
   };

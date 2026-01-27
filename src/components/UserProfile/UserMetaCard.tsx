@@ -47,7 +47,9 @@ export default function UserMetaCard({ user, onUpdate, readOnly = false }: UserM
 
   const handleSave = async () => {
     // Handle save logic here
-    await onUpdate({...user, lichess_username:playLinks.lichessId,chesscom_username: playLinks.chessdotcomId, fide_id: playLinks.fideId, uscf_id: playLinks.uscfId});
+    if (onUpdate) {
+      await onUpdate({...user, lichess_username:playLinks.lichessId,chesscom_username: playLinks.chessdotcomId, fide_id: playLinks.fideId, uscf_id: playLinks.uscfId});
+    }
 
     closeModal();
   };

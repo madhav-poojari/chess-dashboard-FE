@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import {
@@ -6,10 +7,8 @@ import {
   fetchStudentsWithAssignments,
   fetchCoachesWithAssignments,
   approveUser,
-  assignStudentToCoach,
-  assignCoachAsMentor,
-  updateStudentAssignment,
-  updateCoachMentorAssignment,
+  setStudentCoachAssignment,
+  setCoachMentorAssignment,
   StudentWithAssignment,
   CoachWithAssignment,
 } from "../../api/admin/service";
@@ -32,11 +31,8 @@ type TabType = "pending" | "students" | "coaches";
 export default function AdminPage() {
   const { user } = useAuth();
   const isAdmin = user?.role?.toLowerCase() === "admin";
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabType>("pending");
-  const [unapprovedUsers, setUnapprovedUsers] = useState<User[]>([]);
-  const [students, setStudents] = useState<StudentWithAssignment[]>([]);
-  const [coaches, setCoaches] = useState<CoachWithAssignment[]>([]);
-  const [loading, setLoading] = useState(true);
   const [assigningStudentId, setAssigningStudentId] = useState<string | null>(null);
   const [assigningCoachId, setAssigningCoachId] = useState<string | null>(null);
   const [selectedCoachForStudent, setSelectedCoachForStudent] = useState<Record<string, string>>({});
@@ -49,38 +45,54 @@ export default function AdminPage() {
   const [updateSelectedMentor, setUpdateSelectedMentor] = useState<string>("");
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [unapproved, studentsData, coachesData] = await Promise.all([
-        fetchUnapprovedUsers(),
-        fetchStudentsWithAssignments(),
-        fetchCoachesWithAssignments(),
-      ]);
-      setUnapprovedUsers(unapproved);
-      setStudents(studentsData);
-      setCoaches(coachesData);
-      // Debug: log coaches with students to check mentor_coach_id
-      console.log("Coaches with assignments:", coachesData.filter(c => c.student_id && !c.student_id.startsWith("T-")).map(c => ({
-        email: c.email,
-        student_id: c.student_id,
-        mentor_coach_id: c.mentor_coach_id
-      })));
-    } catch (error) {
-      console.error("Error loading admin data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: unapprovedUsers = [], isLoading: unapprovedLoading } = useQuery<User[]>({
+    queryKey: ["admin", "unapproved-users"],
+    queryFn: fetchUnapprovedUsers,
+    enabled: !!user && isAdmin,
+  });
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  const { data: students = [], isLoading: studentsLoading } = useQuery<StudentWithAssignment[]>({
+    queryKey: ["admin", "students"],
+    queryFn: fetchStudentsWithAssignments,
+    enabled: !!user && isAdmin,
+  });
+
+  const { data: coaches = [], isLoading: coachesLoading } = useQuery<CoachWithAssignment[]>({
+    queryKey: ["admin", "coaches"],
+    queryFn: fetchCoachesWithAssignments,
+    enabled: !!user && isAdmin,
+  });
+
+  const loading = unapprovedLoading || studentsLoading || coachesLoading;
+
+  const approveMutation = useMutation({
+    mutationFn: approveUser,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin"] });
+    },
+  });
+
+  const studentAssignmentMutation = useMutation({
+    mutationFn: async (vars: { studentId: string; coachId: string }) =>
+      setStudentCoachAssignment(vars.studentId, vars.coachId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin", "students"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin", "coaches"] });
+    },
+  });
+
+  const coachMentorMutation = useMutation({
+    mutationFn: async (vars: { coachId: string; mentorCoachId: string }) =>
+      setCoachMentorAssignment(vars.coachId, vars.mentorCoachId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin", "coaches"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin", "students"] });
+    },
+  });
 
   const handleApprove = async (userId: string) => {
     try {
-      await approveUser(userId);
-      await loadData();
+      await approveMutation.mutateAsync(userId);
     } catch (error) {
       console.error("Error approving user:", error);
       alert("Failed to approve user");
@@ -92,9 +104,8 @@ export default function AdminPage() {
 
     try {
       setAssigningStudentId(studentId);
-      await assignStudentToCoach(coachId, studentId);
+      await studentAssignmentMutation.mutateAsync({ studentId, coachId });
       setSelectedCoachForStudent({ ...selectedCoachForStudent, [studentId]: "" });
-      await loadData();
     } catch (error) {
       console.error("Error assigning student:", error);
       alert("Failed to assign student");
@@ -108,12 +119,8 @@ export default function AdminPage() {
 
     try {
       setAssigningCoachId(coachId);
-      // Assign the selected mentor coach (mentorCoachId) to the coach (coachId)
-      // If coach has students, mentor will be applied to all of them
-      // If coach has no students yet, mentor will be applied when students are assigned later
-      await assignCoachAsMentor(mentorCoachId, "", coachId);
+      await coachMentorMutation.mutateAsync({ coachId, mentorCoachId });
       setSelectedMentorForCoach({ ...selectedMentorForCoach, [coachId]: "" });
-      await loadData();
     } catch (error) {
       console.error("Error assigning mentor:", error);
       alert("Failed to assign mentor");
@@ -142,16 +149,15 @@ export default function AdminPage() {
 
     try {
       if (updateType === "student") {
-        await updateStudentAssignment(updateTargetId, updateSelectedCoach);
+        await studentAssignmentMutation.mutateAsync({ studentId: updateTargetId, coachId: updateSelectedCoach });
       } else {
-        await updateCoachMentorAssignment(updateTargetId, updateSelectedMentor);
+        await coachMentorMutation.mutateAsync({ coachId: updateTargetId, mentorCoachId: updateSelectedMentor });
       }
       setUpdateModalOpen(false);
       setUpdateType(null);
       setUpdateTargetId(null);
       setUpdateSelectedCoach("");
       setUpdateSelectedMentor("");
-      await loadData();
     } catch (error) {
       console.error("Error updating assignment:", error);
       alert("Failed to update assignment");
@@ -163,12 +169,11 @@ export default function AdminPage() {
 
     try {
       if (type === "student") {
-        await updateStudentAssignment(id, "");
+        await studentAssignmentMutation.mutateAsync({ studentId: id, coachId: "" });
       } else {
-        await updateCoachMentorAssignment(id, "");
+        await coachMentorMutation.mutateAsync({ coachId: id, mentorCoachId: "" });
       }
       setOpenMenuId(null);
-      await loadData();
     } catch (error) {
       console.error("Error removing assignment:", error);
       alert("Failed to remove assignment");
@@ -349,6 +354,7 @@ export default function AdminPage() {
                       isHeader
                       className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400 w-12"
                     >
+                      {" "}
                     </TableCell>
                   )}
                 </TableRow>
@@ -497,6 +503,7 @@ export default function AdminPage() {
                       isHeader
                       className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400 w-12"
                     >
+                      {" "}
                     </TableCell>
                   )}
                 </TableRow>

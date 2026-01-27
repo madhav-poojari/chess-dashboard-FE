@@ -8,9 +8,9 @@ export const tokenStorage = {
   },
   set(token: string) {
     console.log("setting ACT- ",token)
-    try { localStorage.setItem(ACCESS_TOKEN_KEY, token); } catch {}
+    try { localStorage.setItem(ACCESS_TOKEN_KEY, token); } catch { return; }
   },
   remove() {
-    try { localStorage.removeItem(ACCESS_TOKEN_KEY); } catch {}
+    try { localStorage.removeItem(ACCESS_TOKEN_KEY); } catch { return; }
   }
 };
