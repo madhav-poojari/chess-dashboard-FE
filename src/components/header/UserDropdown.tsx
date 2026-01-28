@@ -76,7 +76,7 @@ export default function UserDropdown() {
       >
         <span className="mr-3 overflow-hidden rounded-full h-11 w-11 bg-gray-200 flex items-center justify-center text-lg font-bold text-gray-500">
           {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
-          {/* <img src="/images/user/owner.jpg" alt="User" /> */}
+          {/* <img src="/images/user/dummy-profile-image.png" alt="User" /> */}
         </span>
 
         <span className="block mr-1 font-medium text-theme-sm">{user?.name || "User"}</span>
