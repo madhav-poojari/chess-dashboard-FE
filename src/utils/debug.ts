@@ -1,10 +1,10 @@
-export  const logRecursive = (obj: any, indent = 2) => {
+export const logRecursive = (obj: unknown, indent = 2) => {
     try {
       const output = JSON.stringify(obj, null, indent);
       console.log(output);
-    } catch (error) {
+    } catch (err) {
       // Fallback for circular references or objects that cannot be stringified (e.g., global window object)
-      console.error("Could not stringify object (possibly circular reference). Falling back to console.dir:", obj);
+      console.error("Could not stringify object (possibly circular reference). Falling back to console.dir:", err, obj);
       console.dir(obj);
     }
   };

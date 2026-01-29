@@ -89,6 +89,12 @@ const AppSidebar: React.FC = () => {
       allowedRoles: [UserRole.STUDENT]
     },
     {
+      icon: <TableIcon />,
+      name: "Attendance",
+      path: "/attendance",
+      allowedRoles: [UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
+    },
+    {
       icon: <GroupIcon />,
       name: "Students",
 

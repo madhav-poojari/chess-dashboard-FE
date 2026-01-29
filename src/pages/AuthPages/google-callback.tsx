@@ -44,8 +44,9 @@ const GoogleCallback: React.FC = () => {
 
           window.opener?.postMessage({ type: "oauth", success: true,data, state ,status}, origin);
         }
-      } catch (err: any) {
-        window.opener?.postMessage({ type: "oauth", success: false, error: err?.message || "network", state,status:0 }, origin);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        window.opener?.postMessage({ type: "oauth", success: false, error: msg || "network", state, status: 0 }, origin);
       } finally {
         window.close();
       }
