@@ -61,9 +61,10 @@ export default function UserDropdown() {
       setNewPassword("");
       setConfirmPassword("");
       alert("Password reset successfully!");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error resetting password:", err);
-      setError(err?.response?.data?.message || err?.message || "Failed to reset password");
+      const e2 = err as { response?: { data?: { message?: string } }; message?: string };
+      setError(e2?.response?.data?.message || e2?.message || "Failed to reset password");
     } finally {
       setIsResetting(false);
     }

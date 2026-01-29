@@ -43,9 +43,10 @@ export default function SignUpForm() {
       await signup(signupForm);
       // Redirect to pending approval page
       navigate("/pending-approval");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err?.response?.data?.message || err?.message || "Failed to create account. Please try again.");
+      const e2 = err as { response?: { data?: { message?: string } }; message?: string };
+      setError(e2?.response?.data?.message || e2?.message || "Failed to create account. Please try again.");
     } finally {
       setLoading(false);
     }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth, User as AuthUser } from "../../context/AuthContext";
 import { Note, VisibilityLevel, canViewNote, getVisibleLevelsForRole, VISIBILITY_DESCRIPTIONS, VISIBILITY_COLORS, canManageLessonPlan } from "./types";
 import NoteCard from "./NoteCard";
 import CreateNoteModal from "./CreateNoteModal";
@@ -338,7 +338,7 @@ function NotesContent({
 }: {
     loading: boolean;
     studentIdParam: string | null;
-    user: any;
+    user: AuthUser | null;
     userRole: string;
     visibleLevels: VisibilityLevel[];
     lessonPlans: Note[];
