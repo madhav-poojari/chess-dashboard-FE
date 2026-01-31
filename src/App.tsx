@@ -11,6 +11,9 @@ import { AuthProvider } from "./context/AuthContext";
 import GoogleCallback from "./pages/AuthPages/google-callback";
 import ApprovalPending from "./pages/OtherPage/ApprovalPending";
 import AppBootstrap from "./components/common/AppBootstrap";
+import AdminPage from "./pages/Admin/AdminPage";
+import RequireRole from "./components/auth/RequireRole";
+import AttendancePage from "./pages/Attendance/AttendancePage";
 
 export default function App() {
   return (
@@ -29,6 +32,25 @@ export default function App() {
                 {/* Notes */}
                 <Route path="/notes" element={<Notes />} />
 
+                {/* Admin */}
+                <Route
+                  path="/admin"
+                  element={
+                    <RequireRole allowedRoles={["admin"]}>
+                      <AdminPage />
+                    </RequireRole>
+                  }
+                />
+
+                {/* Attendance */}
+                <Route
+                  path="/attendance"
+                  element={
+                    <RequireRole allowedRoles={["admin", "mentor", "coach"]}>
+                      <AttendancePage />
+                    </RequireRole>
+                  }
+                />
 
               </Route>
 

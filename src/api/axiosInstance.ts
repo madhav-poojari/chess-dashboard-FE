@@ -30,13 +30,13 @@ instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 let isRefreshing = false;
 let refreshPromise: Promise<string> | null = null;
 type PendingReq = {
-  resolve: (value: AxiosResponse<any> | Promise<AxiosResponse<any>>) => void;
-  reject: (err?: any) => void;
+  resolve: (value: AxiosResponse<unknown> | Promise<AxiosResponse<unknown>>) => void;
+  reject: (err?: unknown) => void;
   config: InternalAxiosRequestConfig;
 };
 const pendingQueue: PendingReq[] = [];
 
-const processQueue = (error: any | null, token?: string) => {
+const processQueue = (error: unknown | null, token?: string) => {
   pendingQueue.forEach(({ resolve, reject, config }) => {
     console.log("pending queue len- ", pendingQueue.length)
     console.log("error in queue processing ", error)

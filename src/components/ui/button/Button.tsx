@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { MouseEventHandler, ReactNode } from "react";
 
 interface ButtonProps {
   children: ReactNode; // Button text or content
@@ -6,7 +6,8 @@ interface ButtonProps {
   variant?: "primary" | "outline"; // Button variant
   startIcon?: ReactNode; // Icon before the text
   endIcon?: ReactNode; // Icon after the text
-  onClick?: () => void; // Click handler
+  type?: "button" | "submit" | "reset";
+  onClick?: MouseEventHandler<HTMLButtonElement>; // Click handler
   disabled?: boolean; // Disabled state
   className?: string; // Disabled state
 }
@@ -17,6 +18,7 @@ const Button: React.FC<ButtonProps> = ({
   variant = "primary",
   startIcon,
   endIcon,
+  type = "button",
   onClick,
   className = "",
   disabled = false,
@@ -42,6 +44,7 @@ const Button: React.FC<ButtonProps> = ({
       } ${variantClasses[variant]} ${
         disabled ? "cursor-not-allowed opacity-50" : ""
       }`}
+      type={type}
       onClick={onClick}
       disabled={disabled}
     >

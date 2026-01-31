@@ -32,7 +32,12 @@ import { updateProfile } from "../api/user/service";
 // }
 
 
-export default function UserProfiles() {
+interface UserProfilesProps {
+  studentId?: string | null;
+  readOnly?: boolean;
+}
+
+export default function UserProfiles({ studentId, readOnly = false }: UserProfilesProps) {
 
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,14 +45,29 @@ export default function UserProfiles() {
 
   useEffect(() => {
     let mounted = true;
-    userPublicProfile()
-      .then((p) => mounted && setProfile(p))
-      .catch((e) => mounted && setError(e as Error))
-      .finally(() => mounted && setLoading(false));
+    setLoading(true);
+    setError(null);
+    setProfile(null);
+    userPublicProfile(studentId || undefined)
+      .then((p) => {
+        if (mounted) {
+          setProfile(p);
+        }
+      })
+      .catch((e) => {
+        if (mounted) {
+          setError(e as Error);
+        }
+      })
+      .finally(() => {
+        if (mounted) {
+          setLoading(false);
+        }
+      });
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [studentId]);
   // callback to update local state and optionally call API
   const handleUpdateUser = useCallback(
     async (patch: Partial<PublicProfile> | { uscf_id?: string; fide_id?: string; chesscom_username?: string; lichess_username?: string }) => {
@@ -86,21 +106,27 @@ export default function UserProfiles() {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error loading profile</div>;
 
+  const updateHandler = readOnly ? undefined : handleUpdateUser;
+
   return (profile && (
     <>
-      <PageMeta
-        title="React.js Profile Dashboard | TailAdmin - Next.js Admin Dashboard Template"
-        description="This is React.js Profile Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
-      />
-      <PageBreadcrumb pageTitle="Profile" />
+      {!readOnly && (
+        <>
+          <PageMeta
+            title="React.js Profile Dashboard | TailAdmin - Next.js Admin Dashboard Template"
+            description="This is React.js Profile Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
+          />
+          <PageBreadcrumb pageTitle="Profile" />
+        </>
+      )}
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
         <h3 className="mb-5 text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-7">
           Profile
         </h3>
         <div className="space-y-6">
-          <UserMetaCard user={profile} onUpdate={handleUpdateUser} />
-          <UserInfoCard user={profile} onUpdate={handleUpdateUser} />
-          <UserAddressCard user={profile} onUpdate={handleUpdateUser} />
+          <UserMetaCard user={profile} onUpdate={updateHandler} readOnly={readOnly} />
+          <UserInfoCard user={profile} onUpdate={updateHandler} readOnly={readOnly} />
+          <UserAddressCard user={profile} onUpdate={updateHandler} readOnly={readOnly} />
         </div>
       </div>
     </>

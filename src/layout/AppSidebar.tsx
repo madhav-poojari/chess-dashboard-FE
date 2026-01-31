@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 
 import {
@@ -7,6 +7,7 @@ import {
   UserCircleIcon,
   DocsIcon,
   GroupIcon,
+  TableIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "../context/AuthContext";
@@ -74,7 +75,7 @@ const AppSidebar: React.FC = () => {
   }, [user, loading]);
 
   // Memoize navItems to depend on students
-  const navItems: NavItem[] = [
+  const navItems: NavItem[] = useMemo(() => [
     {
       icon: <UserCircleIcon />,
       name: "User Profile",
@@ -88,6 +89,12 @@ const AppSidebar: React.FC = () => {
       allowedRoles: [UserRole.STUDENT]
     },
     {
+      icon: <TableIcon />,
+      name: "Attendance",
+      path: "/attendance",
+      allowedRoles: [UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
+    },
+    {
       icon: <GroupIcon />,
       name: "Students",
 
@@ -98,7 +105,13 @@ const AppSidebar: React.FC = () => {
         description: student.lessonPlan
       }))
     },
-  ];
+    {
+      icon: <TableIcon />,
+      name: "Admin",
+      path: "/admin",
+      allowedRoles: [UserRole.ADMIN]
+    },
+  ], [students]);
 
   const isActive = useCallback(
     (path: string) => {
@@ -119,7 +132,7 @@ const AppSidebar: React.FC = () => {
   // Effect to auto-open submenu based on current path
   useEffect(() => {
     if (loading) return; // Skip if still loading
-    
+
     let submenuMatched = false;
     navItems.forEach((nav, index) => {
       if (nav.subItems) {
@@ -138,6 +151,7 @@ const AppSidebar: React.FC = () => {
     if (!submenuMatched) {
       setOpenSubmenu(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location, isActive, students, loading]); // Added loading dependency
 
   useEffect(() => {
@@ -151,6 +165,10 @@ const AppSidebar: React.FC = () => {
       }
     }
   }, [openSubmenu]);
+
+  // while loading user we can hide role-restricted links
+  console.log("AppSidebar State:", { loading, user });
+  if (loading) return null;
 
   const handleSubmenuToggle = (index: number) => {
     setOpenSubmenu((prevOpenSubmenu) => {
@@ -322,26 +340,16 @@ const AppSidebar: React.FC = () => {
       >
         <Link to="/">
           {isExpanded || isHovered || isMobileOpen ? (
-            <>
-              <img
-                className="dark:hidden"
-                src="/images/brs-logo/brs-flat.png"
-                alt="Logo"
-                width={400}
-                height={400}
-              />
-              <img
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-            </>
+            <img
+              src="/images/brs-logo/brs-flat.png"
+              alt="BRS Chess Logo"
+              width={150}
+              height={40}
+            />
           ) : (
             <img
-              src="/images/logo/logo-icon.svg"
-              alt="Logo"
+              src="/images/brs-logo/brs-flat.png"
+              alt="BRS Chess Logo"
               width={32}
               height={32}
             />
