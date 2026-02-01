@@ -42,8 +42,9 @@ export default function AddAttendanceModal({ isOpen, onClose, onSuccess }: Props
   const [studentId, setStudentId] = useState<string>("");
   const [studentId2, setStudentId2] = useState<string>(""); // dual
 
-  // Free-text student id for substitution/game_session
-  const [freeTextStudentId, setFreeTextStudentId] = useState<string>("");
+  // Free-text student id for substitution/game_session - now supports multiple
+  const [freeTextStudentIds, setFreeTextStudentIds] = useState<string[]>([]);
+  const [currentInput, setCurrentInput] = useState<string>("");
 
   // Optional coach override for mentor/admin
   const [coachId, setCoachId] = useState<string>("");
@@ -62,6 +63,45 @@ export default function AddAttendanceModal({ isOpen, onClose, onSuccess }: Props
     return (students || []).filter((s) => (s.role || "").toLowerCase() === "student");
   }, [students]);
 
+  // Helper to find student info by ID for chip display
+  const getStudentInfo = (id: string): User | undefined => {
+    return filteredStudents.find((s) => s.id === id);
+  };
+
+  const addStudentChip = (id: string) => {
+    const trimmed = id.trim();
+    if (!trimmed) return;
+    if (freeTextStudentIds.includes(trimmed)) {
+      setError(`Student ID "${trimmed}" is already added.`);
+      return;
+    }
+    
+    // Validate that the student ID exists
+    const student = getStudentInfo(trimmed);
+    if (!student) {
+      setError(`Invalid student ID: "${trimmed}". Please enter a valid student ID.`);
+      return;
+    }
+    
+    setError(""); // Clear any previous errors
+    setFreeTextStudentIds([...freeTextStudentIds, trimmed]);
+    setCurrentInput("");
+  };
+
+  const removeStudentChip = (id: string) => {
+    setFreeTextStudentIds(freeTextStudentIds.filter((sid) => sid !== id));
+  };
+
+  const handleChipInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      addStudentChip(currentInput);
+    } else if (e.key === "Backspace" && !currentInput && freeTextStudentIds.length > 0) {
+      // Remove last chip on backspace if input is empty
+      setFreeTextStudentIds(freeTextStudentIds.slice(0, -1));
+    }
+  };
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -73,7 +113,8 @@ export default function AddAttendanceModal({ isOpen, onClose, onSuccess }: Props
     setSessionId("");
     setStudentId("");
     setStudentId2("");
-    setFreeTextStudentId("");
+    setFreeTextStudentIds([]);
+    setCurrentInput("");
     setCoachId("");
     setClassHighlights("");
     setHomework("");
@@ -98,6 +139,16 @@ export default function AddAttendanceModal({ isOpen, onClose, onSuccess }: Props
       setError("Please choose a date.");
       return;
     }
+
+    // Prevent future dates
+    const selectedDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day for comparison
+    if (selectedDate > today) {
+      setError("Cannot add attendance for future dates.");
+      return;
+    }
+
     if (showStudentDropdown && !studentId) {
       setError("Please select a student.");
       return;
@@ -106,8 +157,8 @@ export default function AddAttendanceModal({ isOpen, onClose, onSuccess }: Props
       setError("Please select a different second student for Dual.");
       return;
     }
-    if (showFreeTextStudent && !freeTextStudentId.trim()) {
-      setError("Please enter a student id / name.");
+    if (showFreeTextStudent && freeTextStudentIds.length === 0) {
+      setError("Please add at least one student.");
       return;
     }
 
@@ -129,8 +180,13 @@ export default function AddAttendanceModal({ isOpen, onClose, onSuccess }: Props
         payload.student_ids = [studentId, studentId2].filter(Boolean);
       } else if (showStudentDropdown) {
         payload.student_id = studentId;
-      } else {
-        payload.student_id = freeTextStudentId.trim();
+      } else if (showFreeTextStudent) {
+        // Multiple student IDs for substitution/game_session
+        if (freeTextStudentIds.length === 1) {
+          payload.student_id = freeTextStudentIds[0];
+        } else {
+          payload.student_ids = freeTextStudentIds;
+        }
       }
 
       await createAttendance(payload);
@@ -159,7 +215,7 @@ export default function AddAttendanceModal({ isOpen, onClose, onSuccess }: Props
         )}
 
         <form onSubmit={submit} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4  ">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Class type
@@ -179,12 +235,13 @@ export default function AddAttendanceModal({ isOpen, onClose, onSuccess }: Props
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Date
+                Date (MM/DD/YYYY)
               </label>
               <input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
+                max={todayYYYYMMDD()}
                 className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2 text-gray-900 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
                 required
               />
@@ -257,20 +314,65 @@ export default function AddAttendanceModal({ isOpen, onClose, onSuccess }: Props
           {showFreeTextStudent && (
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Student ID (free text)
+                Students (type ID and press Enter or comma)
               </label>
-              <input
-                type="text"
-                value={freeTextStudentId}
-                onChange={(e) => setFreeTextStudentId(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2 text-gray-900 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
-                placeholder="Enter student id / name"
-                required
-              />
+              <div className="w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-gray-900 focus-within:border-blue-500 dark:border-gray-600 dark:text-white dark:focus-within:border-blue-500 min-h-[42px] flex flex-wrap gap-2 items-center">
+                {freeTextStudentIds.map((id) => {
+                  const student = getStudentInfo(id);
+                  return (
+                    <div
+                      key={id}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-full text-sm"
+                    >
+                      <span>
+                        {student
+                          ? `${student.first_name} ${student.last_name} (${id})`
+                          : id}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeStudentChip(id)}
+                        className="hover:bg-blue-200 dark:hover:bg-blue-800/50 rounded-full p-0.5 transition-colors"
+                        aria-label="Remove"
+                      >
+                        <svg
+                          className="w-3.5 h-3.5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  );
+                })}
+                <input
+                  type="text"
+                  value={currentInput}
+                  onChange={(e) => setCurrentInput(e.target.value)}
+                  onKeyDown={handleChipInputKeyDown}
+                  onBlur={() => {
+                    if (currentInput.trim()) {
+                      addStudentChip(currentInput);
+                    }
+                  }}
+                  className="flex-1 min-w-[120px] bg-transparent outline-none border-none focus:ring-0 px-1"
+                  placeholder={freeTextStudentIds.length === 0 ? "Enter student ID..." : ""}
+                />
+              </div>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Type student ID and press Enter or comma to add. Valid IDs will show student names.
+              </p>
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Session ID (optional)
@@ -284,7 +386,7 @@ export default function AddAttendanceModal({ isOpen, onClose, onSuccess }: Props
               />
             </div>
             <div />
-          </div>
+          </div> */}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">

@@ -27,7 +27,7 @@ export const updateProfile = async (userProfle: Partial<PublicProfile>): Promise
 export const fetchStudents = async (): Promise<User[]> => {
   const res = await api.get("/users/");
   const data: ApiResponse<User[]> = res.data;
-  return data.data;
+  return data.data.filter((user) => user.role.toLowerCase() === "student");
 };
 
 export const fetchUserById = async (userId: string): Promise<User> => {
