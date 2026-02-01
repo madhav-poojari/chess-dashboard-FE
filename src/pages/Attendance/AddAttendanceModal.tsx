@@ -143,7 +143,7 @@ export default function AddAttendanceModal({ isOpen, onClose, onSuccess }: Props
     // Prevent future dates
     const selectedDate = new Date(date);
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Reset time to start of day for comparison
+    today.setHours(23, 59, 59,999); // Reset time to start of day for comparison
     if (selectedDate > today) {
       setError("Cannot add attendance for future dates.");
       return;
