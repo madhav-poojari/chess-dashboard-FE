@@ -45,7 +45,16 @@ export default function AttendancePage() {
     [students]
   );
 
+  const coachOptions = useMemo(
+    () => (students || []).filter((s) => {
+      const r = (s.role || "").toLowerCase();
+      return r === "coach" || r === "mentor" || r === "admin";
+    }),
+    [students]
+  );
+
   const [selectedStudentId, setSelectedStudentId] = useState<string>("");
+  const [selectedCoachId, setSelectedCoachId] = useState<string>("");
 
   const [attendances, setAttendances] = useState<Attendance[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -73,6 +82,13 @@ export default function AttendancePage() {
     }
   }, [studentOptions, selectedStudentId]);
 
+  // default coach selection when list loads
+  useEffect(() => {
+    if (!selectedCoachId && coachOptions.length > 0) {
+      setSelectedCoachId(coachOptions[0].id);
+    }
+  }, [coachOptions, selectedCoachId]);
+
   const loadAttendances = async () => {
     setError("");
     const parsed = parseMonthInput(monthValue);
@@ -86,6 +102,9 @@ export default function AttendancePage() {
       // Student overview is typically filtered by a student for readability
       if (activeTab === "student_overview" && selectedStudentId) {
         params.student_id = selectedStudentId;
+      }
+      if (activeTab === "coach_overview" && selectedCoachId) {
+        params.coach_id = selectedCoachId;
       }
       const res = await listAttendances(params);
       setAttendances(Array.isArray(res) ? res : []);
@@ -102,9 +121,11 @@ export default function AttendancePage() {
   useEffect(() => {
     // For student overview, wait until we have a selected student (if there are options)
     if (activeTab === "student_overview" && studentOptions.length > 0 && !selectedStudentId) return;
+    // For coach overview, wait until we have a selected coach (if there are options)
+    if (activeTab === "coach_overview" && coachOptions.length > 0 && !selectedCoachId) return;
     loadAttendances();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, monthValue, selectedStudentId]);
+  }, [activeTab, monthValue, selectedStudentId, selectedCoachId]);
 
   const groupedByCoach = useMemo(() => {
     const m = new Map<string, Attendance[]>();
@@ -158,6 +179,30 @@ export default function AttendancePage() {
                 {studentOptions.map((s) => (
                   <option key={s.id} value={s.id} className="dark:bg-gray-800">
                     {s.first_name} {s.last_name} ({s.email})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {activeTab === "coach_overview" && (
+            <div className="min-w-[260px]">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Coach
+              </label>
+              <select
+                value={selectedCoachId}
+                onChange={(e) => setSelectedCoachId(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2 text-gray-900 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
+              >
+                {coachOptions.length === 0 && (
+                  <option value="" disabled>
+                    No coaches found
+                  </option>
+                )}
+                {coachOptions.map((c) => (
+                  <option key={c.id} value={c.id} className="dark:bg-gray-800">
+                    {c.first_name} {c.last_name} ({c.email})
                   </option>
                 ))}
               </select>
@@ -262,6 +307,7 @@ export default function AttendancePage() {
               <p className="text-gray-600 dark:text-gray-400">No attendance records for this month.</p>
             ) : (
               <div className="space-y-6">
+
                 {groupedByCoach.map((g) => (
                   <div key={g.key} className="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
                     <div className="flex items-center justify-between mb-3">

@@ -13,8 +13,8 @@ const PageMeta = ({
     <Helmet>
       <title>{finalTitle}</title>
       <meta name="description" content={description} />
-      <link rel="icon" type="image/png" href="/images/brs-logo/brs-flat.png" />
-      <link rel="apple-touch-icon" href="/images/brs-logo/brs-flat.png" />
+      <link rel="icon" type="image/png" href="/images/brs-logo/logo-without-name-favicon.png" />
+      <link rel="apple-touch-icon" href="/images/brs-logo/logo-without-name-favicon.png" />
     </Helmet>
   );
 };
