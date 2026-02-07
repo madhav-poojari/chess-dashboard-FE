@@ -76,11 +76,9 @@ import { useNavigate } from "react-router";
                 </div>
 
                 <div>
-                <button type="submit" disabled={loading} className="w-full">
-                  <Button className="w-full" size="sm" disabled={loading}>
-                  {loading ? "Signing in…" : "Sign in"}
+                  <Button className="w-full" size="sm" type="submit" disabled={loading}>
+                    {loading ? "Signing in…" : "Sign in"}
                   </Button>
-                  </button>
                 </div>
               </div>
             </form>
