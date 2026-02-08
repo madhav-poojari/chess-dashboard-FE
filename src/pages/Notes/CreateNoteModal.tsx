@@ -79,7 +79,7 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
         setLoading(true);
 
         // For students, always use their own ID
-        const targetStudentId = isStudent 
+        const targetStudentId = isStudent
             ? (initialData?.user_id || user?.id || '')
             : (initialData?.user_id || studentId || selectedStudentId);
 
@@ -92,7 +92,7 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
         try {
             // For students, always use L4 visibility
             const finalVisibility = isStudent ? 'L4' : visibility;
-            
+
             if (initialData) {
                 await updateNote(initialData.id, {
                     title,
@@ -133,7 +133,7 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
     const isEditMode = !!initialData;
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose}>
+        <Modal isOpen={isOpen} onClose={onClose} className="max-w-[600px] m-4">
             <div className="p-4 sm:p-6">
                 <h3 className="mb-5 text-xl font-semibold text-gray-900 dark:text-white">
                     {isEditMode ? 'Edit' : 'Add'} {type === 'lesson_plan' ? 'Lesson Plan' : 'Note'}
