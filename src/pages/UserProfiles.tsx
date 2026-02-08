@@ -74,7 +74,7 @@ export default function UserProfiles({ studentId, readOnly = false }: UserProfil
       // patch is partial object, e.g. { first_name: 'New' } or PlayLinksUpdate
       // Convert PlayLinksUpdate format to PublicProfile format if needed
       let profilePatch: Partial<PublicProfile>;
-      
+
       if ('uscf_id' in patch || 'fide_id' in patch || 'chesscom_username' in patch || 'lichess_username' in patch) {
         // Convert snake_case to camelCase
         profilePatch = {
@@ -87,7 +87,7 @@ export default function UserProfiles({ studentId, readOnly = false }: UserProfil
         // It's already in PublicProfile format
         profilePatch = patch as Partial<PublicProfile>;
       }
-      
+
       // optimistic update:
       console.log("liches id -- ", profilePatch.lichessId);
       setProfile((prev) => {
@@ -95,12 +95,13 @@ export default function UserProfiles({ studentId, readOnly = false }: UserProfil
         return { ...prev, ...profilePatch };
       });
       try {
-        await updateProfile(profilePatch); // implement API call
+        // Include uid from current profile state so API knows which user to update
+        await updateProfile({ ...profilePatch, uid: profile?.uid });
       } catch (err) {
         console.error("Failed to save user:", err);
       }
     },
-    []
+    [profile?.uid]
   );
   // Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
   if (loading) return <div>Loading...</div>;
