@@ -42,8 +42,17 @@ export default function UserMetaCard({ user, onUpdate, readOnly = false }: UserM
     }));
   };
 
-  const lichessUrl = "https://lichess.org/@/" + playLinks.lichessId;
-  const chessDotComUrl = "https://www.chess.com/member/" + playLinks.chessdotcomId;
+  // Use user prop directly for display (handles when viewing different users)
+  // Use playLinks state only for local editing in the modal
+  const displayLinks = {
+    lichessId: user.lichessId || "",
+    chessdotcomId: user.chessdotcomId || "",
+    uscfId: user.uscfId || "",
+    fideId: user.fideId || "",
+  };
+
+  const lichessUrl = "https://lichess.org/@/" + displayLinks.lichessId;
+  const chessDotComUrl = "https://www.chess.com/member/" + displayLinks.chessdotcomId;
 
   const handleSave = async () => {
     // Handle save logic here
@@ -76,7 +85,7 @@ export default function UserMetaCard({ user, onUpdate, readOnly = false }: UserM
             </div>
             <div className="flex items-center order-2 gap-2 grow xl:order-3 xl:justify-end">
               {/* Lichess Icon */}
-              {playLinks.lichessId ? (
+              {displayLinks.lichessId ? (
                 <a
                   href={lichessUrl}
                   target="_blank"
@@ -96,7 +105,7 @@ export default function UserMetaCard({ user, onUpdate, readOnly = false }: UserM
               )}
 
               {/* Chess.com Icon */}
-              {playLinks.chessdotcomId ? (
+              {displayLinks.chessdotcomId ? (
                 <a
                   href={chessDotComUrl}
                   target="_blank"
@@ -116,9 +125,9 @@ export default function UserMetaCard({ user, onUpdate, readOnly = false }: UserM
               )}
 
               {/* USCF Icon */}
-              {playLinks.uscfId ? (
+              {displayLinks.uscfId ? (
                 <a
-                  href={`https://www.uschess.org/msa/MbrDtlMain.php?${playLinks.uscfId}`}
+                  href={`https://www.uschess.org/msa/MbrDtlMain.php?${displayLinks.uscfId}`}
                   target="_blank"
                   rel="noopener"
                   className="flex h-11 w-11 items-center justify-center gap-2 rounded-full border border-gray-300 bg-white text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
@@ -136,9 +145,9 @@ export default function UserMetaCard({ user, onUpdate, readOnly = false }: UserM
               )}
 
               {/* FIDE Icon */}
-              {playLinks.fideId ? (
+              {displayLinks.fideId ? (
                 <a
-                  href={`https://ratings.fide.com/profile/${playLinks.fideId}`}
+                  href={`https://ratings.fide.com/profile/${displayLinks.fideId}`}
                   target="_blank"
                   rel="noopener"
                   className="flex h-11 w-11 items-center justify-center gap-2 rounded-full border border-gray-300 bg-white text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
