@@ -80,7 +80,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [location.pathname, hasFetched]);
 
-  const value = useMemo(() => ({ user, loading, setUser }), [user, loading]);
+  // Wrapper to reset hasFetched when user is cleared (logout)
+  const handleSetUser = (u: User | null) => {
+    setUser(u);
+    if (u === null) {
+      setHasFetched(false); // Allow re-fetching on next login
+    }
+  };
+
+  const value = useMemo(() => ({ user, loading, setUser: handleSetUser }), [user, loading]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

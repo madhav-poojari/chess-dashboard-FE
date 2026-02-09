@@ -167,11 +167,9 @@ export default function SignUpForm() {
               )}
 
               <div>
-                <button type="submit" disabled={loading} className="w-full">
-                  <Button className="w-full" size="sm" disabled={loading}>
-                    {loading ? "Creating account…" : "Sign Up"}
-                  </Button>
-                </button>
+                <Button className="w-full" size="sm" type="submit" disabled={loading}>
+                  {loading ? "Creating account…" : "Sign Up"}
+                </Button>
               </div>
 
               <div className="relative">
