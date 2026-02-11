@@ -13,6 +13,14 @@ export default function Home() {
         title="BRS chess Ecommerce Dashboard |  BRS chess Admin Dashboard "
         description="This is BRS chess Ecommerce Dashboard page "
       />
+    {
+      <div className="flex items-center justify-center h-[80vh]">
+        <h5 className="text-l font-medium text-gray-800 dark:text-white">
+          Welcome to BRS chess Dashboard,
+          Please find the notes  feature in the sidebar to get started!
+        </h5>
+      </div>
+      }
       {/* <div className="grid grid-cols-12 gap-4 md:gap-6">
         <div className="col-span-12 space-y-6 xl:col-span-7">
           <EcommerceMetrics />
