@@ -38,7 +38,7 @@ export const refreshToken = async (): Promise<string> => {
 export const loginByEmail = async (loginForm: LoginForm): Promise<LoginResponse> => {
   // calls backend which reads httpOnly refresh cookie and returns new access token
   const url = `${API_BASE}/auth/login`;
-
+  loginForm.email = loginForm.email.trim().toLowerCase();
   const res = await axios.post(url, loginForm, { withCredentials: true });
   if (!res?.data?.data?.access_token) throw new Error("no_access_token");
   tokenStorage.set(res.data.data.access_token);
