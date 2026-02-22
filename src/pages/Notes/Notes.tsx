@@ -9,6 +9,7 @@ import CreateLessonPlanModal, { LessonPlan } from "./CreateLessonPlanModal";
 import api from "../../api/axiosInstance";
 import { deleteNote, getLessonPlanById } from "../../api/notes/noteService";
 import UserProfiles from "../UserProfiles";
+import StudentGallery from "../../components/UserProfile/StudentGallery";
 
 export default function Notes() {
     const { user } = useAuth();
@@ -16,7 +17,7 @@ export default function Notes() {
     const [loading, setLoading] = useState(true);
     const [searchParams] = useSearchParams();
     const studentIdParam = searchParams.get('studentId');
-    const [activeTab, setActiveTab] = useState<"profile" | "notes">("profile");
+    const [activeTab, setActiveTab] = useState<"profile" | "notes" | "gallery">("profile");
 
     // Edit state
     const [noteToEdit, setNoteToEdit] = useState<Note | undefined>(undefined);
@@ -219,23 +220,30 @@ export default function Notes() {
                     <div className="flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5 dark:bg-gray-900 max-w-2xl">
                         <button
                             onClick={() => setActiveTab("profile")}
-                            className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${
-                                activeTab === "profile"
+                            className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${activeTab === "profile"
                                     ? "shadow-theme-xs text-gray-900 dark:text-white bg-white dark:bg-gray-800"
                                     : "text-gray-500 dark:text-gray-400"
-                            }`}
+                                }`}
                         >
                             User Profile
                         </button>
                         <button
                             onClick={() => setActiveTab("notes")}
-                            className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${
-                                activeTab === "notes"
+                            className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${activeTab === "notes"
                                     ? "shadow-theme-xs text-gray-900 dark:text-white bg-white dark:bg-gray-800"
                                     : "text-gray-500 dark:text-gray-400"
-                            }`}
+                                }`}
                         >
                             Notes
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("gallery")}
+                            className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${activeTab === "gallery"
+                                    ? "shadow-theme-xs text-gray-900 dark:text-white bg-white dark:bg-gray-800"
+                                    : "text-gray-500 dark:text-gray-400"
+                                }`}
+                        >
+                            Gallery
                         </button>
                     </div>
                 </div>
@@ -244,6 +252,10 @@ export default function Notes() {
                 {activeTab === "profile" ? (
                     <div key={studentIdParam}>
                         <UserProfiles studentId={studentIdParam} readOnly={true} />
+                    </div>
+                ) : activeTab === "gallery" ? (
+                    <div key={`gallery-${studentIdParam}`}>
+                        <StudentGallery userId={studentIdParam!} readOnly={true} />
                     </div>
                 ) : (
                     <NotesContent
