@@ -96,10 +96,26 @@ export const updateGalleryImageMetadata = async (
 };
 
 /**
+ * Fetch a presigned URL from the backend for a given R2 object key.
+ * Use this for profile pictures and any url_suffix stored in the DB.
+ */
+export const getPresignedURL = async (key: string): Promise<string> => {
+    if (!key) return "";
+    // If it's already a full URL (e.g. from an upload response), return as-is
+    if (key.startsWith("http")) return key;
+    const res = await api.get(`/images/presign`, { params: { key } });
+    const data: ApiResponse<{ url: string }> = res.data;
+    return data.data?.url || "";
+};
+
+/**
  * Build a full image URL from a url_suffix.
- * e.g. "profile-pictures/123.jpg" → "http://localhost:8080/uploads/profile-pictures/123.jpg"
+ * For R2 presigned URLs (starting with http), returns as-is.
+ * For legacy local suffixes, constructs the local path.
  */
 export const buildImageURL = (urlSuffix: string): string => {
     if (!urlSuffix) return "";
+    // R2 presigned URLs are already full URLs
+    if (urlSuffix.startsWith("http")) return urlSuffix;
     return `${getUploadBaseURL()}/uploads/${urlSuffix}`;
 };
