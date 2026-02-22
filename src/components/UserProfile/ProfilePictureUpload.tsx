@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import {
     uploadProfilePicture,
     deleteProfilePicture,
-    buildImageURL,
+    getPresignedURL,
 } from "../../api/user/imageService";
 
 interface ProfilePictureUploadProps {
@@ -21,12 +21,29 @@ export default function ProfilePictureUpload({
     onDeleted,
 }: ProfilePictureUploadProps) {
     const [urlSuffix, setUrlSuffix] = useState(currentUrlSuffix || "");
+    const [imageUrl, setImageUrl] = useState("");
     const [uploading, setUploading] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const imageUrl = urlSuffix ? buildImageURL(urlSuffix) : "";
+    // Fetch presigned URL whenever urlSuffix changes
+    useEffect(() => {
+        if (!urlSuffix) {
+            setImageUrl("");
+            return;
+        }
+        // If it's already a full URL (e.g. after a fresh upload), use directly
+        if (urlSuffix.startsWith("http")) {
+            setImageUrl(urlSuffix);
+            return;
+        }
+        let cancelled = false;
+        getPresignedURL(urlSuffix).then((url) => {
+            if (!cancelled) setImageUrl(url);
+        });
+        return () => { cancelled = true; };
+    }, [urlSuffix]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -53,6 +70,7 @@ export default function ProfilePictureUpload({
         try {
             const result = await uploadProfilePicture(userId, file);
             setUrlSuffix(result.url_suffix);
+            setImageUrl(result.url); // Use presigned URL from response for immediate display
             onUploaded?.(result.url_suffix);
         } catch (err) {
             console.error("Failed to upload profile picture:", err);
