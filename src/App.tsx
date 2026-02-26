@@ -14,6 +14,7 @@ import AppBootstrap from "./components/common/AppBootstrap";
 import AdminPage from "./pages/Admin/AdminPage";
 import RequireRole from "./components/auth/RequireRole";
 import AttendancePage from "./pages/Attendance/AttendancePage";
+import AcademyGallery from "./pages/AcademyGallery/AcademyGallery";
 
 export default function App() {
   return (
@@ -25,12 +26,15 @@ export default function App() {
             <Routes>
               {/* Dashboard Layout */}
               <Route element={<AppLayout />}>
-              
+
                 <Route index path="/" element={<Home />} />
                 <Route path="/profile" element={<UserProfiles />} />
 
                 {/* Notes */}
                 <Route path="/notes" element={<Notes />} />
+
+                {/* Academy Gallery */}
+                <Route path="/academy-gallery" element={<AcademyGallery />} />
 
                 {/* Admin */}
                 <Route

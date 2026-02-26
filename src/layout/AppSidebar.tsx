@@ -8,6 +8,7 @@ import {
   DocsIcon,
   GroupIcon,
   TableIcon,
+  GridIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "../context/AuthContext";
@@ -110,6 +111,12 @@ const AppSidebar: React.FC = () => {
       name: "Admin",
       path: "/admin",
       allowedRoles: [UserRole.ADMIN]
+    },
+    {
+      icon: <GridIcon />,
+      name: "Academy Gallery",
+      path: "/academy-gallery",
+      allowedRoles: [UserRole.STUDENT, UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
     },
   ], [students]);
 

@@ -2,13 +2,6 @@
 import api from "../axiosInstance";
 import { ApiResponse } from "./dto";
 
-// The backend serves uploads at /uploads/* (not under /api/v1)
-// We derive the base URL by stripping /api/v1 from the axios baseURL
-function getUploadBaseURL(): string {
-    const base = api.defaults.baseURL || "";
-    return base.replace(/\/api\/v1\/?$/, "");
-}
-
 // Profile Picture
 
 export interface ProfilePictureResponse {
@@ -41,7 +34,7 @@ export interface GalleryImage {
     url_suffix: string;
     filename: string;
     title: string;
-    position_in_tournament: string;
+    tags: string[];
     is_private: boolean;
     created_at: string;
     url: string; // full URL returned by backend
@@ -59,14 +52,14 @@ export const uploadGalleryImage = async (
     userId: string,
     file: File,
     title: string,
-    positionInTournament?: string,
+    tags?: string[],
     isPrivate?: boolean
 ): Promise<void> => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("title", title);
-    if (positionInTournament) {
-        formData.append("position_in_tournament", positionInTournament);
+    if (tags && tags.length > 0) {
+        formData.append("tags", JSON.stringify(tags));
     }
     if (isPrivate) {
         formData.append("is_private", "true");
@@ -88,34 +81,37 @@ export const updateGalleryImageMetadata = async (
     imageId: number,
     data: {
         title?: string;
-        position_in_tournament?: string;
+        tags?: string[];
         is_private?: boolean;
     }
 ): Promise<void> => {
     await api.patch(`/users/${userId}/gallery/${imageId}`, data);
 };
 
-/**
- * Fetch a presigned URL from the backend for a given R2 object key.
- * Use this for profile pictures and any url_suffix stored in the DB.
- */
-export const getPresignedURL = async (key: string): Promise<string> => {
-    if (!key) return "";
-    // If it's already a full URL (e.g. from an upload response), return as-is
-    if (key.startsWith("http")) return key;
-    const res = await api.get(`/images/presign`, { params: { key } });
-    const data: ApiResponse<{ url: string }> = res.data;
-    return data.data?.url || "";
-};
 
-/**
- * Build a full image URL from a url_suffix.
- * For R2 presigned URLs (starting with http), returns as-is.
- * For legacy local suffixes, constructs the local path.
- */
-export const buildImageURL = (urlSuffix: string): string => {
-    if (!urlSuffix) return "";
-    // R2 presigned URLs are already full URLs
-    if (urlSuffix.startsWith("http")) return urlSuffix;
-    return `${getUploadBaseURL()}/uploads/${urlSuffix}`;
+
+// Academy Gallery
+
+export interface AcademyGalleryImage extends GalleryImage {
+    user_first_name: string;
+    user_last_name: string;
+}
+
+export interface AcademyGalleryResponse {
+    images: AcademyGalleryImage[];
+    page: number;
+    page_size: number;
+    total: number;
+    total_pages: number;
+}
+
+export const listAcademyGallery = async (
+    page: number = 1,
+    pageSize: number = 12
+): Promise<AcademyGalleryResponse> => {
+    const res = await api.get(`/images/academy-gallery`, {
+        params: { page, page_size: pageSize },
+    });
+    const data: ApiResponse<AcademyGalleryResponse> = res.data;
+    return data.data;
 };
