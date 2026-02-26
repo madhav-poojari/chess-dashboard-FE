@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import {
-    uploadProfilePicture,
-    deleteProfilePicture,
-    getPresignedURL,
-} from "../../api/user/imageService";
+    useUploadProfilePicture,
+    useDeleteProfilePicture,
+} from "../../hooks/useProfilePicture";
 
 interface ProfilePictureUploadProps {
     userId: string;
@@ -21,34 +20,24 @@ export default function ProfilePictureUpload({
     onDeleted,
 }: ProfilePictureUploadProps) {
     const [urlSuffix, setUrlSuffix] = useState(currentUrlSuffix || "");
-    const [imageUrl, setImageUrl] = useState("");
-    const [uploading, setUploading] = useState(false);
+    const [imageUrl, setImageUrl] = useState(currentUrlSuffix || "");
     const [showMenu, setShowMenu] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // Fetch presigned URL whenever urlSuffix changes
+    const uploadMutation = useUploadProfilePicture(userId);
+    const deleteMutation = useDeleteProfilePicture(userId);
+    const uploading = uploadMutation.isPending || deleteMutation.isPending;
+
+    // Sync when the prop changes (e.g. after refetch)
     useEffect(() => {
-        if (!urlSuffix) {
-            setImageUrl("");
-            return;
-        }
-        // If it's already a full URL (e.g. after a fresh upload), use directly
-        if (urlSuffix.startsWith("http")) {
-            setImageUrl(urlSuffix);
-            return;
-        }
-        let cancelled = false;
-        getPresignedURL(urlSuffix).then((url) => {
-            if (!cancelled) setImageUrl(url);
-        });
-        return () => { cancelled = true; };
-    }, [urlSuffix]);
+        setUrlSuffix(currentUrlSuffix || "");
+        setImageUrl(currentUrlSuffix || "");
+    }, [currentUrlSuffix]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
         if (!showMenu) return;
-
         const handleClickOutside = (e: MouseEvent) => {
             if (
                 containerRef.current &&
@@ -57,7 +46,6 @@ export default function ProfilePictureUpload({
                 setShowMenu(false);
             }
         };
-
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [showMenu]);
@@ -66,34 +54,28 @@ export default function ProfilePictureUpload({
         const file = e.target.files?.[0];
         if (!file) return;
 
-        setUploading(true);
-        try {
-            const result = await uploadProfilePicture(userId, file);
-            setUrlSuffix(result.url_suffix);
-            setImageUrl(result.url); // Use presigned URL from response for immediate display
-            onUploaded?.(result.url_suffix);
-        } catch (err) {
-            console.error("Failed to upload profile picture:", err);
-        } finally {
-            setUploading(false);
-            setShowMenu(false);
-            // Reset file input so same file can be re-selected
-            if (fileInputRef.current) fileInputRef.current.value = "";
-        }
+        uploadMutation.mutate(file, {
+            onSuccess: (result) => {
+                setUrlSuffix(result.url_suffix);
+                setImageUrl(result.url);
+                onUploaded?.(result.url_suffix);
+                setShowMenu(false);
+            },
+            onSettled: () => {
+                if (fileInputRef.current) fileInputRef.current.value = "";
+            },
+        });
     };
 
-    const handleDelete = async () => {
-        setUploading(true);
-        try {
-            await deleteProfilePicture(userId);
-            setUrlSuffix("");
-            onDeleted?.();
-        } catch (err) {
-            console.error("Failed to delete profile picture:", err);
-        } finally {
-            setUploading(false);
-            setShowMenu(false);
-        }
+    const handleDelete = () => {
+        deleteMutation.mutate(undefined, {
+            onSuccess: () => {
+                setUrlSuffix("");
+                setImageUrl("");
+                onDeleted?.();
+                setShowMenu(false);
+            },
+        });
     };
 
     const triggerUpload = () => {
@@ -101,10 +83,7 @@ export default function ProfilePictureUpload({
     };
 
     return (
-        <div
-            ref={containerRef}
-            className="relative w-20 h-20 group"
-        >
+        <div ref={containerRef} className="relative w-20 h-20 group">
             {/* Avatar image */}
             <div className="w-20 h-20 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800">
                 {imageUrl ? (
