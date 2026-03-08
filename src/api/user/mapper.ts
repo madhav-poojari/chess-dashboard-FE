@@ -7,14 +7,23 @@ export const toPublicProfile = (u: User): PublicProfile => ({
   last_name: u.last_name,
   email: u.email,
   uid: u.id,
+
   bio: u.details?.bio ?? "",
   country: u.details?.country ?? "",
   city: u.details?.city ?? "",
   state: u.details?.state ?? "",
   postal_code: u.details?.zipcode ?? "",
+
   profile_picture_url: u.details?.profile_picture_url,
   lichessId: u.details?.lichess_username,
   chessdotcomId: u.details?.chesscom_username,
   uscfId: u.details?.uscf_id,
   fideId: u.details?.fide_id,
+
+  syllabus_url: u.details?.syllabus_url,
+  role: u.role,
+  personal_meet_link: u.details?.personal_meet_link ?? "",
+  added_in_whatsapp: u.details?.added_in_whatsapp ?? false,
+  mentorDetails: u.mentor ?? null,
+  coachDetails: u.coach ?? null,
 });

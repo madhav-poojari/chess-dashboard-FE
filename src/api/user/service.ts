@@ -18,6 +18,7 @@ export const fetchMe = async (): Promise<User> => {
 };
 
 export const updateProfile = async (userProfle: Partial<PublicProfile>): Promise<User> => {
+  console.log("Updating profile with data:", userProfle);
   const userId = userProfle.uid;
 
   // Convert camelCase frontend fields to snake_case for backend API
@@ -37,9 +38,14 @@ export const updateProfile = async (userProfle: Partial<PublicProfile>): Promise
   if (userProfle.chessdotcomId !== undefined) payload.chesscom_username = userProfle.chessdotcomId;
   if (userProfle.uscfId !== undefined) payload.uscf_id = userProfle.uscfId;
   if (userProfle.fideId !== undefined) payload.fide_id = userProfle.fideId;
+  if (userProfle.syllabus_url !== undefined) payload.syllabus_url = userProfle.syllabus_url;
+  if (userProfle.personal_meet_link !== undefined) payload.personal_meet_link = userProfle.personal_meet_link;
+  if (userProfle.added_in_whatsapp !== undefined) payload.added_in_whatsapp = userProfle.added_in_whatsapp;
 
   const res = await api.put(`/users/${userId}`, payload);
+  
   const data: ApiResponse<User> = res.data;
+  console.log("Profile update response:", data);
   return data.data;
 };
 
@@ -50,7 +56,10 @@ export const fetchStudents = async (): Promise<User[]> => {
 };
 
 export const fetchUserById = async (userId: string): Promise<User> => {
+  const endpoint = `/users/${userId}`;
+  console.log("Calling API:", api.defaults.baseURL + endpoint);
   const res = await api.get(`/users/${userId}`);
+  console.log("Response Data:", res.data);
   const data: ApiResponse<User> = res.data;
   return data.data;
 };
