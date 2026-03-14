@@ -101,7 +101,7 @@ export default function AcademyGallery() {
                                 >
                                     <img
                                         src={img.url}
-                                        alt={img.title || img.filename}
+                                        alt={img.title || "Gallery image"}
                                         className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
                                         onClick={() => setLightboxUrl(img.url)}
                                     />

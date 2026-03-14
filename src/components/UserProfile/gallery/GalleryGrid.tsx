@@ -5,15 +5,20 @@ interface GalleryGridProps {
     images: GalleryImage[];
     onImageClick: (url: string) => void;
     onEdit?: (img: GalleryImage) => void;
-    /** Whether the current user is the owner (shows edit buttons) */
+    onDelete?: (img: GalleryImage) => void;
+    /** Whether the current user can edit (owner, coach, mentor, admin) */
     isOwner?: boolean;
+    /** Whether the current user is an admin (shows delete button) */
+    isAdmin?: boolean;
 }
 
 export default function GalleryGrid({
     images,
     onImageClick,
     onEdit,
+    onDelete,
     isOwner = false,
+    isAdmin = false,
 }: GalleryGridProps) {
     return (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -24,7 +29,7 @@ export default function GalleryGrid({
                 >
                     <img
                         src={img.url}
-                        alt={img.title || img.filename}
+                        alt={img.title || "Gallery image"}
                         className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
                         onClick={() => onImageClick(img.url)}
                     />
@@ -61,31 +66,57 @@ export default function GalleryGrid({
                         </div>
                     )}
 
-                    {/* Edit button (owner only) */}
-                    {isOwner && onEdit && (
+                    {/* Action buttons (edit + delete) */}
+                    {(isOwner || isAdmin) && (
                         <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onEdit(img);
-                                }}
-                                className="w-7 h-7 flex items-center justify-center rounded-full bg-blue-500/80 hover:bg-blue-600 text-white"
-                                title="Edit metadata"
-                            >
-                                <svg
-                                    className="w-3.5 h-3.5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
+                            {isOwner && onEdit && (
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onEdit(img);
+                                    }}
+                                    className="w-7 h-7 flex items-center justify-center rounded-full bg-blue-500/80 hover:bg-blue-600 text-white"
+                                    title="Edit metadata"
                                 >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                    />
-                                </svg>
-                            </button>
+                                    <svg
+                                        className="w-3.5 h-3.5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                        />
+                                    </svg>
+                                </button>
+                            )}
+                            {isAdmin && onDelete && (
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDelete(img);
+                                    }}
+                                    className="w-7 h-7 flex items-center justify-center rounded-full bg-red-500/80 hover:bg-red-600 text-white"
+                                    title="Delete image (Admin)"
+                                >
+                                    <svg
+                                        className="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M6 18L18 6M6 6l12 12"
+                                        />
+                                    </svg>
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>
