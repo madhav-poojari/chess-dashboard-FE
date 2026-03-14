@@ -32,7 +32,6 @@ export interface GalleryImage {
     id: number;
     user_id: string;
     url_suffix: string;
-    filename: string;
     title: string;
     tags: string[];
     is_private: boolean;

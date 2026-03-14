@@ -4,7 +4,9 @@ import {
     useGalleryImages,
     useUploadGalleryImage,
     useUpdateGalleryImageMetadata,
+    useDeleteGalleryImage,
 } from "../../hooks/useGallery";
+import { useAuth } from "../../context/AuthContext";
 import GalleryGrid from "./gallery/GalleryGrid";
 import GalleryUploadModal from "./gallery/GalleryUploadModal";
 import GalleryEditModal from "./gallery/GalleryEditModal";
@@ -19,9 +21,13 @@ export default function StudentGallery({
     userId,
     readOnly = false,
 }: StudentGalleryProps) {
+    const { user } = useAuth();
     const { data: images = [], isLoading } = useGalleryImages(userId);
     const uploadMutation = useUploadGalleryImage(userId);
     const updateMutation = useUpdateGalleryImageMetadata(userId);
+    const deleteMutation = useDeleteGalleryImage(userId);
+
+    const isAdmin = user?.role?.toLowerCase() === "admin";
 
     const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -69,6 +75,11 @@ export default function StudentGallery({
             { imageId: editingImage.id, data },
             { onSuccess: () => setEditingImage(null) }
         );
+    };
+
+    const handleDelete = (img: GalleryImage) => {
+        if (!window.confirm("Delete this image? This cannot be undone.")) return;
+        deleteMutation.mutate(img.id);
     };
 
     if (isLoading) {
@@ -132,7 +143,9 @@ export default function StudentGallery({
                         images={images}
                         onImageClick={setLightboxUrl}
                         onEdit={!readOnly ? setEditingImage : undefined}
+                        onDelete={isAdmin ? handleDelete : undefined}
                         isOwner={!readOnly}
+                        isAdmin={isAdmin}
                     />
                 )}
             </div>

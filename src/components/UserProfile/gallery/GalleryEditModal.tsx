@@ -66,7 +66,7 @@ export default function GalleryEditModal({
                     <div className="w-full h-48 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
                         <img
                             src={image.url}
-                            alt={image.title || image.filename}
+                            alt={image.title || "Gallery image"}
                             className="w-full h-full object-contain"
                         />
                     </div>

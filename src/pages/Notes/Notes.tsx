@@ -255,7 +255,7 @@ export default function Notes() {
                     </div>
                 ) : activeTab === "gallery" ? (
                     <div key={`gallery-${studentIdParam}`}>
-                        <StudentGallery userId={studentIdParam!} readOnly={true} />
+                        <StudentGallery userId={studentIdParam!} readOnly={false} />
                     </div>
                 ) : (
                     <NotesContent
