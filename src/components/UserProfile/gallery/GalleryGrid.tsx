@@ -1,5 +1,6 @@
 // Tag chips display + overlay for gallery image cards
 import { GalleryImage } from "../../../api/user/imageService";
+import { getImageUrl } from "../../../utils/imageUrl";
 
 interface GalleryGridProps {
     images: GalleryImage[];
@@ -28,10 +29,10 @@ export default function GalleryGrid({
                     className="relative group rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 aspect-square bg-gray-100 dark:bg-gray-800"
                 >
                     <img
-                        src={img.url}
+                        src={getImageUrl(img.url_suffix)}
                         alt={img.title || "Gallery image"}
                         className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
-                        onClick={() => onImageClick(img.url)}
+                        onClick={() => onImageClick(getImageUrl(img.url_suffix))}
                     />
 
                     {/* Title & tags overlay */}
