@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { GalleryImage } from "../../../api/user/imageService";
+import { getImageUrl } from "../../../utils/imageUrl";
 
 interface GalleryEditModalProps {
     image: GalleryImage;
@@ -65,7 +66,7 @@ export default function GalleryEditModal({
                     {/* Image preview */}
                     <div className="w-full h-48 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
                         <img
-                            src={image.url}
+                            src={getImageUrl(image.url_suffix)}
                             alt={image.title || "Gallery image"}
                             className="w-full h-full object-contain"
                         />

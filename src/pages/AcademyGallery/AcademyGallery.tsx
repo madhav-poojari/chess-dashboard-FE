@@ -3,6 +3,7 @@ import { useAcademyGallery } from "../../hooks/useAcademyGallery";
 import { useDeleteGalleryImage } from "../../hooks/useGallery";
 import { useAuth } from "../../context/AuthContext";
 import ImageLightbox from "../../components/UserProfile/gallery/ImageLightbox";
+import { getImageUrl } from "../../utils/imageUrl";
 
 export default function AcademyGallery() {
     const { user } = useAuth();
@@ -100,10 +101,10 @@ export default function AcademyGallery() {
                                     className="relative group rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 aspect-square bg-gray-100 dark:bg-gray-800"
                                 >
                                     <img
-                                        src={img.url}
+                                        src={getImageUrl(img.url_suffix)}
                                         alt={img.title || "Gallery image"}
                                         className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
-                                        onClick={() => setLightboxUrl(img.url)}
+                                        onClick={() => setLightboxUrl(getImageUrl(img.url_suffix))}
                                     />
 
                                     {/* Info overlay */}

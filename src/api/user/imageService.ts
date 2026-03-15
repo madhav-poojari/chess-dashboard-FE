@@ -6,7 +6,6 @@ import { ApiResponse } from "./dto";
 
 export interface ProfilePictureResponse {
     url_suffix: string;
-    url: string;
 }
 
 export const uploadProfilePicture = async (
@@ -36,7 +35,6 @@ export interface GalleryImage {
     tags: string[];
     is_private: boolean;
     created_at: string;
-    url: string; // full URL returned by backend
 }
 
 export const listGalleryImages = async (

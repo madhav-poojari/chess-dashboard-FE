@@ -3,6 +3,7 @@ import {
     useUploadProfilePicture,
     useDeleteProfilePicture,
 } from "../../hooks/useProfilePicture";
+import { getImageUrl } from "../../utils/imageUrl";
 
 interface ProfilePictureUploadProps {
     userId: string;
@@ -20,7 +21,6 @@ export default function ProfilePictureUpload({
     onDeleted,
 }: ProfilePictureUploadProps) {
     const [urlSuffix, setUrlSuffix] = useState(currentUrlSuffix || "");
-    const [imageUrl, setImageUrl] = useState(currentUrlSuffix || "");
     const [showMenu, setShowMenu] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -29,10 +29,11 @@ export default function ProfilePictureUpload({
     const deleteMutation = useDeleteProfilePicture(userId);
     const uploading = uploadMutation.isPending || deleteMutation.isPending;
 
+    const imageUrl = getImageUrl(urlSuffix);
+
     // Sync when the prop changes (e.g. after refetch)
     useEffect(() => {
         setUrlSuffix(currentUrlSuffix || "");
-        setImageUrl(currentUrlSuffix || "");
     }, [currentUrlSuffix]);
 
     // Close dropdown when clicking outside
@@ -57,7 +58,6 @@ export default function ProfilePictureUpload({
         uploadMutation.mutate(file, {
             onSuccess: (result) => {
                 setUrlSuffix(result.url_suffix);
-                setImageUrl(result.url);
                 onUploaded?.(result.url_suffix);
                 setShowMenu(false);
             },
@@ -71,7 +71,6 @@ export default function ProfilePictureUpload({
         deleteMutation.mutate(undefined, {
             onSuccess: () => {
                 setUrlSuffix("");
-                setImageUrl("");
                 onDeleted?.();
                 setShowMenu(false);
             },
