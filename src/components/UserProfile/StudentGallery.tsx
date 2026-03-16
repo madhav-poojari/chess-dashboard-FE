@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useReducer, useRef } from "react";
 import { GalleryImage } from "../../api/user/imageService";
 import {
     useGalleryImages,
@@ -7,6 +7,7 @@ import {
     useDeleteGalleryImage,
 } from "../../hooks/useGallery";
 import { useAuth } from "../../context/AuthContext";
+import { UserRole } from "../../api/user/dto";
 import GalleryGrid from "./gallery/GalleryGrid";
 import GalleryUploadModal from "./gallery/GalleryUploadModal";
 import GalleryEditModal from "./gallery/GalleryEditModal";
@@ -17,50 +18,73 @@ interface StudentGalleryProps {
     readOnly?: boolean;
 }
 
+// Upload modal state managed via useReducer
+type UploadState = {
+    showModal: boolean;
+    selectedFile: File | null;
+    previewUrl: string;
+};
+
+type UploadAction =
+    | { type: "OPEN"; file: File; previewUrl: string }
+    | { type: "CLOSE" };
+
+function uploadReducer(state: UploadState, action: UploadAction): UploadState {
+    switch (action.type) {
+        case "OPEN":
+            return { showModal: true, selectedFile: action.file, previewUrl: action.previewUrl };
+        case "CLOSE":
+            if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
+            return { showModal: false, selectedFile: null, previewUrl: "" };
+    }
+}
+
 export default function StudentGallery({
     userId,
     readOnly = false,
 }: StudentGalleryProps) {
     const { user } = useAuth();
-    const { data: images = [], isLoading } = useGalleryImages(userId);
+    const { data: images = [], isLoading, isError, error } = useGalleryImages(userId);
     const uploadMutation = useUploadGalleryImage(userId);
     const updateMutation = useUpdateGalleryImageMetadata(userId);
     const deleteMutation = useDeleteGalleryImage(userId);
 
-    const isAdmin = user?.role?.toLowerCase() === "admin";
+    const isAdmin = user?.role === UserRole.ADMIN;
 
-    const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+    const [lightboxUrl, setLightboxUrl] = useReducer(
+        (_: string | null, url: string | null) => url,
+        null
+    );
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Upload modal state
-    const [showUploadModal, setShowUploadModal] = useState(false);
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [previewUrl, setPreviewUrl] = useState("");
+    const [uploadState, dispatchUpload] = useReducer(uploadReducer, {
+        showModal: false,
+        selectedFile: null,
+        previewUrl: "",
+    });
 
     // Edit modal state
-    const [editingImage, setEditingImage] = useState<GalleryImage | null>(null);
+    const [editingImage, setEditingImage] = useReducer(
+        (_: GalleryImage | null, img: GalleryImage | null) => img,
+        null
+    );
 
     // File selection → open upload modal
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        setSelectedFile(file);
-        setPreviewUrl(URL.createObjectURL(file));
-        setShowUploadModal(true);
+        dispatchUpload({ type: "OPEN", file, previewUrl: URL.createObjectURL(file) });
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
     const handleUploadModalClose = () => {
-        setShowUploadModal(false);
-        if (previewUrl) URL.revokeObjectURL(previewUrl);
-        setSelectedFile(null);
-        setPreviewUrl("");
+        dispatchUpload({ type: "CLOSE" });
     };
 
     const handleUpload = (title: string, tags: string[], isPrivate: boolean) => {
-        if (!selectedFile) return;
+        if (!uploadState.selectedFile) return;
         uploadMutation.mutate(
-            { file: selectedFile, title, tags, isPrivate: isPrivate || undefined },
+            { file: uploadState.selectedFile, title, tags, isPrivate: isPrivate || undefined },
             { onSuccess: handleUploadModalClose }
         );
     };
@@ -86,6 +110,15 @@ export default function StudentGallery({
         return (
             <div className="flex items-center justify-center min-h-[200px]">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+            </div>
+        );
+    }
+
+    if (isError) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[200px] text-red-500 dark:text-red-400">
+                <p className="text-sm">Failed to load gallery images.</p>
+                <p className="text-xs mt-1 text-gray-400">{error?.message}</p>
             </div>
         );
     }
@@ -159,9 +192,9 @@ export default function StudentGallery({
             )}
 
             {/* Upload Modal */}
-            {showUploadModal && (
+            {uploadState.showModal && (
                 <GalleryUploadModal
-                    previewUrl={previewUrl}
+                    previewUrl={uploadState.previewUrl}
                     uploading={uploadMutation.isPending}
                     onClose={handleUploadModalClose}
                     onUpload={handleUpload}

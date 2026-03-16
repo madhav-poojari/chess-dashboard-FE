@@ -9,7 +9,6 @@ import CreateLessonPlanModal, { LessonPlan } from "./CreateLessonPlanModal";
 import api from "../../api/axiosInstance";
 import { deleteNote, getLessonPlanById } from "../../api/notes/noteService";
 import UserProfiles from "../UserProfiles";
-import StudentGallery from "../../components/UserProfile/StudentGallery";
 
 export default function Notes() {
     const { user } = useAuth();
@@ -17,7 +16,7 @@ export default function Notes() {
     const [loading, setLoading] = useState(true);
     const [searchParams] = useSearchParams();
     const studentIdParam = searchParams.get('studentId');
-    const [activeTab, setActiveTab] = useState<"profile" | "notes" | "gallery">("profile");
+    const [activeTab, setActiveTab] = useState<"profile" | "notes">("profile");
 
     // Edit state
     const [noteToEdit, setNoteToEdit] = useState<Note | undefined>(undefined);
@@ -236,26 +235,13 @@ export default function Notes() {
                         >
                             Notes
                         </button>
-                        <button
-                            onClick={() => setActiveTab("gallery")}
-                            className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${activeTab === "gallery"
-                                    ? "shadow-theme-xs text-gray-900 dark:text-white bg-white dark:bg-gray-800"
-                                    : "text-gray-500 dark:text-gray-400"
-                                }`}
-                        >
-                            Gallery
-                        </button>
                     </div>
                 </div>
 
                 {/* Tab Content */}
                 {activeTab === "profile" ? (
                     <div key={studentIdParam}>
-                        <UserProfiles studentId={studentIdParam} readOnly={true} />
-                    </div>
-                ) : activeTab === "gallery" ? (
-                    <div key={`gallery-${studentIdParam}`}>
-                        <StudentGallery userId={studentIdParam!} readOnly={false} />
+                        <UserProfiles studentId={studentIdParam} readOnly={true} galleryReadOnly={false} />
                     </div>
                 ) : (
                     <NotesContent
