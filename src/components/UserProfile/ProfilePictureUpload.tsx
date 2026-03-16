@@ -4,6 +4,7 @@ import {
     useDeleteProfilePicture,
 } from "../../hooks/useProfilePicture";
 import { getImageUrl } from "../../utils/imageUrl";
+import { useToast } from "../../context/ToastContext";
 
 interface ProfilePictureUploadProps {
     userId: string;
@@ -28,6 +29,7 @@ export default function ProfilePictureUpload({
     const uploadMutation = useUploadProfilePicture(userId);
     const deleteMutation = useDeleteProfilePicture(userId);
     const uploading = uploadMutation.isPending || deleteMutation.isPending;
+    const toast = useToast();
 
     const imageUrl = getImageUrl(urlSuffix);
 
@@ -60,6 +62,10 @@ export default function ProfilePictureUpload({
                 setUrlSuffix(result.url_suffix);
                 onUploaded?.(result.url_suffix);
                 setShowMenu(false);
+                toast.success("Profile picture updated");
+            },
+            onError: () => {
+                toast.error("Could not update profile picture. Please try again.");
             },
             onSettled: () => {
                 if (fileInputRef.current) fileInputRef.current.value = "";
@@ -73,6 +79,10 @@ export default function ProfilePictureUpload({
                 setUrlSuffix("");
                 onDeleted?.();
                 setShowMenu(false);
+                toast.success("Profile picture removed");
+            },
+            onError: () => {
+                toast.error("Could not remove profile picture. Please try again.");
             },
         });
     };

@@ -15,11 +15,14 @@ import AdminPage from "./pages/Admin/AdminPage";
 import RequireRole from "./components/auth/RequireRole";
 import AttendancePage from "./pages/Attendance/AttendancePage";
 import AcademyGallery from "./pages/AcademyGallery/AcademyGallery";
+import { ToastProvider } from "./context/ToastContext";
+import ToastContainer from "./components/ui/Toast";
 
 export default function App() {
   return (
     <>
       <Router>
+        <ToastProvider>
         <AuthProvider>
           <ScrollToTop />
           <AppBootstrap>
@@ -69,6 +72,8 @@ export default function App() {
             </Routes>
           </AppBootstrap>
         </AuthProvider>
+        <ToastContainer />
+      </ToastProvider>
       </Router>
     </>
   );

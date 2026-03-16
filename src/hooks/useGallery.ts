@@ -37,9 +37,6 @@ export function useUploadGalleryImage(userId: string) {
             queryClient.invalidateQueries({ queryKey: queryKeys.gallery.images(userId) });
             queryClient.invalidateQueries({ queryKey: queryKeys.academyGallery.all() });
         },
-        onError: (error: Error) => {
-            alert(`Failed to upload image: ${error.message}`);
-        },
     });
 }
 
@@ -50,9 +47,6 @@ export function useDeleteGalleryImage(userId: string) {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.gallery.images(userId) });
             queryClient.invalidateQueries({ queryKey: queryKeys.academyGallery.all() });
-        },
-        onError: (error: Error) => {
-            alert(`Failed to delete image: ${error.message}`);
         },
     });
 }
@@ -71,9 +65,6 @@ export function useUpdateGalleryImageMetadata(userId: string) {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.gallery.images(userId) });
             queryClient.invalidateQueries({ queryKey: queryKeys.academyGallery.all() });
-        },
-        onError: (error: Error) => {
-            alert(`Failed to update image metadata: ${error.message}`);
         },
     });
 }
