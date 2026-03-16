@@ -14,9 +14,13 @@ import { updateProfile } from "../api/user/service";
 interface UserProfilesProps {
   studentId?: string | null;
   readOnly?: boolean;
+  /** Controls gallery readOnly independently from profile readOnly. Defaults to readOnly. */
+  galleryReadOnly?: boolean;
 }
 
-export default function UserProfiles({ studentId, readOnly = false }: UserProfilesProps) {
+export default function UserProfiles({ studentId, readOnly = false, galleryReadOnly }: UserProfilesProps) {
+
+  const isGalleryReadOnly = galleryReadOnly ?? readOnly;
 
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -132,7 +136,7 @@ export default function UserProfiles({ studentId, readOnly = false }: UserProfil
             <UserAddressCard user={profile} onUpdate={updateHandler} readOnly={readOnly} />
           </div>
         ) : (
-          <StudentGallery userId={profile.uid} readOnly={readOnly} />
+          <StudentGallery userId={profile.uid} readOnly={isGalleryReadOnly} />
         )}
       </div>
     </>

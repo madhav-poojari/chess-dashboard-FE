@@ -7,10 +7,11 @@ import {
     updateGalleryImageMetadata,
     GalleryImage,
 } from "../api/user/imageService";
+import { queryKeys } from "../constants/queryKeys";
 
 export function useGalleryImages(userId: string) {
     return useQuery<GalleryImage[]>({
-        queryKey: ["gallery", userId],
+        queryKey: queryKeys.gallery.images(userId),
         queryFn: () => listGalleryImages(userId),
         enabled: !!userId,
     });
@@ -33,8 +34,11 @@ export function useUploadGalleryImage(userId: string) {
                 params.isPrivate
             ),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["gallery", userId] });
-            queryClient.invalidateQueries({ queryKey: ["academyGallery"] });
+            queryClient.invalidateQueries({ queryKey: queryKeys.gallery.images(userId) });
+            queryClient.invalidateQueries({ queryKey: queryKeys.academyGallery.all() });
+        },
+        onError: (error: Error) => {
+            alert(`Failed to upload image: ${error.message}`);
         },
     });
 }
@@ -44,8 +48,11 @@ export function useDeleteGalleryImage(userId: string) {
     return useMutation({
         mutationFn: (imageId: number) => deleteGalleryImage(userId, imageId),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["gallery", userId] });
-            queryClient.invalidateQueries({ queryKey: ["academyGallery"] });
+            queryClient.invalidateQueries({ queryKey: queryKeys.gallery.images(userId) });
+            queryClient.invalidateQueries({ queryKey: queryKeys.academyGallery.all() });
+        },
+        onError: (error: Error) => {
+            alert(`Failed to delete image: ${error.message}`);
         },
     });
 }
@@ -62,8 +69,11 @@ export function useUpdateGalleryImageMetadata(userId: string) {
             };
         }) => updateGalleryImageMetadata(userId, params.imageId, params.data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["gallery", userId] });
-            queryClient.invalidateQueries({ queryKey: ["academyGallery"] });
+            queryClient.invalidateQueries({ queryKey: queryKeys.gallery.images(userId) });
+            queryClient.invalidateQueries({ queryKey: queryKeys.academyGallery.all() });
+        },
+        onError: (error: Error) => {
+            alert(`Failed to update image metadata: ${error.message}`);
         },
     });
 }

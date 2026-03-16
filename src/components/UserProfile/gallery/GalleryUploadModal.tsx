@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useReducer } from "react";
 
 interface GalleryUploadModalProps {
     previewUrl: string;
@@ -7,23 +7,47 @@ interface GalleryUploadModalProps {
     onUpload: (title: string, tags: string[], isPrivate: boolean) => void;
 }
 
+type FormState = {
+    title: string;
+    tagsInput: string;
+    isPrivate: boolean;
+};
+
+type FormAction =
+    | { type: "SET_TITLE"; value: string }
+    | { type: "SET_TAGS"; value: string }
+    | { type: "TOGGLE_PRIVATE" };
+
+function formReducer(state: FormState, action: FormAction): FormState {
+    switch (action.type) {
+        case "SET_TITLE":
+            return { ...state, title: action.value };
+        case "SET_TAGS":
+            return { ...state, tagsInput: action.value };
+        case "TOGGLE_PRIVATE":
+            return { ...state, isPrivate: !state.isPrivate };
+    }
+}
+
 export default function GalleryUploadModal({
     previewUrl,
     uploading,
     onClose,
     onUpload,
 }: GalleryUploadModalProps) {
-    const [title, setTitle] = useState("");
-    const [tagsInput, setTagsInput] = useState("");
-    const [isPrivate, setIsPrivate] = useState(false);
+    const [form, dispatch] = useReducer(formReducer, {
+        title: "",
+        tagsInput: "",
+        isPrivate: false,
+    });
 
     const handleSubmit = () => {
-        if (!title.trim()) return;
-        const tags = tagsInput
+        if (!form.title.trim()) return;
+        const tags = form.tagsInput
             .split(",")
             .map((t) => t.trim())
             .filter(Boolean);
-        onUpload(title.trim(), tags, isPrivate);
+        onUpload(form.title.trim(), tags, form.isPrivate);
     };
 
     return (
@@ -58,6 +82,8 @@ export default function GalleryUploadModal({
                             <img
                                 src={previewUrl}
                                 alt="Preview"
+                                loading="lazy"
+                                decoding="async"
                                 className="w-full h-full object-contain"
                             />
                         </div>
@@ -70,8 +96,8 @@ export default function GalleryUploadModal({
                         </label>
                         <input
                             type="text"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
+                            value={form.title}
+                            onChange={(e) => dispatch({ type: "SET_TITLE", value: e.target.value })}
                             placeholder="e.g. State Championship Win"
                             className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
@@ -84,8 +110,8 @@ export default function GalleryUploadModal({
                         </label>
                         <input
                             type="text"
-                            value={tagsInput}
-                            onChange={(e) => setTagsInput(e.target.value)}
+                            value={form.tagsInput}
+                            onChange={(e) => dispatch({ type: "SET_TAGS", value: e.target.value })}
                             placeholder="e.g. 1st Place, Nationals, 2025"
                             className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
@@ -106,14 +132,14 @@ export default function GalleryUploadModal({
                         </div>
                         <button
                             type="button"
-                            onClick={() => setIsPrivate(!isPrivate)}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isPrivate
+                            onClick={() => dispatch({ type: "TOGGLE_PRIVATE" })}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.isPrivate
                                     ? "bg-blue-600"
                                     : "bg-gray-300 dark:bg-gray-600"
                                 }`}
                         >
                             <span
-                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isPrivate ? "translate-x-6" : "translate-x-1"
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${form.isPrivate ? "translate-x-6" : "translate-x-1"
                                     }`}
                             />
                         </button>
@@ -130,7 +156,7 @@ export default function GalleryUploadModal({
                     </button>
                     <button
                         onClick={handleSubmit}
-                        disabled={!title.trim() || uploading}
+                        disabled={!form.title.trim() || uploading}
                         className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
                     >
                         {uploading && (

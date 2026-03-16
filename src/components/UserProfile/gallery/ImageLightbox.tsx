@@ -31,6 +31,8 @@ export default function ImageLightbox({ url, onClose }: ImageLightboxProps) {
             <img
                 src={url}
                 alt="Gallery preview"
+                loading="lazy"
+                decoding="async"
                 className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
                 onClick={(e) => e.stopPropagation()}
             />

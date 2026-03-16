@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useReducer, useEffect } from "react";
 import { GalleryImage } from "../../../api/user/imageService";
 import { getImageUrl } from "../../../utils/imageUrl";
 
@@ -9,32 +9,59 @@ interface GalleryEditModalProps {
     onSave: (data: { title: string; tags: string[]; is_private: boolean }) => void;
 }
 
+type FormState = {
+    title: string;
+    tagsInput: string;
+    isPrivate: boolean;
+};
+
+type FormAction =
+    | { type: "SET_TITLE"; value: string }
+    | { type: "SET_TAGS"; value: string }
+    | { type: "TOGGLE_PRIVATE" }
+    | { type: "RESET"; image: GalleryImage };
+
+function formReducer(state: FormState, action: FormAction): FormState {
+    switch (action.type) {
+        case "SET_TITLE":
+            return { ...state, title: action.value };
+        case "SET_TAGS":
+            return { ...state, tagsInput: action.value };
+        case "TOGGLE_PRIVATE":
+            return { ...state, isPrivate: !state.isPrivate };
+        case "RESET":
+            return {
+                title: action.image.title || "",
+                tagsInput: (action.image.tags || []).join(", "),
+                isPrivate: action.image.is_private || false,
+            };
+    }
+}
+
 export default function GalleryEditModal({
     image,
     saving,
     onClose,
     onSave,
 }: GalleryEditModalProps) {
-    const [title, setTitle] = useState(image.title || "");
-    const [tagsInput, setTagsInput] = useState(
-        (image.tags || []).join(", ")
-    );
-    const [isPrivate, setIsPrivate] = useState(image.is_private || false);
+    const [form, dispatch] = useReducer(formReducer, {
+        title: image.title || "",
+        tagsInput: (image.tags || []).join(", "),
+        isPrivate: image.is_private || false,
+    });
 
     // Sync when image changes
     useEffect(() => {
-        setTitle(image.title || "");
-        setTagsInput((image.tags || []).join(", "));
-        setIsPrivate(image.is_private || false);
+        dispatch({ type: "RESET", image });
     }, [image]);
 
     const handleSubmit = () => {
-        if (!title.trim()) return;
-        const tags = tagsInput
+        if (!form.title.trim()) return;
+        const tags = form.tagsInput
             .split(",")
             .map((t) => t.trim())
             .filter(Boolean);
-        onSave({ title: title.trim(), tags, is_private: isPrivate });
+        onSave({ title: form.title.trim(), tags, is_private: form.isPrivate });
     };
 
     return (
@@ -68,6 +95,8 @@ export default function GalleryEditModal({
                         <img
                             src={getImageUrl(image.url_suffix)}
                             alt={image.title || "Gallery image"}
+                            loading="lazy"
+                            decoding="async"
                             className="w-full h-full object-contain"
                         />
                     </div>
@@ -79,8 +108,8 @@ export default function GalleryEditModal({
                         </label>
                         <input
                             type="text"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
+                            value={form.title}
+                            onChange={(e) => dispatch({ type: "SET_TITLE", value: e.target.value })}
                             placeholder="e.g. State Championship Win"
                             className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
@@ -93,8 +122,8 @@ export default function GalleryEditModal({
                         </label>
                         <input
                             type="text"
-                            value={tagsInput}
-                            onChange={(e) => setTagsInput(e.target.value)}
+                            value={form.tagsInput}
+                            onChange={(e) => dispatch({ type: "SET_TAGS", value: e.target.value })}
                             placeholder="e.g. 1st Place, Nationals, 2025"
                             className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
@@ -115,14 +144,14 @@ export default function GalleryEditModal({
                         </div>
                         <button
                             type="button"
-                            onClick={() => setIsPrivate(!isPrivate)}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isPrivate
+                            onClick={() => dispatch({ type: "TOGGLE_PRIVATE" })}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.isPrivate
                                     ? "bg-blue-600"
                                     : "bg-gray-300 dark:bg-gray-600"
                                 }`}
                         >
                             <span
-                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isPrivate ? "translate-x-6" : "translate-x-1"
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${form.isPrivate ? "translate-x-6" : "translate-x-1"
                                     }`}
                             />
                         </button>
@@ -139,7 +168,7 @@ export default function GalleryEditModal({
                     </button>
                     <button
                         onClick={handleSubmit}
-                        disabled={!title.trim() || saving}
+                        disabled={!form.title.trim() || saving}
                         className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
                     >
                         {saving && (

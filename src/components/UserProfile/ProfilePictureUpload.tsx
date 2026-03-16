@@ -89,12 +89,16 @@ export default function ProfilePictureUpload({
                     <img
                         src={imageUrl}
                         alt="Profile"
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover"
                     />
                 ) : (
                     <img
                         src="/images/user/dummy-profile-image.png"
                         alt="Default avatar"
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover"
                     />
                 )}
