@@ -12,6 +12,7 @@ import GalleryGrid from "./gallery/GalleryGrid";
 import GalleryUploadModal from "./gallery/GalleryUploadModal";
 import GalleryEditModal from "./gallery/GalleryEditModal";
 import ImageLightbox from "./gallery/ImageLightbox";
+import { useToast } from "../../context/ToastContext";
 
 interface StudentGalleryProps {
     userId: string;
@@ -50,6 +51,7 @@ export default function StudentGallery({
     const deleteMutation = useDeleteGalleryImage(userId);
 
     const isAdmin = user?.role === UserRole.ADMIN;
+    const toast = useToast();
 
     const [lightboxUrl, setLightboxUrl] = useReducer(
         (_: string | null, url: string | null) => url,
@@ -85,7 +87,15 @@ export default function StudentGallery({
         if (!uploadState.selectedFile) return;
         uploadMutation.mutate(
             { file: uploadState.selectedFile, title, tags, isPrivate: isPrivate || undefined },
-            { onSuccess: handleUploadModalClose }
+            {
+                onSuccess: () => {
+                    handleUploadModalClose();
+                    toast.success("Image uploaded successfully");
+                },
+                onError: () => {
+                    toast.error("Could not upload image. Please try again.");
+                },
+            }
         );
     };
 
@@ -97,13 +107,28 @@ export default function StudentGallery({
         if (!editingImage) return;
         updateMutation.mutate(
             { imageId: editingImage.id, data },
-            { onSuccess: () => setEditingImage(null) }
+            {
+                onSuccess: () => {
+                    setEditingImage(null);
+                    toast.success("Image details updated");
+                },
+                onError: () => {
+                    toast.error("Could not update image details. Please try again.");
+                },
+            }
         );
     };
 
     const handleDelete = (img: GalleryImage) => {
         if (!window.confirm("Delete this image? This cannot be undone.")) return;
-        deleteMutation.mutate(img.id);
+        deleteMutation.mutate(img.id, {
+            onSuccess: () => {
+                toast.success("Image deleted");
+            },
+            onError: () => {
+                toast.error("Could not delete image. Please try again.");
+            },
+        });
     };
 
     if (isLoading) {

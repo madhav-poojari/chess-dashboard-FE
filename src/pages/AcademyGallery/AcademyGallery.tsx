@@ -7,6 +7,7 @@ import { AcademyGalleryImage, GalleryImage } from "../../api/user/imageService";
 import GalleryGrid from "../../components/UserProfile/gallery/GalleryGrid";
 import ImageLightbox from "../../components/UserProfile/gallery/ImageLightbox";
 import Pagination from "../../components/ui/Pagination";
+import { useToast } from "../../context/ToastContext";
 
 export default function AcademyGallery() {
     const { user } = useAuth();
@@ -23,10 +24,18 @@ export default function AcademyGallery() {
     const isAdmin = user?.role === UserRole.ADMIN;
 
     const deleteMutation = useDeleteGalleryImage(user?.id || "");
+    const toast = useToast();
 
     const handleDelete = (img: GalleryImage) => {
         if (!window.confirm("Delete this image? This cannot be undone.")) return;
-        deleteMutation.mutate(img.id);
+        deleteMutation.mutate(img.id, {
+            onSuccess: () => {
+                toast.success("Image deleted");
+            },
+            onError: () => {
+                toast.error("Could not delete image. Please try again.");
+            },
+        });
     };
 
     return (
