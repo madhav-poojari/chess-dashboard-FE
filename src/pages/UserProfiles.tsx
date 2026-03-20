@@ -3,51 +3,36 @@ import UserMetaCard from "../components/UserProfile/UserMetaCard";
 import UserInfoCard from "../components/UserProfile/UserInfoCard";
 import UserAddressCard from "../components/UserProfile/UserAddressCard";
 import PageMeta from "../components/common/PageMeta";
+import StudentGallery from "../components/UserProfile/StudentGallery";
 
 import { useEffect, useState, useCallback } from "react";
 import { userPublicProfile } from "../api/user/publicProfile";
 import { PublicProfile } from "../models/publicProfile";
 import { updateProfile } from "../api/user/service";
-// import { userPublicProfile } from "../api/user";
-// export default function UserProfiles() {
-//   return (
-//     <>
-//       <PageMeta
-//         title="BRS chess Profile Dashboard |  Next.js Admin Dashboard "
-//         description="This is BRS chess Profile Dashboard page "
-//       />
-//       <PageBreadcrumb pageTitle="Profile" />
-//       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
-//         <h3 className="mb-5 text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-7">
-//           Profile
-//         </h3>
-//         <div className="space-y-6">
-//           <UserMetaCard />
-//           <UserInfoCard />
-//           <UserAddressCard />
-//         </div>
-//       </div>
-//     </>
-//   );
-// }
 
 
 interface UserProfilesProps {
   studentId?: string | null;
   readOnly?: boolean;
+  /** Controls gallery readOnly independently from profile readOnly. Defaults to readOnly. */
+  galleryReadOnly?: boolean;
 }
 
-export default function UserProfiles({ studentId, readOnly = false }: UserProfilesProps) {
+export default function UserProfiles({ studentId, readOnly = false, galleryReadOnly }: UserProfilesProps) {
+
+  const isGalleryReadOnly = galleryReadOnly ?? readOnly;
 
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [activeTab, setActiveTab] = useState<"profile" | "gallery">("profile");
 
   useEffect(() => {
     let mounted = true;
     setLoading(true);
     setError(null);
     setProfile(null);
+    setActiveTab("profile");
     userPublicProfile(studentId || undefined)
       .then((p) => {
         if (mounted) {
@@ -121,14 +106,38 @@ export default function UserProfiles({ studentId, readOnly = false }: UserProfil
         </>
       )}
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
-        <h3 className="mb-5 text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-7">
-          Profile
-        </h3>
-        <div className="space-y-6">
-          <UserMetaCard user={profile} onUpdate={updateHandler} readOnly={readOnly} />
-          <UserInfoCard user={profile} onUpdate={updateHandler} readOnly={readOnly} />
-          <UserAddressCard user={profile} onUpdate={updateHandler} readOnly={readOnly} />
+        {/* Tab switcher at the top */}
+        <div className="flex items-center gap-4 mb-5 lg:mb-7">
+          <button
+            onClick={() => setActiveTab("profile")}
+            className={`text-lg font-semibold transition-colors ${activeTab === "profile"
+                ? "text-gray-800 dark:text-white/90"
+                : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+              }`}
+          >
+            Profile
+          </button>
+          <div className="h-5 w-px bg-gray-300 dark:bg-gray-700" />
+          <button
+            onClick={() => setActiveTab("gallery")}
+            className={`text-lg font-semibold transition-colors ${activeTab === "gallery"
+                ? "text-gray-800 dark:text-white/90"
+                : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+              }`}
+          >
+            Gallery
+          </button>
         </div>
+
+        {activeTab === "profile" ? (
+          <div className="space-y-6">
+            <UserMetaCard user={profile} onUpdate={updateHandler} readOnly={readOnly} />
+            <UserInfoCard user={profile} onUpdate={updateHandler} readOnly={readOnly} />
+            <UserAddressCard user={profile} onUpdate={updateHandler} readOnly={readOnly} />
+          </div>
+        ) : (
+          <StudentGallery userId={profile.uid} readOnly={isGalleryReadOnly} />
+        )}
       </div>
     </>
   ));

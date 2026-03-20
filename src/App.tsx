@@ -14,23 +14,30 @@ import AppBootstrap from "./components/common/AppBootstrap";
 import AdminPage from "./pages/Admin/AdminPage";
 import RequireRole from "./components/auth/RequireRole";
 import AttendancePage from "./pages/Attendance/AttendancePage";
+import AcademyGallery from "./pages/AcademyGallery/AcademyGallery";
+import { ToastProvider } from "./context/ToastContext";
+import ToastContainer from "./components/ui/Toast";
 
 export default function App() {
   return (
     <>
       <Router>
+        <ToastProvider>
         <AuthProvider>
           <ScrollToTop />
           <AppBootstrap>
             <Routes>
               {/* Dashboard Layout */}
               <Route element={<AppLayout />}>
-              
+
                 <Route index path="/" element={<Home />} />
                 <Route path="/profile" element={<UserProfiles />} />
 
                 {/* Notes */}
                 <Route path="/notes" element={<Notes />} />
+
+                {/* Academy Gallery */}
+                <Route path="/academy-gallery" element={<AcademyGallery />} />
 
                 {/* Admin */}
                 <Route
@@ -65,6 +72,8 @@ export default function App() {
             </Routes>
           </AppBootstrap>
         </AuthProvider>
+        <ToastContainer />
+      </ToastProvider>
       </Router>
     </>
   );
