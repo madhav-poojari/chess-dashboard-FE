@@ -58,3 +58,15 @@ export const setCoachMentorAssignment = async (
     mentor_coach_id: mentorCoachId, // empty string removes mentor assignment
   });
 };
+
+export const createUser = async (userData: {
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  role: string;
+}): Promise<User> => {
+  const res = await api.post("/auth/signup", userData);
+  const data: ApiResponse<User> = res.data;
+  return data.data;
+};

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "react-router";
 
 import {
@@ -30,7 +31,27 @@ const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
 
-  const [students, setStudents] = useState<{ id: string; name: string; lessonPlan?: string }[]>([]);
+  const userRole = user?.role?.toLowerCase().trim() || "";
+  const permittedRoles = [UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN];
+  const shouldFetchStudents = user && permittedRoles.includes(userRole as UserRole);
+
+  const { data: fetchedStudents = [] } = useQuery<User[]>({
+    queryKey: ["students"],
+    queryFn: fetchStudents,
+    enabled: !!(!loading && shouldFetchStudents),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  const students = useMemo(() => {
+    if (fetchedStudents && Array.isArray(fetchedStudents)) {
+      return fetchedStudents.map((s: User) => ({
+        id: s.id,
+        name: `${s.first_name} ${s.last_name}`,
+        lessonPlan: s.current_lesson_plan || "No active plan"
+      }));
+    }
+    return [];
+  }, [fetchedStudents]);
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main";
@@ -40,40 +61,6 @@ const AppSidebar: React.FC = () => {
     {}
   );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
-
-  useEffect(() => {
-    const loadStudents = async () => {
-      // Normalize role comparison
-      const userRole = user?.role?.toLowerCase().trim() || "";
-
-      const permittedRoles = [UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN];
-
-      if (user && permittedRoles.includes(userRole as UserRole)) {
-        try {
-          const fetchedStudents = await fetchStudents();
-
-          if (fetchedStudents && Array.isArray(fetchedStudents)) {
-            const mappedStudents = fetchedStudents.map((s: User) => ({
-              id: s.id,
-              name: `${s.first_name} ${s.last_name}`,
-              lessonPlan: s.current_lesson_plan || "No active plan"
-            }));
-            setStudents(mappedStudents);
-          } else {
-            setStudents([]);
-          }
-        } catch (err) {
-          console.error("Failed to fetch students", err);
-          // Set to empty on error
-          setStudents([]);
-        }
-      }
-    };
-
-    if (!loading) {
-      loadStudents();
-    }
-  }, [user, loading]);
 
   // Memoize navItems to depend on students
   const navItems: NavItem[] = useMemo(() => [

@@ -19,6 +19,7 @@ interface InputProps {
   success?: boolean;
   error?: boolean;
   hint?: string;
+  autoComplete?: string;
 }
 
 const Input: FC<InputProps> = ({
@@ -39,6 +40,7 @@ const Input: FC<InputProps> = ({
   success = false,
   error = false,
   hint,
+  autoComplete,
 }) => {
   let inputClasses = ` h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3  dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 ${className}`;
 
@@ -68,18 +70,18 @@ const Input: FC<InputProps> = ({
         step={step}
         required={required}
         disabled={disabled}
+        autoComplete={autoComplete ?? (type === "password" ? "off" : undefined)}
         className={inputClasses}
       />
 
       {hint && (
         <p
-          className={`mt-1.5 text-xs ${
-            error
-              ? "text-error-500"
-              : success
+          className={`mt-1.5 text-xs ${error
+            ? "text-error-500"
+            : success
               ? "text-success-500"
               : "text-gray-500"
-          }`}
+            }`}
         >
           {hint}
         </p>
