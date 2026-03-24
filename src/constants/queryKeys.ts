@@ -8,4 +8,7 @@ export const queryKeys = {
         list: (page: number, pageSize: number) =>
             ["academyGallery", page, pageSize] as const,
     },
+    tournaments: {
+        byUser: (userId: string) => ["tournaments", userId] as const,
+    },
 };
