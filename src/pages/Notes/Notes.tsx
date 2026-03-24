@@ -9,6 +9,7 @@ import CreateLessonPlanModal, { LessonPlan } from "./CreateLessonPlanModal";
 import api from "../../api/axiosInstance";
 import { deleteNote, getLessonPlanById } from "../../api/notes/noteService";
 import UserProfiles from "../UserProfiles";
+import TournamentList from "../../components/UserProfile/tournaments/TournamentList";
 
 export default function Notes() {
     const { user } = useAuth();
@@ -16,7 +17,7 @@ export default function Notes() {
     const [loading, setLoading] = useState(true);
     const [searchParams] = useSearchParams();
     const studentIdParam = searchParams.get('studentId');
-    const [activeTab, setActiveTab] = useState<"profile" | "notes">("profile");
+    const [activeTab, setActiveTab] = useState<"profile" | "notes" | "tournaments">("profile");
 
     // Edit state
     const [noteToEdit, setNoteToEdit] = useState<Note | undefined>(undefined);
@@ -235,6 +236,15 @@ export default function Notes() {
                         >
                             Notes
                         </button>
+                        <button
+                            onClick={() => setActiveTab("tournaments")}
+                            className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${activeTab === "tournaments"
+                                    ? "shadow-theme-xs text-gray-900 dark:text-white bg-white dark:bg-gray-800"
+                                    : "text-gray-500 dark:text-gray-400"
+                                }`}
+                        >
+                            Tournaments
+                        </button>
                     </div>
                 </div>
 
@@ -242,6 +252,10 @@ export default function Notes() {
                 {activeTab === "profile" ? (
                     <div key={studentIdParam}>
                         <UserProfiles studentId={studentIdParam} readOnly={true} galleryReadOnly={false} />
+                    </div>
+                ) : activeTab === "tournaments" ? (
+                    <div key={`tournaments-${studentIdParam}`}>
+                        <TournamentList userId={studentIdParam!} />
                     </div>
                 ) : (
                     <NotesContent
