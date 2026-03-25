@@ -10,6 +10,31 @@ import { userPublicProfile } from "../api/user/publicProfile";
 import { PublicProfile } from "../models/publicProfile";
 import { updateProfile } from "../api/user/service";
 import { useShareProfileImage } from "../hooks/useShareProfileImage";
+import { useAuth } from "../context/AuthContext";
+import BrsRelatedUserInfo from "../components/UserProfile/BrsRelatedUserInfo";
+import UserGuidanceDetailsCard from "../components/UserProfile/UserGuidanceDetailsCard";
+// import { userPublicProfile } from "../api/user";
+// export default function UserProfiles() {
+//   return (
+//     <>
+//       <PageMeta
+//         title="BRS chess Profile Dashboard |  Next.js Admin Dashboard "
+//         description="This is BRS chess Profile Dashboard page "
+//       />
+//       <PageBreadcrumb pageTitle="Profile" />
+//       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
+//         <h3 className="mb-5 text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-7">
+//           Profile
+//         </h3>
+//         <div className="space-y-6">
+//           <UserMetaCard />
+//           <UserInfoCard />
+//           <UserAddressCard />
+//         </div>
+//       </div>
+//     </>
+//   );
+// }
 
 
 interface UserProfilesProps {
@@ -23,6 +48,7 @@ export default function UserProfiles({ studentId, readOnly = false, galleryReadO
 
   const isGalleryReadOnly = galleryReadOnly ?? readOnly;
 
+  const { user } = useAuth();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -94,7 +120,14 @@ export default function UserProfiles({ studentId, readOnly = false, galleryReadO
   if (error) return <div>Error loading profile</div>;
 
   const updateHandler = readOnly ? undefined : handleUpdateUser;
+
   const { shareProfile, isGenerating } = useShareProfileImage(profile);
+
+  const CAN_EDIT_SYLLABUS = ["coach", "mentor", "admin"];
+  const syllabusUpdateHandler = CAN_EDIT_SYLLABUS.includes(user?.role?.toLowerCase() || "")
+    ? handleUpdateUser
+    : undefined;
+
 
   return (profile && (
     <>
@@ -130,6 +163,7 @@ export default function UserProfiles({ studentId, readOnly = false, galleryReadO
             Gallery
           </button>
 
+
           {activeTab === "profile" && (
             <button
               onClick={shareProfile}
@@ -148,12 +182,21 @@ export default function UserProfiles({ studentId, readOnly = false, galleryReadO
           )}
         </div>
 
+	</div>
+        <h3 className="mb-5 text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-7">
+          Profile
+        </h3>
+
+
         {activeTab === "profile" ? (
-          <div className="space-y-6">
-            <UserMetaCard user={profile} onUpdate={updateHandler} readOnly={readOnly} />
-            <UserInfoCard user={profile} onUpdate={updateHandler} readOnly={readOnly} />
-            <UserAddressCard user={profile} onUpdate={updateHandler} readOnly={readOnly} />
-          </div>
+	  
+        <div className="space-y-6">
+          <UserMetaCard user={profile} onUpdate={updateHandler} onSyllabusUpdate={syllabusUpdateHandler} readOnly={readOnly} viewerRole={user?.role?.toLowerCase()} />
+          <BrsRelatedUserInfo user={profile} onUpdate={handleUpdateUser} readOnly={false} viewerRole={user?.role?.toLowerCase()} />
+          <UserGuidanceDetailsCard user={profile} viewerRole={user?.role?.toLowerCase()} />
+          <UserInfoCard user={profile} onUpdate={updateHandler} readOnly={readOnly} />
+          <UserAddressCard user={profile} onUpdate={updateHandler} readOnly={readOnly} />
+        </div>
         ) : (
           <StudentGallery userId={profile.uid} readOnly={isGalleryReadOnly} />
         )}
