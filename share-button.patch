@@ -1,0 +1,127 @@
+diff --git a/src/pages/Attendance/AttendancePage.tsx b/src/pages/Attendance/AttendancePage.tsx
+index 0763927..ae11352 100644
+--- a/src/pages/Attendance/AttendancePage.tsx
++++ b/src/pages/Attendance/AttendancePage.tsx
+@@ -6,6 +6,8 @@ import { fetchStudents } from "../../api/user/service";
+ import { User } from "../../api/user/dto";
+ import { Attendance, listAttendances, ListAttendancesParams } from "../../api/attendance/service";
+ import AddAttendanceModal from "./AddAttendanceModal";
++import { generateAttendanceImage, copyImageToClipboard, downloadImage } from "../../utils/shareImage";
++import { useToast } from "../../context/ToastContext";
+ 
+ type TabType = "student_overview" | "coach_overview";
+ 
+@@ -61,6 +63,47 @@ export default function AttendancePage() {
+   const [error, setError] = useState<string>("");
+ 
+   const [isAddOpen, setIsAddOpen] = useState(false);
++  const [isShareGenerating, setIsShareGenerating] = useState(false);
++  const toast = useToast();
++
++  const handleShareAttendance = async () => {
++    if (attendances.length === 0) return;
++    setIsShareGenerating(true);
++    try {
++      // Determine the name for the header
++      let personName = "Student";
++      if (activeTab === "student_overview") {
++        const student = studentOptions.find((s) => s.id === selectedStudentId);
++        if (student) personName = `${student.first_name} ${student.last_name}`;
++      } else {
++        const coach = coachOptions.find((c) => c.id === selectedCoachId);
++        if (coach) personName = `${coach.first_name} ${coach.last_name}`;
++      }
++
++      // Format month label
++      const parsed = parseMonthInput(monthValue);
++      const monthLabel = parsed
++        ? new Date(parsed.year, parsed.month - 1).toLocaleDateString("en-US", {
++            month: "long",
++            year: "numeric",
++          })
++        : monthValue;
++
++      const blob = await generateAttendanceImage(personName, monthLabel, attendances);
++      const copied = await copyImageToClipboard(blob);
++      if (copied) {
++        toast.success("Attendance image copied to clipboard!");
++      } else {
++        downloadImage(blob, `attendance-${monthValue}.png`);
++        toast.success("Attendance image downloaded!");
++      }
++    } catch (err) {
++      console.error("Share failed", err);
++      toast.error("Failed to generate attendance image");
++    } finally {
++      setIsShareGenerating(false);
++    }
++  };
+ 
+   // load students for dropdowns (coach/mentor/admin)
+   useEffect(() => {
+@@ -211,6 +254,20 @@ export default function AttendancePage() {
+         </div>
+ 
+         <div className="flex items-center justify-between sm:justify-end gap-3">
++          <button
++            onClick={handleShareAttendance}
++            disabled={isShareGenerating || attendances.length === 0}
++            className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
++          >
++            {isShareGenerating ? (
++              <span className="h-4 w-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
++            ) : (
++              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
++                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
++              </svg>
++            )}
++            Share
++          </button>
+           <button
+             onClick={() => setIsAddOpen(true)}
+             className="inline-flex items-center justify-center rounded-lg bg-blue-600 hover:bg-blue-700 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors"
+diff --git a/src/pages/UserProfiles.tsx b/src/pages/UserProfiles.tsx
+index 7888a64..f2d00b1 100644
+--- a/src/pages/UserProfiles.tsx
++++ b/src/pages/UserProfiles.tsx
+@@ -9,6 +9,7 @@ import { useEffect, useState, useCallback } from "react";
+ import { userPublicProfile } from "../api/user/publicProfile";
+ import { PublicProfile } from "../models/publicProfile";
+ import { updateProfile } from "../api/user/service";
++import { useShareProfileImage } from "../hooks/useShareProfileImage";
+ 
+ 
+ interface UserProfilesProps {
+@@ -93,6 +94,7 @@ export default function UserProfiles({ studentId, readOnly = false, galleryReadO
+   if (error) return <div>Error loading profile</div>;
+ 
+   const updateHandler = readOnly ? undefined : handleUpdateUser;
++  const { shareProfile, isGenerating } = useShareProfileImage(profile);
+ 
+   return (profile && (
+     <>
+@@ -127,6 +129,23 @@ export default function UserProfiles({ studentId, readOnly = false, galleryReadO
+           >
+             Gallery
+           </button>
++
++          {activeTab === "profile" && (
++            <button
++              onClick={shareProfile}
++              disabled={isGenerating}
++              className="ml-auto inline-flex items-center gap-2 rounded-lg bg-blue-600 hover:bg-blue-700 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors disabled:opacity-50"
++            >
++              {isGenerating ? (
++                <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
++              ) : (
++                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
++                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
++                </svg>
++              )}
++              Share
++            </button>
++          )}
+         </div>
+ 
+         {activeTab === "profile" ? (
+
