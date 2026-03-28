@@ -8,12 +8,12 @@ import { ChangeEvent, useState } from "react";
 import { PublicProfile } from "../../models/publicProfile";
 import ProfilePictureUpload from "./ProfilePictureUpload";
 
-interface PlayLinksUpdate {
-  uscf_id: string;
-  fide_id: string;
-  chesscom_username: string;
-  lichess_username: string;
-}
+//interface PlayLinksUpdate {
+//  uscf_id: string;
+//  fide_id: string;
+//  chesscom_username: string;
+//  lichess_username: string;
+//}
 import { DocsIcon, MeetIcon } from "../../icons";
 
 interface UserMetaCardProps {
