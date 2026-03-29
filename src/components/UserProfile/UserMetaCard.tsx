@@ -106,10 +106,6 @@ export default function UserMetaCard({ user, onUpdate, onSyllabusUpdate, readOnl
               readOnly={readOnly}
             />
 
-            {/* Avatar */}
-            <div className="w-20 h-20 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800">
-              <img src="/images/user/dummy-profile-image.png" alt="user" />
-            </div>
 
             {/* Name + location */}
             <div className="order-3 xl:order-2">
