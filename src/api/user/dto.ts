@@ -1,3 +1,5 @@
+import { GuidanceInfo } from "../../models/publicProfile";
+
 // src/api/user/dto.ts
 export enum UserRole {
   STUDENT = "student",
@@ -22,6 +24,9 @@ export interface UserDetails {
   uscf_id: string;
   chesscom_username: string;
   fide_id: string;
+  syllabus_url: string;
+  added_in_whatsapp: boolean;
+  personal_meet_link: string;
 }
 
 export interface User {
@@ -35,7 +40,10 @@ export interface User {
   created_at: string;
   updated_at: string;
   details: UserDetails;
+
   current_lesson_plan?: string;
+  mentor?: GuidanceInfo;
+  coach?: GuidanceInfo;
 }
 
 export interface ApiResponse<T> {

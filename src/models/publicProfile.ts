@@ -14,5 +14,18 @@ export interface PublicProfile {
     chessdotcomId:string;
     uscfId:string;
     fideId:string;
+    syllabus_url:string;
+    role: string;
+    personal_meet_link: string;
+    added_in_whatsapp: boolean;
+    mentorDetails: GuidanceInfo | null;
+    coachDetails: GuidanceInfo | null;
   }
   
+  export interface GuidanceInfo {
+    name: string;
+    profile_picture_url?: string;
+    fide_id?: string;
+    bio: string;
+    personal_meet_link?: string;
+  }
