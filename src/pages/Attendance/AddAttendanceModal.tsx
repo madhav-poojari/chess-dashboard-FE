@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Modal } from "../../components/ui/modal";
 import { useAuth } from "../../context/AuthContext";
-import { fetchStudents } from "../../api/user/service";
-import { User } from "../../api/user/dto";
+import { fetchStudents, fetchStudentSummaries } from "../../api/user/service";
+import { StudentSummary, User } from "../../api/user/dto";
 import { AttendanceClassType, createAttendance, CreateAttendancePayload } from "../../api/attendance/service";
+import StudentAutocomplete from "../../components/form/StudentAutocomplete";
 
 type Props = {
   isOpen: boolean;
@@ -42,9 +43,11 @@ export default function AddAttendanceModal({ isOpen, onClose, onSuccess }: Props
   const [studentId, setStudentId] = useState<string>("");
   const [studentId2, setStudentId2] = useState<string>(""); // dual
 
-  // Free-text student id for substitution/game_session - now supports multiple
+  // Student ids for substitution/game_session (autocomplete-driven)
   const [freeTextStudentIds, setFreeTextStudentIds] = useState<string[]>([]);
-  const [currentInput, setCurrentInput] = useState<string>("");
+
+  // Student summaries for autocomplete dropdown
+  const [studentSummaries, setStudentSummaries] = useState<StudentSummary[]>([]);
 
   // Optional coach override for mentor/admin
   const [coachId, setCoachId] = useState<string>("");
@@ -63,43 +66,21 @@ export default function AddAttendanceModal({ isOpen, onClose, onSuccess }: Props
     return (students || []).filter((s) => (s.role || "").toLowerCase() === "student");
   }, [students]);
 
-  // Helper to find student info by ID for chip display
-  const getStudentInfo = (id: string): User | undefined => {
-    return filteredStudents.find((s) => s.id === id);
+  const handleAutocompleteSelect = (student: StudentSummary) => {
+    if (classType === "substitution") {
+      // Single select ΓÇô replace any existing
+      setFreeTextStudentIds([student.id]);
+    } else {
+      // Multi select (game_session)
+      if (!freeTextStudentIds.includes(student.id)) {
+        setFreeTextStudentIds([...freeTextStudentIds, student.id]);
+      }
+    }
+    setError("");
   };
 
-  const addStudentChip = (id: string) => {
-    const trimmed = id.trim();
-    if (!trimmed) return;
-    if (freeTextStudentIds.includes(trimmed)) {
-      setError(`Student ID "${trimmed}" is already added.`);
-      return;
-    }
-    
-    // Validate that the student ID exists
-    const student = getStudentInfo(trimmed);
-    if (!student) {
-      setError(`Invalid student ID: "${trimmed}". Please enter a valid student ID.`);
-      return;
-    }
-    
-    setError(""); // Clear any previous errors
-    setFreeTextStudentIds([...freeTextStudentIds, trimmed]);
-    setCurrentInput("");
-  };
-
-  const removeStudentChip = (id: string) => {
+  const handleAutocompleteRemove = (id: string) => {
     setFreeTextStudentIds(freeTextStudentIds.filter((sid) => sid !== id));
-  };
-
-  const handleChipInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      addStudentChip(currentInput);
-    } else if (e.key === "Backspace" && !currentInput && freeTextStudentIds.length > 0) {
-      // Remove last chip on backspace if input is empty
-      setFreeTextStudentIds(freeTextStudentIds.slice(0, -1));
-    }
   };
 
   useEffect(() => {
@@ -114,19 +95,24 @@ export default function AddAttendanceModal({ isOpen, onClose, onSuccess }: Props
     setStudentId("");
     setStudentId2("");
     setFreeTextStudentIds([]);
-    setCurrentInput("");
     setCoachId("");
+    setStudentSummaries([]);
     setClassHighlights("");
     setHomework("");
 
     // load students for dropdown options (coach/mentor/admin)
     (async () => {
       try {
-        const data = await fetchStudents();
-        setStudents(Array.isArray(data) ? data : []);
+        const [usersData, summariesData] = await Promise.all([
+          fetchStudents(),
+          fetchStudentSummaries(),
+        ]);
+        setStudents(Array.isArray(usersData) ? usersData : []);
+        setStudentSummaries(Array.isArray(summariesData) ? summariesData : []);
       } catch (e) {
         console.error("Failed to fetch students", e);
         setStudents([]);
+        setStudentSummaries([]);
       }
     })();
   }, [isOpen]);
@@ -280,7 +266,7 @@ export default function AddAttendanceModal({ isOpen, onClose, onSuccess }: Props
                   </option>
                   {filteredStudents.map((s) => (
                     <option key={s.id} value={s.id} className="dark:bg-gray-800">
-                      {s.first_name} {s.last_name} ({s.email})
+                      {s.first_name} {s.last_name} 
                     </option>
                   ))}
                 </select>
@@ -314,61 +300,16 @@ export default function AddAttendanceModal({ isOpen, onClose, onSuccess }: Props
           {showFreeTextStudent && (
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Students (type ID and press Enter or comma)
+                {classType === "substitution" ? "Student" : "Students"}
               </label>
-              <div className="w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-gray-900 focus-within:border-blue-500 dark:border-gray-600 dark:text-white dark:focus-within:border-blue-500 min-h-[42px] flex flex-wrap gap-2 items-center">
-                {freeTextStudentIds.map((id) => {
-                  const student = getStudentInfo(id);
-                  return (
-                    <div
-                      key={id}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-full text-sm"
-                    >
-                      <span>
-                        {student
-                          ? `${student.first_name} ${student.last_name} (${id})`
-                          : id}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => removeStudentChip(id)}
-                        className="hover:bg-blue-200 dark:hover:bg-blue-800/50 rounded-full p-0.5 transition-colors"
-                        aria-label="Remove"
-                      >
-                        <svg
-                          className="w-3.5 h-3.5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  );
-                })}
-                <input
-                  type="text"
-                  value={currentInput}
-                  onChange={(e) => setCurrentInput(e.target.value)}
-                  onKeyDown={handleChipInputKeyDown}
-                  onBlur={() => {
-                    if (currentInput.trim()) {
-                      addStudentChip(currentInput);
-                    }
-                  }}
-                  className="flex-1 min-w-[120px] bg-transparent outline-none border-none focus:ring-0 px-1"
-                  placeholder={freeTextStudentIds.length === 0 ? "Enter student ID..." : ""}
-                />
-              </div>
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Type student ID and press Enter or comma to add. Valid IDs will show student names.
-              </p>
+              <StudentAutocomplete
+                students={studentSummaries}
+                selectedIds={freeTextStudentIds}
+                onSelect={handleAutocompleteSelect}
+                onRemove={handleAutocompleteRemove}
+                multiple={classType === "game_session"}
+                placeholder="Search student by name..."
+              />
             </div>
           )}
 

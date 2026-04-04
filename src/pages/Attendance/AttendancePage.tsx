@@ -4,8 +4,9 @@ import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import { useAuth } from "../../context/AuthContext";
 import { fetchStudents } from "../../api/user/service";
 import { User } from "../../api/user/dto";
-import { Attendance, listAttendances, ListAttendancesParams } from "../../api/attendance/service";
+import { Attendance, deleteAttendance, listAttendances, ListAttendancesParams } from "../../api/attendance/service";
 import AddAttendanceModal from "./AddAttendanceModal";
+import EditAttendanceModal from "./EditAttendanceModal";
 
 type TabType = "student_overview" | "coach_overview";
 
@@ -61,6 +62,26 @@ export default function AttendancePage() {
   const [error, setError] = useState<string>("");
 
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<Attendance | null>(null);
+  const [deleting, setDeleting] = useState<number | null>(null);
+
+  const handleDelete = async (a: Attendance) => {
+    const label = a.student
+      ? `${a.student.first_name} ${a.student.last_name}`
+      : a.student_id;
+    if (!window.confirm(`Delete attendance for ${label} on ${formatDateOnly(a.date)}? This cannot be undone.`)) return;
+    setDeleting(a.id);
+    try {
+      await deleteAttendance(a.id);
+      loadAttendances();
+    } catch (err: unknown) {
+      console.error("Delete attendance failed", err);
+      const e2 = err as { response?: { data?: { message?: string; error?: string } }; message?: string };
+      setError(e2.response?.data?.message || e2.response?.data?.error || e2.message || "Failed to delete attendance");
+    } finally {
+      setDeleting(null);
+    }
+  };
 
   // load students for dropdowns (coach/mentor/admin)
   useEffect(() => {
@@ -275,6 +296,7 @@ export default function AttendancePage() {
                       <th className="text-left py-2 pr-4 text-gray-500 font-medium">Verified</th>
                       <th className="text-left py-2 pr-4 text-gray-500 font-medium">Highlights</th>
                       <th className="text-left py-2 pr-4 text-gray-500 font-medium">Homework</th>
+                      <th className="text-left py-2 pr-4 text-gray-500 font-medium">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
@@ -293,6 +315,23 @@ export default function AttendancePage() {
                         </td>
                         <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
                           {a.homework || "-"}
+                        </td>
+                        <td className="py-3 pr-4">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => setEditTarget(a)}
+                              className="text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDelete(a)}
+                              disabled={deleting === a.id}
+                              className="text-xs font-medium text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50"
+                            >
+                              {deleting === a.id ? "Deleting..." : "Delete"}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -326,6 +365,7 @@ export default function AttendancePage() {
                             <th className="text-left py-2 pr-4 text-gray-500 font-medium">Type</th>
                             <th className="text-left py-2 pr-4 text-gray-500 font-medium">Student</th>
                             <th className="text-left py-2 pr-4 text-gray-500 font-medium">Verified</th>
+                            <th className="text-left py-2 pr-4 text-gray-500 font-medium">Actions</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
@@ -337,6 +377,23 @@ export default function AttendancePage() {
                                 {a.student ? `${a.student.first_name} ${a.student.last_name}` : a.student_id}
                               </td>
                               <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">{a.is_verified ? "Yes" : "No"}</td>
+                              <td className="py-3 pr-4">
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => setEditTarget(a)}
+                                    className="text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={() => handleDelete(a)}
+                                    disabled={deleting === a.id}
+                                    className="text-xs font-medium text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50"
+                                  >
+                                    {deleting === a.id ? "Deleting..." : "Delete"}
+                                  </button>
+                                </div>
+                              </td>
                             </tr>
                           ))}
                         </tbody>
@@ -353,6 +410,15 @@ export default function AttendancePage() {
       <AddAttendanceModal
         isOpen={isAddOpen}
         onClose={() => setIsAddOpen(false)}
+        onSuccess={() => {
+          loadAttendances();
+        }}
+      />
+
+      <EditAttendanceModal
+        isOpen={!!editTarget}
+        attendance={editTarget}
+        onClose={() => setEditTarget(null)}
         onSuccess={() => {
           loadAttendances();
         }}
