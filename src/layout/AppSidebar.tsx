@@ -14,7 +14,7 @@ import {
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "../context/AuthContext";
 
-import { fetchStudents } from "../api/user/service";
+import { fetchStudents, fetchCoaches } from "../api/user/service";
 
 import { User, UserRole } from "../api/user/dto";
 
@@ -42,6 +42,14 @@ const AppSidebar: React.FC = () => {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
+  const shouldFetchCoaches = user && [UserRole.MENTOR_COACH, UserRole.ADMIN].includes(userRole as UserRole);
+  const { data: fetchedCoaches = [] } = useQuery<User[]>({
+    queryKey: ["coaches"],
+    queryFn: fetchCoaches,
+    enabled: !!(!loading && shouldFetchCoaches),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
   const students = useMemo(() => {
     if (fetchedStudents && Array.isArray(fetchedStudents)) {
       return fetchedStudents.map((s: User) => ({
@@ -51,7 +59,18 @@ const AppSidebar: React.FC = () => {
       }));
     }
     return [];
-  }, [fetchedStudents]);
+  }, [fetchedStudents, user?.id, userRole]);
+
+  const coaches = useMemo(() => {
+    if (fetchedCoaches && Array.isArray(fetchedCoaches)) {
+      return fetchedCoaches.map((c: User) => ({
+        id: c.id,
+        name: `${c.first_name} ${c.last_name}`,
+        lessonPlan: c.current_lesson_plan || "No active plan"
+      }));
+    }
+    return [];
+  }, [fetchedCoaches, user?.id, userRole]);
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main";
@@ -61,51 +80,61 @@ const AppSidebar: React.FC = () => {
     {}
   );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
-
-  // Memoize navItems to depend on students
-  const navItems: NavItem[] = useMemo(() => [
-    {
-      icon: <UserCircleIcon />,
-      name: "User Profile",
-      path: "/profile",
-      allowedRoles: [UserRole.STUDENT, UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
-    },
-    {
-      icon: <DocsIcon />,
-      name: "Notes",
-      path: "/notes",
-      allowedRoles: [UserRole.STUDENT]
-    },
-    {
-      icon: <TableIcon />,
-      name: "Attendance",
-      path: "/attendance",
-      allowedRoles: [UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
-    },
-    {
-      icon: <GroupIcon />,
-      name: "Students",
-
-      allowedRoles: [UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN],
-      subItems: students.map(student => ({
-        name: student.name,
-        path: `/notes?studentId=${student.id}`,
-        description: student.lessonPlan
-      }))
-    },
-    {
-      icon: <TableIcon />,
-      name: "Admin",
-      path: "/admin",
-      allowedRoles: [UserRole.ADMIN]
-    },
-    {
-      icon: <GridIcon />,
-      name: "Academy Gallery",
-      path: "/academy-gallery",
-      allowedRoles: [UserRole.STUDENT, UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
-    },
-  ], [students]);
+  // Memoize navItems to depend on students and coaches
+  const navItems: NavItem[] = useMemo(() => {
+    return [
+      {
+        icon: <UserCircleIcon />,
+        name: "User Profile",
+        path: "/profile",
+        allowedRoles: [UserRole.STUDENT, UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
+      },
+      {
+        icon: <DocsIcon />,
+        name: "Notes",
+        path: "/notes",
+        allowedRoles: [UserRole.STUDENT]
+      },
+      {
+        icon: <TableIcon />,
+        name: "Attendance",
+        path: "/attendance",
+        allowedRoles: [UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
+      },
+      {
+        icon: <GroupIcon />,
+        name: "Students",
+        allowedRoles: [UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN],
+        subItems: students.map(student => ({
+          name: student.name,
+          path: `/notes?studentId=${student.id}`,
+          description: student.lessonPlan
+        }))
+      },
+      {
+        icon: <GroupIcon />,
+        name: "Coaches",
+        allowedRoles: [UserRole.MENTOR_COACH, UserRole.ADMIN],
+        subItems: coaches.map(coach => ({
+          name: coach.name,
+          path: `/notes?coachId=${coach.id}`,
+          description: coach.lessonPlan
+        }))
+      },
+      {
+        icon: <TableIcon />,
+        name: "Admin",
+        path: "/admin",
+        allowedRoles: [UserRole.ADMIN]
+      },
+      {
+        icon: <GridIcon />,
+        name: "Academy Gallery",
+        path: "/academy-gallery",
+        allowedRoles: [UserRole.STUDENT, UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
+      },
+    ]
+  }, [students, coaches]);
 
   const isActive = useCallback(
     (path: string) => {
@@ -146,7 +175,7 @@ const AppSidebar: React.FC = () => {
       setOpenSubmenu(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location, isActive, students, loading]); // Added loading dependency
+  }, [location, isActive, loading]);
 
   useEffect(() => {
     if (openSubmenu !== null) {
@@ -260,7 +289,7 @@ const AppSidebar: React.FC = () => {
                 <ul className="mt-2 space-y-1 ml-9">
                   {nav.subItems.length === 0 && (
                     <li className="px-4 py-2 text-sm text-gray-500 italic">
-                      No students found
+                      No users found
                     </li>
                   )}
                   {nav.subItems.map((subItem) => (
