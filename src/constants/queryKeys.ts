@@ -12,6 +12,10 @@ export const queryKeys = {
         all: () => ["schedules"] as const,
         students: () => ["schedule-students"] as const,
     },
+    ratings: {
+        byPlatform: (studentId: string, platform: string) =>
+            ["student-ratings", studentId, platform] as const,
+    },
     users: {
         students: () => ["users", "students"] as const,
         coaches: () => ["users", "coaches"] as const,
