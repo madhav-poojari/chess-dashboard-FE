@@ -14,6 +14,7 @@ import AppBootstrap from "./components/common/AppBootstrap";
 import AdminPage from "./pages/Admin/AdminPage";
 import RequireRole from "./components/auth/RequireRole";
 import AttendancePage from "./pages/Attendance/AttendancePage";
+import SchedulePage from "./pages/Schedule/SchedulePage";
 import AcademyGallery from "./pages/AcademyGallery/AcademyGallery";
 import { ToastProvider } from "./context/ToastContext";
 import ToastContainer from "./components/ui/Toast";
@@ -55,6 +56,16 @@ export default function App() {
                   element={
                     <RequireRole allowedRoles={["admin", "mentor", "coach"]}>
                       <AttendancePage />
+                    </RequireRole>
+                  }
+                />
+
+                {/* Schedule */}
+                <Route
+                  path="/schedule"
+                  element={
+                    <RequireRole allowedRoles={["admin", "mentor", "coach"]}>
+                      <SchedulePage />
                     </RequireRole>
                   }
                 />
