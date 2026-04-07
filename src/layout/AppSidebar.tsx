@@ -10,6 +10,7 @@ import {
   GroupIcon,
   TableIcon,
   GridIcon,
+  CalenderIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "../context/AuthContext";
@@ -80,6 +81,12 @@ const AppSidebar: React.FC = () => {
       icon: <TableIcon />,
       name: "Attendance",
       path: "/attendance",
+      allowedRoles: [UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
+    },
+    {
+      icon: <CalenderIcon />,
+      name: "Schedule",
+      path: "/schedule",
       allowedRoles: [UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
     },
     {
