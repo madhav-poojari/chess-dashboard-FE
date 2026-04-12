@@ -1,72 +1,14 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
 import { fetchStudentPlatformRatings, RatingRecord, RatingPlatform } from "../../api/ratings/service";
 import { queryKeys } from "../../constants/queryKeys";
+import { PLATFORMS, STALE_TIME, TIME_RANGES, TimeRange } from "./progress/progressConstants";
+import { getTimeRangeCutoff, formatDate, computeStats, computeYDomain } from "./progress/progressUtils";
+import RatingStatsRow from "./progress/RatingStatsRow";
+import RatingAreaChart from "./progress/RatingAreaChart";
 
 interface StudentProgressCardProps {
   studentId: string;
-}
-
-type TimeRange = "1m" | "6m" | "1y" | "all";
-
-const PLATFORMS: { key: RatingPlatform; label: string; color: string; gradientId: string }[] = [
-  { key: "chesscom", label: "Chess.com", color: "#81b64c", gradientId: "colorChesscom" },
-  { key: "lichess",  label: "Lichess",   color: "#e6e6e6", gradientId: "colorLichess" },
-  { key: "fide",     label: "FIDE",      color: "#c4a35a", gradientId: "colorFide" },
-];
-
-// staleTime per platform — data updates weekly for chesscom/lichess, monthly for fide
-const STALE_TIME: Record<RatingPlatform, number> = {
-  chesscom: 6 * 60 * 60 * 1000,  // 6 hours (weekly cron)
-  lichess:  6 * 60 * 60 * 1000,  // 6 hours (weekly cron)
-  fide:    24 * 60 * 60 * 1000,  // 24 hours (monthly cron)
-};
-
-const TIME_RANGES: { key: TimeRange; label: string }[] = [
-  { key: "1m",  label: "1M" },
-  { key: "6m",  label: "6M" },
-  { key: "1y",  label: "1Y" },
-  { key: "all", label: "All" },
-];
-
-function getTimeRangeCutoff(range: TimeRange): Date | null {
-  if (range === "all") return null;
-  const now = new Date();
-  switch (range) {
-    case "1m":  now.setMonth(now.getMonth() - 1); break;
-    case "6m":  now.setMonth(now.getMonth() - 6); break;
-    case "1y":  now.setFullYear(now.getFullYear() - 1); break;
-  }
-  return now;
-}
-
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "2-digit" });
-}
-
-function formatTooltipDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
-}
-
-function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
-  if (!active || !payload?.length || !label) return null;
-  return (
-    <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-theme-sm dark:border-gray-700 dark:bg-gray-800">
-      <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">{formatTooltipDate(label)}</p>
-      <p className="text-sm font-semibold text-gray-800 dark:text-white/90">{payload[0].value}</p>
-    </div>
-  );
 }
 
 export default function StudentProgressCard({ studentId }: StudentProgressCardProps) {
@@ -122,28 +64,8 @@ export default function StudentProgressCard({ studentId }: StudentProgressCardPr
     }));
   }, [records, timeRange]);
 
-  // Stats
-  const stats = useMemo(() => {
-    if (chartData.length === 0) return null;
-    const ratings = chartData.map((d) => d.rating);
-    const current = ratings[ratings.length - 1];
-    const first = ratings[0];
-    const change = current - first;
-    const high = Math.max(...ratings);
-    const low = Math.min(...ratings);
-    return { current, change, high, low };
-  }, [chartData]);
-
-  // Dynamic Y-axis domain with padding
-  const yDomain = useMemo((): [number, number] => {
-    if (chartData.length === 0) return [0, 3000];
-    const ratings = chartData.map((d) => d.rating);
-    const min = Math.min(...ratings);
-    const max = Math.max(...ratings);
-    const padding = Math.max(Math.round((max - min) * 0.15), 20);
-    return [Math.max(0, min - padding), max + padding];
-  }, [chartData]);
-
+  const stats = useMemo(() => computeStats(chartData), [chartData]);
+  const yDomain = useMemo(() => computeYDomain(chartData), [chartData]);
   const strokeColor = activePlatform === "lichess" ? "#b0b0b0" : platformConfig.color;
 
   return (
@@ -221,81 +143,16 @@ export default function StudentProgressCard({ studentId }: StudentProgressCardPr
         </div>
       )}
 
-      {/* Stats bar + Chart */}
+      {/* Stats + Chart */}
       {!isLoading && !isError && chartData.length > 0 && stats && (
         <>
-          {/* Stats row */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-            <div className="rounded-xl bg-gray-50 dark:bg-gray-800/50 px-4 py-3">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Current</p>
-              <p className="text-xl font-bold text-gray-800 dark:text-white/90">{stats.current}</p>
-            </div>
-            <div className="rounded-xl bg-gray-50 dark:bg-gray-800/50 px-4 py-3">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Change</p>
-              <p className={`text-xl font-bold ${
-                stats.change > 0 ? "text-success-500" : stats.change < 0 ? "text-error-500" : "text-gray-800 dark:text-white/90"
-              }`}>
-                {stats.change > 0 ? "+" : ""}{stats.change}
-              </p>
-            </div>
-            <div className="rounded-xl bg-gray-50 dark:bg-gray-800/50 px-4 py-3">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Peak</p>
-              <p className="text-xl font-bold text-gray-800 dark:text-white/90">{stats.high}</p>
-            </div>
-            <div className="rounded-xl bg-gray-50 dark:bg-gray-800/50 px-4 py-3">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Low</p>
-              <p className="text-xl font-bold text-gray-800 dark:text-white/90">{stats.low}</p>
-            </div>
-          </div>
-
-          {/* Chart */}
-          <div className="h-72 sm:h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
-                <defs>
-                  <linearGradient id={platformConfig.gradientId} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={strokeColor} stopOpacity={0.25} />
-                    <stop offset="95%" stopColor={strokeColor} stopOpacity={0.02} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={false}
-                  stroke="var(--color-gray-200, #E4E7EC)"
-                />
-                <XAxis
-                  dataKey="date"
-                  tickFormatter={formatDate}
-                  tick={{ fontSize: 11, fill: "var(--color-gray-500, #667085)" }}
-                  axisLine={false}
-                  tickLine={false}
-                  minTickGap={40}
-                />
-                <YAxis
-                  domain={yDomain}
-                  tick={{ fontSize: 11, fill: "var(--color-gray-500, #667085)" }}
-                  axisLine={false}
-                  tickLine={false}
-                  width={45}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Area
-                  type="monotone"
-                  dataKey="rating"
-                  stroke={strokeColor}
-                  strokeWidth={2}
-                  fill={`url(#${platformConfig.gradientId})`}
-                  dot={false}
-                  activeDot={{
-                    r: 5,
-                    fill: strokeColor,
-                    stroke: "#fff",
-                    strokeWidth: 2,
-                  }}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+          <RatingStatsRow stats={stats} />
+          <RatingAreaChart
+            chartData={chartData}
+            yDomain={yDomain}
+            platformConfig={platformConfig}
+            strokeColor={strokeColor}
+          />
         </>
       )}
     </div>
