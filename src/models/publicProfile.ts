@@ -1,4 +1,6 @@
 // src/models/publicProfile.ts
+import { ClassScheduleDTO } from "../api/user/dto";
+
 export interface PublicProfile {
     first_name: string;
     last_name: string;
@@ -20,6 +22,7 @@ export interface PublicProfile {
     added_in_whatsapp: boolean;
     mentorDetails: GuidanceInfo | null;
     coachDetails: GuidanceInfo | null;
+    schedule?: ClassScheduleDTO[];
   }
   
   export interface GuidanceInfo {

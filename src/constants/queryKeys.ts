@@ -11,6 +11,5 @@ export const queryKeys = {
     schedule: {
         all: () => ["schedules"] as const,
         students: () => ["schedule-students"] as const,
-        byStudent: (studentId: string) => ["student-schedule", studentId] as const,
     },
 };
