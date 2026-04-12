@@ -165,7 +165,7 @@ export default function CalendarView({ slots }: CalendarViewProps) {
         slotEventOverlap={false}
         eventContent={(arg) => {
           return (
-            <div className="px-2 py-1 h-full overflow-hidden">
+            <div className="px-2 py-1 h-full overflow-hidden cursor-pointer" title={arg.event.title}>
               <div className="text-xs font-semibold truncate">{arg.event.title}</div>
             </div>
           );
