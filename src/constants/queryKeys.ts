@@ -25,3 +25,4 @@ export const queryKeys = {
             ["attendances", params] as const,
     },
 };
+
