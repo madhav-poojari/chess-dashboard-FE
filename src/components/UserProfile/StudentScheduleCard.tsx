@@ -1,42 +1,19 @@
-import { useQuery } from "@tanstack/react-query";
-import { getStudentSchedule, ClassSchedule } from "../../api/schedule/service";
-import { UserRole } from "../../api/user/dto";
+import { UserRole, ClassScheduleDTO } from "../../api/user/dto";
 import { DAY_NAMES, formatScheduleDisplay, STAFF_ROLES } from "../../utils/timezone";
 import { CalenderIcon } from "../../icons";
-import { queryKeys } from "../../constants/queryKeys";
 
 interface StudentScheduleCardProps {
-  studentId: string;
+  schedule?: ClassScheduleDTO[];
   viewerRole?: string;
 }
 
 export default function StudentScheduleCard({
-  studentId,
+  schedule = [],
   viewerRole = UserRole.STUDENT,
 }: StudentScheduleCardProps) {
-  const { data: slots = [], isLoading } = useQuery<ClassSchedule[]>({
-    queryKey: queryKeys.schedule.byStudent(studentId),
-    queryFn: () => getStudentSchedule(studentId),
-    enabled: !!studentId,
-    staleTime: 2 * 60 * 1000,
-  });
-
   const displayRole = STAFF_ROLES.includes(viewerRole ?? "") ? viewerRole! : UserRole.STUDENT;
 
-  if (isLoading) {
-    return (
-      <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-        <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 mb-4">
-          Class Schedule
-        </h4>
-        <div className="flex items-center justify-center py-8">
-          <div className="animate-spin h-6 w-6 rounded-full border-3 border-brand-500 border-t-transparent" />
-        </div>
-      </div>
-    );
-  }
-
-  if (slots.length === 0) {
+  if (schedule.length === 0) {
     return (
       <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
         <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 mb-4">
@@ -53,8 +30,8 @@ export default function StudentScheduleCard({
   }
 
   // Group by display day (may differ from stored day for staff due to TZ conversion)
-  const byDay = new Map<number, { slot: ClassSchedule; primary: string; secondary: string }[]>();
-  for (const slot of slots) {
+  const byDay = new Map<number, { slot: ClassScheduleDTO; primary: string; secondary: string }[]>();
+  for (const slot of schedule) {
     const { primary, secondary, displayDay } = formatScheduleDisplay(
       slot.start_time,
       slot.timezone,
@@ -109,4 +86,3 @@ export default function StudentScheduleCard({
     </div>
   );
 }
-

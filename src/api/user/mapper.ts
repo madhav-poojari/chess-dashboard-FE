@@ -26,4 +26,5 @@ export const toPublicProfile = (u: User): PublicProfile => ({
   added_in_whatsapp: u.details?.added_in_whatsapp ?? false,
   mentorDetails: u.mentor ?? null,
   coachDetails: u.coach ?? null,
+  schedule: u.schedule,
 });
