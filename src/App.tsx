@@ -85,6 +85,16 @@ export default function App() {
                   }
                 />
 
+                {/* Schedule */}
+                <Route
+                  path="/schedule"
+                  element={
+                    <RequireRole allowedRoles={["admin", "mentor", "coach"]}>
+                      <SchedulePage />
+                    </RequireRole>
+                  }
+                />
+
               </Route>
 
                 {/* Auth Layout */}
