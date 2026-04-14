@@ -7,6 +7,7 @@ import { User } from "../../api/user/dto";
 import { Attendance, deleteAttendance, listAttendances, ListAttendancesParams } from "../../api/attendance/service";
 import AddAttendanceModal from "./AddAttendanceModal";
 import EditAttendanceModal from "./EditAttendanceModal";
+import { AttendanceShareCard } from "../../components/share";
 
 type TabType = "student_overview" | "coach_overview";
 
@@ -162,6 +163,23 @@ export default function AttendancePage() {
     }));
   }, [attendances]);
 
+  // Derived values for share card
+  const shareMonthLabel = useMemo(() => {
+    const parsed = parseMonthInput(monthValue);
+    if (!parsed) return "";
+    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    return `${months[parsed.month - 1]} ${parsed.year}`;
+  }, [monthValue]);
+
+  const sharePersonName = useMemo(() => {
+    if (activeTab === "student_overview") {
+      const s = studentOptions.find((x) => x.id === selectedStudentId);
+      return s ? `${s.first_name} ${s.last_name}` : "";
+    }
+    const c = coachOptions.find((x) => x.id === selectedCoachId);
+    return c ? `${c.first_name} ${c.last_name}` : "";
+  }, [activeTab, selectedStudentId, selectedCoachId, studentOptions, coachOptions]);
+
   return (
     <div>
       <PageMeta title="Attendance" description="Track class attendance" />
@@ -232,6 +250,14 @@ export default function AttendancePage() {
         </div>
 
         <div className="flex items-center justify-between sm:justify-end gap-3">
+          {attendances.length > 0 && (
+            <AttendanceShareCard
+              attendances={attendances}
+              viewType={activeTab}
+              monthLabel={shareMonthLabel}
+              personName={sharePersonName}
+            />
+          )}
           <button
             onClick={() => setIsAddOpen(true)}
             className="inline-flex items-center justify-center rounded-lg bg-blue-600 hover:bg-blue-700 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors"
