@@ -257,7 +257,7 @@ export default function Notes() {
                 {/* Tab Content */}
                 {activeTab === "profile" ? (
                     <div key={studentIdParam}>
-                        <UserProfiles studentId={studentIdParam} readOnly={true} galleryReadOnly={false} />
+                        <UserProfiles studentId={studentIdParam} readOnly={false} galleryReadOnly={false} />
                     </div>
                 ) : (
                     <NotesContent
@@ -330,7 +330,7 @@ export default function Notes() {
                 {/* Tab Content */}
                 {activeTab === "profile" ? (
                     <div key={coachIdParam}>
-                        <UserProfiles studentId={coachIdParam} readOnly={true} galleryReadOnly={false} />
+                        <UserProfiles studentId={coachIdParam} readOnly={false} galleryReadOnly={false} />
                     </div>
                 ) : (
                     <NotesContent
