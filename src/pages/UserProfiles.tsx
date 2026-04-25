@@ -172,7 +172,7 @@ export default function UserProfiles({ studentId, readOnly = false, galleryReadO
             {/* Schedule card — shown for student profiles only */}
             {(profile.role?.toLowerCase() === UserRole.STUDENT || studentId) && (
               <StudentScheduleCard
-                studentId={profile.uid}
+                schedule={profile.schedule}
                 viewerRole={user?.role?.toLowerCase()}
               />
             )}

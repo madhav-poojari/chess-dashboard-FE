@@ -41,8 +41,3 @@ export const deleteSchedule = async (id: number): Promise<void> => {
   await api.delete(`/schedules/${id}`);
 };
 
-export const getStudentSchedule = async (studentId: string): Promise<ClassSchedule[]> => {
-  const res = await api.get(`/schedules/student/${studentId}`);
-  const data: ApiResponse<ClassSchedule[]> = res.data;
-  return data.data;
-};

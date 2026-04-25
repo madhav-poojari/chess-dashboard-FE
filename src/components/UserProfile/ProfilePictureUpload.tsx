@@ -105,7 +105,7 @@ export default function ProfilePictureUpload({
                     />
                 ) : (
                     <img
-                        src="/images/user/dummy-profile-image.png"
+                        src="/images/user/owner.jpg"
                         alt="Default avatar"
                         loading="lazy"
                         decoding="async"

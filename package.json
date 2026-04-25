@@ -24,6 +24,7 @@
     "axios": "^1.13.2",
     "clsx": "^2.1.1",
     "flatpickr": "^4.6.13",
+    "html-to-image": "^1.11.13",
     "jwt-decode": "^4.0.0",
     "luxon": "^3.7.2",
     "react": "^19.0.0",
