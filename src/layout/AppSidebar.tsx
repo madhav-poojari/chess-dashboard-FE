@@ -112,6 +112,12 @@ const AppSidebar: React.FC = () => {
       path: "/academy-gallery",
       allowedRoles: [UserRole.STUDENT, UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
     },
+    {
+      icon: <GroupIcon />,
+      name: "Referral Graph",
+      allowedRoles: [UserRole.ADMIN],
+      path: "/referral-graph"
+    },
   ], [students]);
 
   const isActive = useCallback(
