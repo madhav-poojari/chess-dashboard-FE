@@ -18,48 +18,53 @@ import SchedulePage from "./pages/Schedule/SchedulePage";
 import AcademyGallery from "./pages/AcademyGallery/AcademyGallery";
 import { ToastProvider } from "./context/ToastContext";
 import ToastContainer from "./components/ui/Toast";
+import ReferralGraph from "./pages/Admin/ReferralGraph";
 
 export default function App() {
   return (
     <>
       <Router>
         <ToastProvider>
-        <AuthProvider>
-          <ScrollToTop />
-          <AppBootstrap>
-            <Routes>
-              {/* Dashboard Layout */}
-              <Route element={<AppLayout />}>
+          <AuthProvider>
+            <ScrollToTop />
+            <AppBootstrap>
+              <Routes>
+                {/* Dashboard Layout */}
+                <Route element={<AppLayout />}>
 
-                <Route index path="/" element={<Home />} />
-                <Route path="/profile" element={<UserProfiles />} />
+                  <Route index path="/" element={<Home />} />
+                  <Route path="/profile" element={<UserProfiles />} />
 
-                {/* Notes */}
-                <Route path="/notes" element={<Notes />} />
+                  {/* Notes */}
+                  <Route path="/notes" element={<Notes />} />
 
-                {/* Academy Gallery */}
-                <Route path="/academy-gallery" element={<AcademyGallery />} />
+                  {/* Academy Gallery */}
+                  <Route path="/academy-gallery" element={<AcademyGallery />} />
 
-                {/* Admin */}
-                <Route
-                  path="/admin"
-                  element={
-                    <RequireRole allowedRoles={["admin"]}>
-                      <AdminPage />
-                    </RequireRole>
-                  }
-                />
+                  {/* Admin */}
+                  <Route
+                    path="/admin"
+                    element={
+                      <RequireRole allowedRoles={["admin"]}>
+                        <AdminPage />
+                      </RequireRole>
+                    }
+                  />
 
-                {/* Attendance */}
-                <Route
-                  path="/attendance"
-                  element={
-                    <RequireRole allowedRoles={["admin", "mentor", "coach"]}>
-                      <AttendancePage />
-                    </RequireRole>
-                  }
-                />
+                  {/* Referral Graph */}
+                  +                  <Route path="/referral-graph" element={<RequireRole allowedRoles={["admin"]}>
+                    <ReferralGraph />
+                  </RequireRole>} />
 
+                  {/* Attendance */}
+                  <Route
+                    path="/attendance"
+                    element={
+                      <RequireRole allowedRoles={["admin", "mentor", "coach"]}>
+                        <AttendancePage />
+                      </RequireRole>
+                    }
+                  />
                 {/* Schedule */}
                 <Route
                   path="/schedule"
@@ -72,19 +77,31 @@ export default function App() {
 
               </Route>
 
-              {/* Auth Layout */}
-              <Route path="/signin" element={<SignIn />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/oauth/google-callback" element={<GoogleCallback />} />
-              <Route path="/pending-approval" element={<ApprovalPending />} />
+                  {/* Schedule */}
+                  <Route
+                    path="/schedule"
+                    element={
+                      <RequireRole allowedRoles={["admin", "mentor", "coach"]}>
+                        <SchedulePage />
+                      </RequireRole>
+                    }
+                  />
 
-              {/* Fallback Route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </AppBootstrap>
-        </AuthProvider>
-        <ToastContainer />
-      </ToastProvider>
+                </Route>
+
+                {/* Auth Layout */}
+                <Route path="/signin" element={<SignIn />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="/oauth/google-callback" element={<GoogleCallback />} />
+                <Route path="/pending-approval" element={<ApprovalPending />} />
+
+                {/* Fallback Route */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AppBootstrap>
+          </AuthProvider>
+          <ToastContainer />
+        </ToastProvider>
       </Router>
     </>
   );

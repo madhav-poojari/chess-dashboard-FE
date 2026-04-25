@@ -30,8 +30,9 @@ import { EyeCloseIcon, EyeIcon, MoreDotIcon } from "../../icons";
 import { useAuth } from "../../context/AuthContext";
 import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
+import AddRelationshipModal from "../../components/ReferralGraph/AddRelationshipModal";
 
-type TabType = "pending" | "students" | "coaches" | "add-user" | "manage-users";
+type TabType = "pending" | "students" | "coaches" | "add-user" | "add-referral" | "manage-users";
 
 export default function AdminPage() {
   const { user } = useAuth();
@@ -58,6 +59,7 @@ export default function AdminPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [manageRoleFilter, setManageRoleFilter] = useState<string>("all");
   const [creatingUser, setCreatingUser] = useState(false);
+  const [showAddRelationshipModal, setShowAddRelationshipModal] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const { data: unapprovedUsers = [], isLoading: unapprovedLoading } = useQuery<User[]>({
@@ -321,6 +323,10 @@ export default function AdminPage() {
             Add User
           </button>
           <button
+            onClick={() => setActiveTab("add-referral")}
+            className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${getTabButtonClass("add-referral")}`}
+          >
+            Add Referral
             onClick={() => setActiveTab("manage-users")}
             className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${getTabButtonClass("manage-users")}`}
           >
@@ -854,6 +860,24 @@ export default function AdminPage() {
           </div>
         )}
 
+        {/* Add Referral Tab */}
+        {activeTab === "add-referral" && (
+          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+            <div className="border-b border-gray-100 dark:border-white/[0.05] px-5 py-4">
+              <h3 className="font-semibold text-gray-800 text-theme-base dark:text-white/90">
+                Add Referral Relationship
+              </h3>
+            </div>
+            <div className="p-6">
+              <button
+                onClick={() => setShowAddRelationshipModal(true)}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+              >
+                + Add New Referral
+              </button>
+              <p className="text-gray-600 dark:text-gray-400 text-theme-sm mt-4">
+                Create a new referral relationship between two users by specifying the referrer, referee, and relationship type.
+              </p>
         {/* Manage Users Tab */}
         {activeTab === "manage-users" && (
           <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
@@ -1002,6 +1026,16 @@ export default function AdminPage() {
           </div>
         )}
       </div>
+
+      {/* Add Relationship Modal */}
+      {showAddRelationshipModal && (
+        <AddRelationshipModal
+          onClose={() => setShowAddRelationshipModal(false)}
+          onSuccess={() => {
+            setShowAddRelationshipModal(false);
+          }}
+        />
+      )}
 
       {/* Update Assignment Modal */}
       {updateModalOpen && updateType && updateTargetId && (
