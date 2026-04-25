@@ -147,7 +147,7 @@ const AppSidebar: React.FC = () => {
       allowedRoles: [UserRole.ADMIN],
       path: "/referral-graph"
     },
-  ], [students]);
+  ], [students, coaches]);
 
   const isActive = useCallback(
     (path: string) => {
