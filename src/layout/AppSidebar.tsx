@@ -45,7 +45,7 @@ const AppSidebar: React.FC = () => {
 
   const students = useMemo(() => {
     if (fetchedStudents && Array.isArray(fetchedStudents)) {
-      return fetchedStudents.map((s: User) => ({
+      return fetchedStudents.filter((s: User) => s.active).map((s: User) => ({
         id: s.id,
         name: `${s.first_name} ${s.last_name}`,
         lessonPlan: s.current_lesson_plan || "No active plan"
