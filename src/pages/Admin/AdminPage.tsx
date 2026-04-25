@@ -327,6 +327,8 @@ export default function AdminPage() {
             className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${getTabButtonClass("add-referral")}`}
           >
             Add Referral
+          </button>
+          <button
             onClick={() => setActiveTab("manage-users")}
             className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${getTabButtonClass("manage-users")}`}
           >
@@ -878,6 +880,10 @@ export default function AdminPage() {
               <p className="text-gray-600 dark:text-gray-400 text-theme-sm mt-4">
                 Create a new referral relationship between two users by specifying the referrer, referee, and relationship type.
               </p>
+            </div>
+          </div>
+        )}
+
         {/* Manage Users Tab */}
         {activeTab === "manage-users" && (
           <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
@@ -903,36 +909,11 @@ export default function AdminPage() {
               <Table>
                 <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
                   <TableRow>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      Name
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      Email
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400"
-                    >
-                      Role
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400"
-                    >
-                      Status
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400"
-                    >
-                      Action
-                    </TableCell>
+                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Name</TableCell>
+                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Email</TableCell>
+                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">Role</TableCell>
+                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">Status</TableCell>
+                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">Action</TableCell>
                   </TableRow>
                 </TableHeader>
                 <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
@@ -949,10 +930,7 @@ export default function AdminPage() {
                     if (filtered.length === 0) {
                       return (
                         <TableRow>
-                          <TableCell
-                            colSpan={5}
-                            className="px-5 py-8 text-center text-gray-500 text-theme-sm"
-                          >
+                          <TableCell colSpan={5} className="px-5 py-8 text-center text-gray-500 text-theme-sm">
                             No users found
                           </TableCell>
                         </TableRow>
@@ -970,9 +948,7 @@ export default function AdminPage() {
                           </div>
                         </TableCell>
                         <TableCell className="px-5 py-4 text-start">
-                          <span className="text-gray-700 text-theme-sm dark:text-gray-300">
-                            {u.email}
-                          </span>
+                          <span className="text-gray-700 text-theme-sm dark:text-gray-300">{u.email}</span>
                         </TableCell>
                         <TableCell className="px-5 py-4 text-center">
                           <Badge
@@ -1001,15 +977,8 @@ export default function AdminPage() {
                             variant={u.active ? "outline" : "primary"}
                             onClick={() => {
                               const action = u.active ? "deactivate" : "activate";
-                              if (
-                                confirm(
-                                  `Are you sure you want to ${action} ${u.first_name} ${u.last_name}?`
-                                )
-                              ) {
-                                toggleActiveMutation.mutate({
-                                  userId: u.id,
-                                  active: !u.active,
-                                });
+                              if (confirm(`Are you sure you want to ${action} ${u.first_name} ${u.last_name}?`)) {
+                                toggleActiveMutation.mutate({ userId: u.id, active: !u.active });
                               }
                             }}
                             disabled={toggleActiveMutation.isPending}
@@ -1031,9 +1000,7 @@ export default function AdminPage() {
       {showAddRelationshipModal && (
         <AddRelationshipModal
           onClose={() => setShowAddRelationshipModal(false)}
-          onSuccess={() => {
-            setShowAddRelationshipModal(false);
-          }}
+          onSuccess={() => setShowAddRelationshipModal(false)}
         />
       )}
 
@@ -1051,10 +1018,7 @@ export default function AdminPage() {
                     Select Coach
                   </label>
                   <Select
-                    options={[
-                      { value: "", label: "None (Remove Assignment)" },
-                      ...getAvailableCoaches()
-                    ]}
+                    options={[{ value: "", label: "None (Remove Assignment)" }, ...getAvailableCoaches()]}
                     placeholder="Select Coach"
                     onChange={(coachId) => setUpdateSelectedCoach(coachId)}
                     className="text-theme-xs"
@@ -1068,10 +1032,7 @@ export default function AdminPage() {
                     Select Mentor Coach
                   </label>
                   <Select
-                    options={[
-                      { value: "", label: "None (Remove Assignment)" },
-                      ...getAvailableMentorCoaches()
-                    ]}
+                    options={[{ value: "", label: "None (Remove Assignment)" }, ...getAvailableMentorCoaches()]}
                     placeholder="Select Mentor"
                     onChange={(mentorId) => setUpdateSelectedMentor(mentorId)}
                     className="text-theme-xs"
@@ -1092,9 +1053,7 @@ export default function AdminPage() {
               >
                 Cancel
               </Button>
-              <Button onClick={handleSaveUpdate}>
-                Save
-              </Button>
+              <Button onClick={handleSaveUpdate}>Save</Button>
             </div>
           </div>
         </div>
