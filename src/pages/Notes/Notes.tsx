@@ -17,6 +17,7 @@ export default function Notes() {
     const [loading, setLoading] = useState(true);
     const [searchParams] = useSearchParams();
     const studentIdParam = searchParams.get('studentId');
+    const coachIdParam = searchParams.get('coachId');
     const [activeTab, setActiveTab] = useState<"profile" | "notes">("profile");
 
     // Edit state
@@ -32,7 +33,7 @@ export default function Notes() {
     const loadNotes = async () => {
         setLoading(true);
         try {
-            const userId = studentIdParam || user?.id;
+            const userId = studentIdParam || coachIdParam || user?.id;
             if (!userId) {
                 console.error('No user ID available for fetching notes');
                 setNotes([]);
@@ -40,11 +41,12 @@ export default function Notes() {
                 return;
             }
             // API_BASE already includes /api/v1
+            console.log("calling api: ", `/notes/?user_id=${userId}`);
             const response = await api.get(`/notes/?user_id=${userId}`);
             const data = response.data;
+            console.log("API response for notes: ", data);
             if (data.success && data.data) {
                 const { notes, lesson_plan } = data.data;
-
                 // Map the standard notes - ensure notes is an array
                 const mappedNotes: Note[] = Array.isArray(notes) ? notes
                     .filter((item: { visibility: number }) => {
@@ -119,7 +121,7 @@ export default function Notes() {
             loadNotes();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user, studentIdParam]);
+    }, [user, studentIdParam, coachIdParam]);
 
     // Resolve the student name for lesson plan sharing
     useEffect(() => {
@@ -134,6 +136,7 @@ export default function Notes() {
 
     const userRole = user?.role || '';
     const isViewingStudent = !!studentIdParam && userRole !== 'student';
+    const isViewingCoach = !!coachIdParam && userRole !== 'coach' && userRole !== 'student';
 
     const filteredNotes = notes
         .filter(note => {
@@ -207,10 +210,10 @@ export default function Notes() {
 
     // Reset to profile tab when studentIdParam changes
     useEffect(() => {
-        if (isViewingStudent) {
+        if (isViewingStudent || isViewingCoach) {
             setActiveTab("profile");
         }
-    }, [studentIdParam, isViewingStudent]);
+    }, [studentIdParam, isViewingStudent, isViewingCoach]);
 
     // If viewing a student, show tabs
     if (isViewingStudent) {
@@ -233,8 +236,8 @@ export default function Notes() {
                         <button
                             onClick={() => setActiveTab("profile")}
                             className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${activeTab === "profile"
-                                    ? "shadow-theme-xs text-gray-900 dark:text-white bg-white dark:bg-gray-800"
-                                    : "text-gray-500 dark:text-gray-400"
+                                ? "shadow-theme-xs text-gray-900 dark:text-white bg-white dark:bg-gray-800"
+                                : "text-gray-500 dark:text-gray-400"
                                 }`}
                         >
                             User Profile
@@ -242,8 +245,8 @@ export default function Notes() {
                         <button
                             onClick={() => setActiveTab("notes")}
                             className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${activeTab === "notes"
-                                    ? "shadow-theme-xs text-gray-900 dark:text-white bg-white dark:bg-gray-800"
-                                    : "text-gray-500 dark:text-gray-400"
+                                ? "shadow-theme-xs text-gray-900 dark:text-white bg-white dark:bg-gray-800"
+                                : "text-gray-500 dark:text-gray-400"
                                 }`}
                         >
                             Notes
@@ -280,6 +283,77 @@ export default function Notes() {
                         handleCloseModal={handleCloseModal}
                         rawLessonPlan={rawLessonPlan}
                         studentName={studentName}
+                    />
+                )}
+            </>
+        );
+    }
+
+    if (isViewingCoach) {
+        return (
+            <>
+                <PageMeta
+                    title="Coach Details | BRS Academy"
+                    description="View coach profile and notes"
+                />
+
+                <div className="mb-6">
+                    <h2 className="text-title-md2 font-semibold text-black dark:text-white">
+                        Coach Details
+                    </h2>
+                </div>
+
+                {/* Tabs */}
+                <div className="mb-6">
+                    <div className="flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5 dark:bg-gray-900 max-w-2xl">
+                        <button
+                            onClick={() => setActiveTab("profile")}
+                            className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${activeTab === "profile"
+                                ? "shadow-theme-xs text-gray-900 dark:text-white bg-white dark:bg-gray-800"
+                                : "text-gray-500 dark:text-gray-400"
+                                }`}
+                        >
+                            User Profile
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("notes")}
+                            className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${activeTab === "notes"
+                                ? "shadow-theme-xs text-gray-900 dark:text-white bg-white dark:bg-gray-800"
+                                : "text-gray-500 dark:text-gray-400"
+                                }`}
+                        >
+                            Notes
+                        </button>
+                    </div>
+                </div>
+
+                {/* Tab Content */}
+                {activeTab === "profile" ? (
+                    <div key={coachIdParam}>
+                        <UserProfiles studentId={coachIdParam} readOnly={true} galleryReadOnly={false} />
+                    </div>
+                ) : (
+                    <NotesContent
+                        loading={loading}
+                        coachIdParam={coachIdParam}
+                        user={user}
+                        userRole={userRole}
+                        visibleLevels={getVisibleLevelsForRole(userRole)}
+                        lessonPlans={lessonPlans}
+                        regularNotes={regularNotes}
+                        canCreateNote={['admin', 'mentor', 'coach', 'student'].includes(userRole)}
+                        canManageLessonPlan={canManageLessonPlan(userRole)}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        setIsCreateModalOpen={setIsCreateModalOpen}
+                        setNoteToEdit={setNoteToEdit}
+                        setIsLessonPlanModalOpen={setIsLessonPlanModalOpen}
+                        noteToEdit={noteToEdit}
+                        isCreateModalOpen={isCreateModalOpen}
+                        isLessonPlanModalOpen={isLessonPlanModalOpen}
+                        lessonPlanToEdit={lessonPlanToEdit}
+                        loadNotes={loadNotes}
+                        handleCloseModal={handleCloseModal}
                     />
                 )}
             </>
@@ -332,6 +406,7 @@ export default function Notes() {
 function NotesContent({
     loading,
     studentIdParam,
+    coachIdParam,
     user,
     userRole,
     visibleLevels,
@@ -354,7 +429,8 @@ function NotesContent({
     studentName,
 }: {
     loading: boolean;
-    studentIdParam: string | null;
+    studentIdParam?: string | null;
+    coachIdParam?: string | null;
     user: AuthUser | null;
     userRole: string;
     visibleLevels: VisibilityLevel[];
@@ -403,7 +479,7 @@ function NotesContent({
             )}
 
             {/* Lesson Plans Section */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6 mb-6">
+            {studentIdParam && (<div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6 mb-6">
                 <div className="flex items-center justify-between mb-5 lg:mb-7">
                     <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
                         Lesson Plans
@@ -452,7 +528,7 @@ function NotesContent({
                         ))}
                     </div>
                 )}
-            </div>
+            </div>)}
 
             <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
                 <div className="flex items-center justify-between mb-5 lg:mb-7">
@@ -507,7 +583,7 @@ function NotesContent({
                 onSuccess={() => {
                     loadNotes();
                 }}
-                studentId={studentIdParam}
+                studentId={studentIdParam ? studentIdParam : coachIdParam}
                 initialData={noteToEdit}
             />
 

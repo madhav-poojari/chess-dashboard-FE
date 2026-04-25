@@ -55,6 +55,12 @@ export const fetchStudents = async (): Promise<User[]> => {
   return data.data.filter((user) => user.role.toLowerCase() === "student");
 };
 
+export const fetchCoaches = async (): Promise<User[]> => {
+  const res = await api.get("/users/");
+  const data: ApiResponse<User[]> = res.data;
+  return data.data.filter((user) => user.role.toLowerCase() === "coach");
+};
+
 export const fetchStudentSummaries = async (): Promise<StudentSummary[]> => {
   const res = await api.get("/users/students");
   const data: ApiResponse<StudentSummary[]> = res.data;
