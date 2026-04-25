@@ -8,6 +8,14 @@ export enum UserRole {
   ADMIN = "admin"
 }
 
+export interface ClassScheduleDTO {
+  id: number;
+  student_id: string;
+  day_of_week: number; // 0=Sun..6=Sat
+  start_time: string;  // "HH:MM" in student's timezone
+  timezone: string;    // IANA timezone
+}
+
 export interface UserDetails {
   user_id: string;
   city: string;
@@ -44,10 +52,18 @@ export interface User {
   current_lesson_plan?: string;
   mentor?: GuidanceInfo;
   coach?: GuidanceInfo;
+  schedule?: ClassScheduleDTO[];
+}
+
+export interface StudentSummary {
+  id: string;
+  first_name: string;
+  last_name: string;
 }
 
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
   data: T;
+  error?: any;
 }

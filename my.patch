@@ -1,0 +1,972 @@
+diff --git a/package-lock.json b/package-lock.json
+index 4acbf9f..26909dd 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -22,6 +22,7 @@
+         "axios": "^1.13.2",
+         "clsx": "^2.1.1",
+         "flatpickr": "^4.6.13",
++        "html-to-image": "^1.11.13",
+         "jwt-decode": "^4.0.0",
+         "luxon": "^3.7.2",
+         "react": "^19.0.0",
+@@ -112,6 +113,7 @@
+       "integrity": "sha512-l+lkXCHS6tQEc5oUpK28xBOZ6+HwaH7YwoYQbLFiYb4nS2/l1tKnZEtEWkD0GuiYdvArf9qBS0XlQGXzPMsNqQ==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@ampproject/remapping": "^2.2.0",
+         "@babel/code-frame": "^7.26.2",
+@@ -1025,6 +1027,7 @@
+       "resolved": "https://registry.npmjs.org/@fullcalendar/core/-/core-6.1.15.tgz",
+       "integrity": "sha512-BuX7o6ALpLb84cMw1FCB9/cSgF4JbVO894cjJZ6kP74jzbUZNjtwffwRdA+Id8rrLjT30d/7TrkW90k4zbXB5Q==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "preact": "~10.12.1"
+       }
+@@ -1705,6 +1708,7 @@
+       "resolved": "https://registry.npmjs.org/@svgdotjs/svg.js/-/svg.js-3.2.4.tgz",
+       "integrity": "sha512-BjJ/7vWNowlX3Z8O4ywT58DqbNRyYlkk6Yz/D13aB7hGmfQTvGX4Tkgtm/ApYlu9M7lCQi15xUEidqMUmdMYwg==",
+       "license": "MIT",
++      "peer": true,
+       "funding": {
+         "type": "github",
+         "url": "https://github.com/sponsors/Fuzzyma"
+@@ -1728,6 +1732,7 @@
+       "resolved": "https://registry.npmjs.org/@svgdotjs/svg.select.js/-/svg.select.js-4.0.2.tgz",
+       "integrity": "sha512-5gWdrvoQX3keo03SCmgaBbD+kFftq0F/f2bzCbNnpkkvW6tk4rl4MakORzFuNjvXPWwB4az9GwuvVxQVnjaK2g==",
+       "license": "MIT",
++      "peer": true,
+       "engines": {
+         "node": ">= 14.18"
+       },
+@@ -1904,6 +1909,7 @@
+       "integrity": "sha512-8QqtOQT5ACVlmsvKOJNEaWmRPmcojMOzCz4Hs2BGG/toAp/K38LcsMRyLp349glq5AzJbCEeimEoxaX6v/fLrA==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@babel/core": "^7.21.3",
+         "@svgr/babel-preset": "8.1.0",
+@@ -2311,6 +2317,7 @@
+       "integrity": "sha512-V6Ar115dBDrjbtXSrS+/Oruobc+qVbbUxDFC1RSbRqLt5SYvxxyIDrSC85RWml54g+jfNeEMZhEj7wW07ONQhA==",
+       "devOptional": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "csstype": "^3.0.2"
+       }
+@@ -2361,6 +2368,7 @@
+       "integrity": "sha512-MFDaO9CYiard9j9VepMNa9MTcqVvSny2N4hkY6roquzj8pdCBRENhErrteaQuu7Yjn1ppk0v1/ZF9CG3KIlrTA==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@typescript-eslint/scope-manager": "8.24.0",
+         "@typescript-eslint/types": "8.24.0",
+@@ -2550,6 +2558,7 @@
+       "integrity": "sha512-UVJyE9MttOsBQIDKw1skb9nAwQuR5wuGD3+82K6JgJlm/Y+KI92oNsMNGZCYdDsVtRHSak0pcV5Dno5+4jh9sw==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "bin": {
+         "acorn": "bin/acorn"
+       },
+@@ -2605,6 +2614,7 @@
+       "resolved": "https://registry.npmjs.org/apexcharts/-/apexcharts-4.4.0.tgz",
+       "integrity": "sha512-JGsHeQEKDlQh1rob8aBai9/HKvXIpbZ83TnobKZAcdOELf+oQZaxZyAnbbldr6PPBdCgG2zzzLaP1dtEsJxzWw==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@svgdotjs/svg.draggable.js": "^3.0.4",
+         "@svgdotjs/svg.filter.js": "^3.0.8",
+@@ -2697,6 +2707,7 @@
+         }
+       ],
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "caniuse-lite": "^1.0.30001688",
+         "electron-to-chromium": "^1.5.73",
+@@ -3146,6 +3157,7 @@
+       "integrity": "sha512-XoMjdBOwe/esVgEvLmNsD3IRHkm7fbKIUGvrleloJXUZgDHig2IPWNniv+GwjyJXzuNqVjlr5+4yVUZjycJwfQ==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@eslint-community/eslint-utils": "^4.8.0",
+         "@eslint-community/regexpp": "^4.12.1",
+@@ -3707,6 +3719,12 @@
+         "react-is": "^16.7.0"
+       }
+     },
++    "node_modules/html-to-image": {
++      "version": "1.11.13",
++      "resolved": "https://registry.npmjs.org/html-to-image/-/html-to-image-1.11.13.tgz",
++      "integrity": "sha512-cuOPoI7WApyhBElTTb9oqsawRvZ0rHhaHwghRLlTuffoD1B2aDemlCruLeZrUIIdvG7gs9xeELEPm6PhuASqrg==",
++      "license": "MIT"
++    },
+     "node_modules/ignore": {
+       "version": "5.3.2",
+       "resolved": "https://registry.npmjs.org/ignore/-/ignore-5.3.2.tgz",
+@@ -3804,7 +3822,8 @@
+       "version": "3.7.1",
+       "resolved": "https://registry.npmjs.org/jquery/-/jquery-3.7.1.tgz",
+       "integrity": "sha512-m4avr8yL8kmFN8psrbFFFmB/If14iN5o9nw/NgnnM+kybDJpRsAynV2BsfpTYrTRysYUdADVD7CkUUizgkpLfg==",
+-      "license": "MIT"
++      "license": "MIT",
++      "peer": true
+     },
+     "node_modules/js-tokens": {
+       "version": "4.0.0",
+@@ -4588,6 +4607,7 @@
+       "resolved": "https://registry.npmjs.org/react/-/react-19.0.0.tgz",
+       "integrity": "sha512-V8AVnmPIICiWpGfm6GLzCR/W5FXLchHop40W4nXBmdlEceh16rCN8O8LNWm5bh5XUX91fh7KpA+W0TgMKmgTpQ==",
+       "license": "MIT",
++      "peer": true,
+       "engines": {
+         "node": ">=0.10.0"
+       }
+@@ -4649,6 +4669,7 @@
+       "resolved": "https://registry.npmjs.org/react-dom/-/react-dom-19.0.0.tgz",
+       "integrity": "sha512-4GV5sHFG0e/0AD4X+ySy6UJd3jVl1iNsNHdpad0qhABJ11twS3TTBnseqsKurKcsNqCEFeGL3uLpVChpIO3QfQ==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "scheduler": "^0.25.0"
+       },
+@@ -5096,6 +5117,7 @@
+       "integrity": "sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw==",
+       "dev": true,
+       "license": "Apache-2.0",
++      "peer": true,
+       "bin": {
+         "tsc": "bin/tsc",
+         "tsserver": "bin/tsserver"
+@@ -5174,6 +5196,7 @@
+       "integrity": "sha512-+Oxm7q9hDoLMyJOYfUYBuHQo+dkAloi33apOPP56pzj+vsdJDzr+j1NISE5pyaAuKL4A3UD34qd0lx5+kfKp2g==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "esbuild": "^0.25.0",
+         "fdir": "^6.4.4",
+diff --git a/package.json b/package.json
+index 9e6907b..c98cfa7 100644
+--- a/package.json
++++ b/package.json
+@@ -24,6 +24,7 @@
+     "axios": "^1.13.2",
+     "clsx": "^2.1.1",
+     "flatpickr": "^4.6.13",
++    "html-to-image": "^1.11.13",
+     "jwt-decode": "^4.0.0",
+     "luxon": "^3.7.2",
+     "react": "^19.0.0",
+diff --git a/src/components/UserProfile/ProfilePictureUpload.tsx b/src/components/UserProfile/ProfilePictureUpload.tsx
+index 6280929..e4a458a 100644
+--- a/src/components/UserProfile/ProfilePictureUpload.tsx
++++ b/src/components/UserProfile/ProfilePictureUpload.tsx
+@@ -105,7 +105,7 @@ export default function ProfilePictureUpload({
+                     />
+                 ) : (
+                     <img
+-                        src="/images/user/dummy-profile-image.png"
++                        src="/images/user/owner.jpg"
+                         alt="Default avatar"
+                         loading="lazy"
+                         decoding="async"
+diff --git a/src/components/UserProfile/UserMetaCard.tsx b/src/components/UserProfile/UserMetaCard.tsx
+index ed4affb..e8704fc 100644
+--- a/src/components/UserProfile/UserMetaCard.tsx
++++ b/src/components/UserProfile/UserMetaCard.tsx
+@@ -7,6 +7,7 @@ import Label from "../form/Label";
+ import { ChangeEvent, useState } from "react";
+ import { PublicProfile } from "../../models/publicProfile";
+ import ProfilePictureUpload from "./ProfilePictureUpload";
++import { ProfileShareCard } from "../share";
+ 
+ //interface PlayLinksUpdate {
+ //  uscf_id: string;
+@@ -224,6 +225,9 @@ export default function UserMetaCard({ user, onUpdate, onSyllabusUpdate, readOnl
+             </button>
+           )}
+ 
++          {/* Share profile */}
++          <ProfileShareCard profile={user} />
++
+         </div>
+       </div>
+ 
+diff --git a/src/components/share/AttendanceShareCard.tsx b/src/components/share/AttendanceShareCard.tsx
+new file mode 100644
+index 0000000..c475463
+--- /dev/null
++++ b/src/components/share/AttendanceShareCard.tsx
+@@ -0,0 +1,127 @@
++import ShareCardLayout from "./ShareCardLayout";
++import { Attendance } from "../../api/attendance/service";
++import { useTheme } from "../../context/ThemeContext";
++import { useShareToClipboard } from "./useShareToClipboard";
++import ShareButton from "./ShareButton";
++
++type AttendanceViewType = "student_overview" | "coach_overview";
++
++interface AttendanceShareCardProps {
++  attendances: Attendance[];
++  viewType: AttendanceViewType;
++  monthLabel: string; // e.g. "April 2026"
++  personName: string; // student or coach name depending on view
++}
++
++function formatDateOnly(iso: string): string {
++  if (!iso) return "";
++  return iso.length >= 10 ? iso.slice(0, 10) : iso;
++}
++
++function formatClassType(ct: string): string {
++  return ct
++    .split("_")
++    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
++    .join(" ");
++}
++
++const MAX_ROWS = 25;
++
++export default function AttendanceShareCard({
++  attendances,
++  viewType,
++  monthLabel,
++  personName,
++}: AttendanceShareCardProps) {
++  const { theme } = useTheme();
++  const isDark = theme === "dark";
++  const { ref, share, sharing } = useShareToClipboard();
++
++  const isStudentView = viewType === "student_overview";
++  const title = `${monthLabel} - ${personName}`;
++  const subtitle = isStudentView ? "Student Attendance" : "Coach Attendance";
++  const rows = attendances.slice(0, MAX_ROWS);
++
++  const thStyle: React.CSSProperties = {
++    textAlign: "left",
++    padding: "6px 8px",
++    fontSize: 11,
++    fontWeight: 600,
++    color: isDark ? "#9ca3af" : "#6b7280",
++    borderBottom: `1px solid ${isDark ? "#374151" : "#e5e7eb"}`,
++    whiteSpace: "nowrap",
++  };
++
++  const tdStyle: React.CSSProperties = {
++    padding: "5px 8px",
++    fontSize: 11,
++    color: isDark ? "#d1d5db" : "#374151",
++    borderBottom: `1px solid ${isDark ? "#374151" : "#f3f4f6"}`,
++  };
++
++  const verifiedDot = (ok: boolean): React.CSSProperties => ({
++    display: "inline-block",
++    width: 8,
++    height: 8,
++    borderRadius: "50%",
++    background: ok ? "#12B76A" : "#F04438",
++  });
++
++  return (
++    <>
++      <ShareButton onClick={share} sharing={sharing} />
++
++      {/* Off-screen render target */}
++      <div style={{ position: "absolute", left: -9999, top: -9999 }}>
++        <ShareCardLayout ref={ref} title={title} subtitle={subtitle} isDark={isDark}>
++          {/* Table */}
++          <table style={{ width: "100%", borderCollapse: "collapse" }}>
++              <thead>
++                <tr>
++                  <th style={thStyle}>#</th>
++                  <th style={thStyle}>Date</th>
++                  <th style={thStyle}>Type</th>
++                  <th style={thStyle}>{isStudentView ? "Coach" : "Student"}</th>
++                  <th style={thStyle}>Verified</th>
++                </tr>
++              </thead>
++              <tbody>
++                {rows.map((a, i) => (
++                  <tr key={a.id}>
++                    <td style={tdStyle}>{i + 1}</td>
++                    <td style={tdStyle}>{formatDateOnly(a.date)}</td>
++                    <td style={tdStyle}>{formatClassType(a.class_type)}</td>
++                    <td style={tdStyle}>
++                      {isStudentView
++                        ? a.coach
++                          ? `${a.coach.first_name} ${a.coach.last_name}`
++                          : "-"
++                        : a.student
++                        ? `${a.student.first_name} ${a.student.last_name}`
++                        : "-"}
++                    </td>
++                    <td style={tdStyle}>
++                      <span style={verifiedDot(a.is_verified)} />
++                    </td>
++                  </tr>
++                ))}
++              </tbody>
++          </table>
++
++          {attendances.length > MAX_ROWS && (
++            <div
++              style={{
++                marginTop: 8,
++                fontSize: 11,
++                color: isDark ? "#6b7280" : "#9ca3af",
++                textAlign: "center",
++              }}
++            >
++              + {attendances.length - MAX_ROWS} more record(s)
++            </div>
++          )}
++        </ShareCardLayout>
++      </div>
++    </>
++  );
++}
+diff --git a/src/components/share/LessonPlanShareCard.tsx b/src/components/share/LessonPlanShareCard.tsx
+new file mode 100644
+index 0000000..92c2fca
+--- /dev/null
++++ b/src/components/share/LessonPlanShareCard.tsx
+@@ -0,0 +1,69 @@
++import ShareCardLayout from "./ShareCardLayout";
++import { useTheme } from "../../context/ThemeContext";
++import { useShareToClipboard } from "./useShareToClipboard";
++import ShareButton from "./ShareButton";
++
++interface LessonPlanShareCardProps {
++  studentName: string;
++  startDate: string; // ISO or YYYY-MM-DD
++  endDate: string;
++  description: string; // newline-separated
++}
++
++function formatDateRange(start: string, end: string): string {
++  const fmt = (s: string) => {
++    const d = new Date(s);
++    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
++  };
++  return `${fmt(start)} - ${fmt(end)}`;
++}
++
++export default function LessonPlanShareCard({
++  studentName,
++  startDate,
++  endDate,
++  description,
++}: LessonPlanShareCardProps) {
++  const { theme } = useTheme();
++  const isDark = theme === "dark";
++  const { ref, share, sharing } = useShareToClipboard();
++
++  const title = `${studentName}'s Lesson Plan`;
++  const subtitle = formatDateRange(startDate, endDate);
++
++  const lines = description
++    .split("\n")
++    .map((l) => l.trim())
++    .filter(Boolean);
++
++  const bulletColor = isDark ? "#6366f1" : "#465FFF";
++  const textColor = isDark ? "#d1d5db" : "#374151";
++
++  return (
++    <>
++      <ShareButton onClick={share} sharing={sharing} />
++
++      <div style={{ position: "absolute", left: -9999, top: -9999 }}>
++        <ShareCardLayout ref={ref} title={title} subtitle={subtitle} isDark={isDark}>
++          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
++            {lines.map((line, i) => (
++              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
++                <div
++                  style={{
++                    width: 6,
++                    height: 6,
++                    borderRadius: "50%",
++                    background: bulletColor,
++                    marginTop: 6,
++                    flexShrink: 0,
++                  }}
++                />
++                <div style={{ fontSize: 13, color: textColor, lineHeight: "1.5" }}>{line}</div>
++              </div>
++            ))}
++          </div>
++        </ShareCardLayout>
++      </div>
++    </>
++  );
++}
+diff --git a/src/components/share/ProfileShareCard.tsx b/src/components/share/ProfileShareCard.tsx
+new file mode 100644
+index 0000000..9662df7
+--- /dev/null
++++ b/src/components/share/ProfileShareCard.tsx
+@@ -0,0 +1,173 @@
++import ShareCardLayout from "./ShareCardLayout";
++import { PublicProfile } from "../../models/publicProfile";
++import { useTheme } from "../../context/ThemeContext";
++import { useShareToClipboard } from "./useShareToClipboard";
++import ShareButton from "./ShareButton";
++import { getImageUrl } from "../../utils/imageUrl";
++
++interface ProfileShareCardProps {
++  profile: PublicProfile;
++}
++
++export default function ProfileShareCard({ profile }: ProfileShareCardProps) {
++  const { theme } = useTheme();
++  const isDark = theme === "dark";
++  const { ref, share, sharing } = useShareToClipboard();
++
++  const fullName = `${profile.first_name} ${profile.last_name}`.trim();
++  const locationParts = [profile.city, profile.state, profile.country].filter(Boolean);
++  const location = locationParts.join(", ");
++  const profilePicUrl = profile.profile_picture_url
++    ? getImageUrl(profile.profile_picture_url)
++    : "";
++
++  // Determine chess ID to display: fideId > lichessId > chessdotcomId
++  const chessId = profile.fideId
++    ? { label: "FIDE ID", value: profile.fideId }
++    : profile.lichessId
++    ? { label: "Lichess", value: profile.lichessId }
++    : profile.chessdotcomId
++    ? { label: "Chess.com", value: profile.chessdotcomId }
++    : null;
++
++  const mutedText = isDark ? "#9ca3af" : "#6b7280";
++  const text = isDark ? "#f3f4f6" : "#111827";
++  const pillBg = isDark ? "#111827" : "#f3f4f6";
++  const pillBorder = isDark ? "#374151" : "#e5e7eb";
++
++  return (
++    <>
++      <ShareButton onClick={share} sharing={sharing} />
++
++      <div style={{ position: "absolute", left: -9999, top: -9999 }}>
++        <ShareCardLayout ref={ref} title={fullName} isDark={isDark}>
++          <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
++            {/* Profile picture */}
++            {profilePicUrl ? (
++              <img
++                src={profilePicUrl}
++                alt={fullName}
++                crossOrigin="anonymous"
++                style={{
++                  width: 80,
++                  height: 80,
++                  borderRadius: 16,
++                  objectFit: "cover",
++                  border: `2px solid ${pillBorder}`,
++                  flexShrink: 0,
++                }}
++              />
++            ) : (
++              <div
++                style={{
++                  width: 80,
++                  height: 80,
++                  borderRadius: 16,
++                  background: isDark ? "#374151" : "#e5e7eb",
++                  display: "flex",
++                  alignItems: "center",
++                  justifyContent: "center",
++                  fontSize: 28,
++                  fontWeight: 700,
++                  color: mutedText,
++                  flexShrink: 0,
++                }}
++              >
++                {(profile.first_name?.[0] || "").toUpperCase()}
++              </div>
++            )}
++
++            {/* Info */}
++            <div style={{ flex: 1, minWidth: 0 }}>
++              {/* Name */}
++              <div style={{ fontSize: 18, fontWeight: 700, color: text, marginBottom: 4 }}>
++                {fullName}
++              </div>
++
++              {/* Location */}
++              {location && (
++                <div
++                  style={{
++                    display: "flex",
++                    alignItems: "center",
++                    gap: 6,
++                    fontSize: 12,
++                    color: mutedText,
++                    marginBottom: 10,
++                  }}
++                >
++                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={mutedText} strokeWidth="2">
++                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
++                    <circle cx="12" cy="10" r="3" />
++                  </svg>
++                  {location}
++                </div>
++              )}
++
++              {/* Chips row */}
++              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
++                {profile.fideId && (
++                  <Pill label="FIDE" value={profile.fideId} bg={pillBg} border={pillBorder} text={text} muted={mutedText} />
++                )}
++                {chessId && chessId.label !== "FIDE ID" && (
++                  <Pill label={chessId.label} value={chessId.value} bg={pillBg} border={pillBorder} text={text} muted={mutedText} />
++                )}
++              </div>
++            </div>
++          </div>
++
++          {/* Bio */}
++          {profile.bio && (
++            <div
++              style={{
++                marginTop: 16,
++                padding: "12px 14px",
++                background: pillBg,
++                borderRadius: 10,
++                fontSize: 12,
++                lineHeight: "1.6",
++                color: isDark ? "#d1d5db" : "#374151",
++              }}
++            >
++              {profile.bio}
++            </div>
++          )}
++        </ShareCardLayout>
++      </div>
++    </>
++  );
++}
++
++function Pill({
++  label,
++  value,
++  bg,
++  border,
++  text,
++  muted,
++}: {
++  label: string;
++  value: string;
++  bg: string;
++  border: string;
++  text: string;
++  muted: string;
++}) {
++  return (
++    <div
++      style={{
++        display: "inline-flex",
++        alignItems: "center",
++        gap: 6,
++        fontSize: 11,
++        padding: "4px 10px",
++        borderRadius: 8,
++        background: bg,
++        border: `1px solid ${border}`,
++      }}
++    >
++      <span style={{ fontWeight: 600, color: muted }}>{label}</span>
++      <span style={{ fontWeight: 700, color: text }}>{value}</span>
++    </div>
++  );
++}
+diff --git a/src/components/share/ShareButton.tsx b/src/components/share/ShareButton.tsx
+new file mode 100644
+index 0000000..638f10a
+--- /dev/null
++++ b/src/components/share/ShareButton.tsx
+@@ -0,0 +1,26 @@
++interface ShareButtonProps {
++  onClick: () => void;
++  sharing: boolean;
++  className?: string;
++}
++
++export default function ShareButton({ onClick, sharing, className = "" }: ShareButtonProps) {
++  return (
++    <button
++      onClick={onClick}
++      disabled={sharing}
++      className={`inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 hover:text-gray-800 transition-colors disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 ${className}`}
++      title="Share as image"
++    >
++      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
++        <path
++          strokeLinecap="round"
++          strokeLinejoin="round"
++          strokeWidth="2"
++          d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
++        />
++      </svg>
++      {sharing ? "Copying..." : "Share"}
++    </button>
++  );
++}
+diff --git a/src/components/share/ShareCardLayout.tsx b/src/components/share/ShareCardLayout.tsx
+new file mode 100644
+index 0000000..8fbd027
+--- /dev/null
++++ b/src/components/share/ShareCardLayout.tsx
+@@ -0,0 +1,78 @@
++import { forwardRef } from "react";
++
++interface ShareCardLayoutProps {
++  title: string;
++  subtitle?: string;
++  children: React.ReactNode;
++  isDark: boolean;
++}
++
++/**
++ * Common layout wrapper for all share-to-clipboard cards.
++ * Renders the BRS logo, a title row, and children content.
++ */
++const ShareCardLayout = forwardRef<HTMLDivElement, ShareCardLayoutProps>(
++  ({ title, subtitle, children, isDark }, ref) => {
++    const bg = isDark ? "#1f2937" : "#ffffff";
++    const text = isDark ? "#f3f4f6" : "#111827";
++    const mutedText = isDark ? "#9ca3af" : "#6b7280";
++    const border = isDark ? "#374151" : "#e5e7eb";
++
++    return (
++      <div
++        ref={ref}
++        style={{
++          width: 540,
++          fontFamily: "'Outfit', sans-serif",
++          background: bg,
++          color: text,
++          borderRadius: 16,
++          border: `1px solid ${border}`,
++          padding: 28,
++          boxSizing: "border-box",
++        }}
++      >
++        {/* Header with logo */}
++        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
++          <img
++            src="/images/brs-logo/logo-without-name-favicon.png"
++            alt="BRS"
++            crossOrigin="anonymous"
++            style={{ width: 36, height: 36, borderRadius: 8 }}
++          />
++          <div style={{ flex: 1 }}>
++            <div style={{ fontSize: 16, fontWeight: 700, lineHeight: "1.3" }}>{title}</div>
++            {subtitle && (
++              <div style={{ fontSize: 12, color: mutedText, lineHeight: "1.3", marginTop: 2 }}>{subtitle}</div>
++            )}
++          </div>
++        </div>
++
++        {/* Divider */}
++        <div style={{ height: 1, background: border, marginBottom: 20 }} />
++
++        {/* Content */}
++        {children}
++
++        {/* Footer */}
++        <div
++          style={{
++            marginTop: 20,
++            paddingTop: 12,
++            borderTop: `1px solid ${border}`,
++            textAlign: "center",
++            fontSize: 10,
++            color: isDark ? "#4b5563" : "#d1d5db",
++            fontWeight: 500,
++            letterSpacing: 0.5,
++          }}
++        >
++          BRS Academy
++        </div>
++      </div>
++    );
++  }
++);
++
++ShareCardLayout.displayName = "ShareCardLayout";
++export default ShareCardLayout;
+diff --git a/src/components/share/index.ts b/src/components/share/index.ts
+new file mode 100644
+index 0000000..20769ae
+--- /dev/null
++++ b/src/components/share/index.ts
+@@ -0,0 +1,6 @@
++export { default as ShareButton } from "./ShareButton";
++export { default as ShareCardLayout } from "./ShareCardLayout";
++export { default as AttendanceShareCard } from "./AttendanceShareCard";
++export { default as LessonPlanShareCard } from "./LessonPlanShareCard";
++export { default as ProfileShareCard } from "./ProfileShareCard";
++export { useShareToClipboard } from "./useShareToClipboard";
+diff --git a/src/components/share/useShareToClipboard.ts b/src/components/share/useShareToClipboard.ts
+new file mode 100644
+index 0000000..2e819a9
+--- /dev/null
++++ b/src/components/share/useShareToClipboard.ts
+@@ -0,0 +1,64 @@
++import { useRef, useCallback, useState } from "react";
++import { toPng } from "html-to-image";
++import { useToast } from "../../context/ToastContext";
++
++/**
++ * Convert all <img> inside the container to inline data-URIs so
++ * html-to-image can render cross-origin images (e.g. profile pics
++ * served from R2/CDN).
++ */
++async function inlineImages(root: HTMLElement): Promise<void> {
++  const imgs = root.querySelectorAll<HTMLImageElement>("img");
++  await Promise.all(
++    Array.from(imgs).map(async (img) => {
++      if (!img.src || img.src.startsWith("data:")) return;
++      try {
++        const resp = await fetch(img.src, { mode: "cors" });
++        const blob = await resp.blob();
++        const dataUrl = await new Promise<string>((resolve) => {
++          const reader = new FileReader();
++          reader.onloadend = () => resolve(reader.result as string);
++          reader.readAsDataURL(blob);
++        });
++        img.src = dataUrl;
++      } catch {
++        // If fetch fails, leave original src ΓÇö html-to-image will use
++        // the fallback (blank or broken) which is acceptable.
++      }
++    })
++  );
++}
++
++export function useShareToClipboard() {
++  const ref = useRef<HTMLDivElement>(null);
++  const [sharing, setSharing] = useState(false);
++  const toast = useToast();
++
++  const share = useCallback(async () => {
++    if (!ref.current) return;
++    setSharing(true);
++    try {
++      // Pre-convert cross-origin images to data URIs
++      await inlineImages(ref.current);
++
++      const dataUrl = await toPng(ref.current, {
++        pixelRatio: 2,
++        cacheBust: true,
++        quality: 1,
++      });
++      const res = await fetch(dataUrl);
++      const blob = await res.blob();
++      await navigator.clipboard.write([
++        new ClipboardItem({ "image/png": blob }),
++      ]);
++      toast.success("Image copied to clipboard!");
++    } catch (err) {
++      console.error("Share failed", err);
++      toast.error("Failed to copy image. Please try again.");
++    } finally {
++      setSharing(false);
++    }
++  }, [toast]);
++
++  return { ref, share, sharing };
++}
+diff --git a/src/pages/Attendance/AttendancePage.tsx b/src/pages/Attendance/AttendancePage.tsx
+index a1f4f65..0512e9a 100644
+--- a/src/pages/Attendance/AttendancePage.tsx
++++ b/src/pages/Attendance/AttendancePage.tsx
+@@ -7,6 +7,7 @@ import { User } from "../../api/user/dto";
+ import { Attendance, deleteAttendance, listAttendances, ListAttendancesParams } from "../../api/attendance/service";
+ import AddAttendanceModal from "./AddAttendanceModal";
+ import EditAttendanceModal from "./EditAttendanceModal";
++import { AttendanceShareCard } from "../../components/share";
+ 
+ type TabType = "student_overview" | "coach_overview";
+ 
+@@ -162,6 +163,23 @@ export default function AttendancePage() {
+     }));
+   }, [attendances]);
+ 
++  // Derived values for share card
++  const shareMonthLabel = useMemo(() => {
++    const parsed = parseMonthInput(monthValue);
++    if (!parsed) return "";
++    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
++    return `${months[parsed.month - 1]} ${parsed.year}`;
++  }, [monthValue]);
++
++  const sharePersonName = useMemo(() => {
++    if (activeTab === "student_overview") {
++      const s = studentOptions.find((x) => x.id === selectedStudentId);
++      return s ? `${s.first_name} ${s.last_name}` : "";
++    }
++    const c = coachOptions.find((x) => x.id === selectedCoachId);
++    return c ? `${c.first_name} ${c.last_name}` : "";
++  }, [activeTab, selectedStudentId, selectedCoachId, studentOptions, coachOptions]);
++
+   return (
+     <div>
+       <PageMeta title="Attendance" description="Track class attendance" />
+@@ -232,6 +250,14 @@ export default function AttendancePage() {
+         </div>
+ 
+         <div className="flex items-center justify-between sm:justify-end gap-3">
++          {attendances.length > 0 && (
++            <AttendanceShareCard
++              attendances={attendances}
++              viewType={activeTab}
++              monthLabel={shareMonthLabel}
++              personName={sharePersonName}
++            />
++          )}
+           <button
+             onClick={() => setIsAddOpen(true)}
+             className="inline-flex items-center justify-center rounded-lg bg-blue-600 hover:bg-blue-700 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors"
+diff --git a/src/pages/Notes/NoteCard.tsx b/src/pages/Notes/NoteCard.tsx
+index 64eaf35..29789bc 100644
+--- a/src/pages/Notes/NoteCard.tsx
++++ b/src/pages/Notes/NoteCard.tsx
+@@ -1,5 +1,6 @@
+ import { Note, VISIBILITY_COLORS, canEditNote, canManageLessonPlan } from './types';
+ import { PencilIcon, TrashBinIcon } from '../../icons';
++import { LessonPlanShareCard } from '../../components/share';
+ 
+ interface NoteCardProps {
+     note: Note;
+@@ -7,9 +8,15 @@ interface NoteCardProps {
+     onEdit?: (note: Note) => void;
+     onDelete?: (note: Note) => void;
+     userId?: string;
++    /** For lesson plan sharing ╬ô├ç├╢ pass raw lesson plan metadata */
++    lessonPlanMeta?: {
++        studentName: string;
++        startDate: string;
++        endDate: string;
++    };
+ }
+ 
+-export default function NoteCard({ note, userRole, onEdit, onDelete, userId }: NoteCardProps) {
++export default function NoteCard({ note, userRole, onEdit, onDelete, userId, lessonPlanMeta }: NoteCardProps) {
+     const colors = VISIBILITY_COLORS[note.visibility_level];
+     const isLessonPlan = note.type === 'lesson_plan';
+     const isStudent = userRole === 'student';
+@@ -91,6 +98,14 @@ export default function NoteCard({ note, userRole, onEdit, onDelete, userId }: N
+                 </div>
+ 
+                 <div className="flex items-start gap-2 flex-shrink-0">
++                    {isLessonPlan && lessonPlanMeta && (
++                        <LessonPlanShareCard
++                            studentName={lessonPlanMeta.studentName}
++                            startDate={lessonPlanMeta.startDate}
++                            endDate={lessonPlanMeta.endDate}
++                            description={note.content}
++                        />
++                    )}
+                     {canEdit && (
+                         <div className="flex items-center gap-2">
+                             {onEdit && (
+diff --git a/src/pages/Notes/Notes.tsx b/src/pages/Notes/Notes.tsx
+index e78892c..1337bca 100644
+--- a/src/pages/Notes/Notes.tsx
++++ b/src/pages/Notes/Notes.tsx
+@@ -9,6 +9,7 @@ import CreateLessonPlanModal, { LessonPlan } from "./CreateLessonPlanModal";
+ import api from "../../api/axiosInstance";
+ import { deleteNote, getLessonPlanById } from "../../api/notes/noteService";
+ import UserProfiles from "../UserProfiles";
++import { userPublicProfile } from "../../api/user/publicProfile";
+ 
+ export default function Notes() {
+     const { user } = useAuth();
+@@ -26,6 +27,7 @@ export default function Notes() {
+     // Detailed lesson plan data
+     const [lessonPlanToEdit, setLessonPlanToEdit] = useState<LessonPlan | undefined>(undefined);
+     const [rawLessonPlan, setRawLessonPlan] = useState<LessonPlan | undefined>(undefined);
++    const [studentName, setStudentName] = useState<string>("");
+ 
+     const loadNotes = async () => {
+         setLoading(true);
+@@ -119,6 +121,17 @@ export default function Notes() {
+         // eslint-disable-next-line react-hooks/exhaustive-deps
+     }, [user, studentIdParam]);
+ 
++    // Resolve the student name for lesson plan sharing
++    useEffect(() => {
++        if (studentIdParam) {
++            userPublicProfile(studentIdParam)
++                .then((p) => setStudentName(`${p.first_name} ${p.last_name}`.trim()))
++                .catch(() => setStudentName(""));
++        } else if (user) {
++            setStudentName(user.name || "");
++        }
++    }, [studentIdParam, user]);
++
+     const userRole = user?.role || '';
+     const isViewingStudent = !!studentIdParam && userRole !== 'student';
+ 
+@@ -265,6 +278,8 @@ export default function Notes() {
+                         lessonPlanToEdit={lessonPlanToEdit}
+                         loadNotes={loadNotes}
+                         handleCloseModal={handleCloseModal}
++                        rawLessonPlan={rawLessonPlan}
++                        studentName={studentName}
+                     />
+                 )}
+             </>
+@@ -306,6 +321,8 @@ export default function Notes() {
+                 lessonPlanToEdit={lessonPlanToEdit}
+                 loadNotes={loadNotes}
+                 handleCloseModal={handleCloseModal}
++                rawLessonPlan={rawLessonPlan}
++                studentName={studentName}
+             />
+         </>
+     );
+@@ -333,6 +350,8 @@ function NotesContent({
+     lessonPlanToEdit,
+     loadNotes,
+     handleCloseModal,
++    rawLessonPlan,
++    studentName,
+ }: {
+     loading: boolean;
+     studentIdParam: string | null;
+@@ -354,6 +373,8 @@ function NotesContent({
+     lessonPlanToEdit: LessonPlan | undefined;
+     loadNotes: () => void;
+     handleCloseModal: () => void;
++    rawLessonPlan?: LessonPlan;
++    studentName: string;
+ }) {
+     if (loading) {
+         return (
+@@ -418,6 +439,15 @@ function NotesContent({
+                                 userId={user?.id}
+                                 onEdit={onEdit}
+                                 onDelete={onDelete}
++                                lessonPlanMeta={
++                                    rawLessonPlan && rawLessonPlan.id === note.id
++                                        ? {
++                                              studentName,
++                                              startDate: rawLessonPlan.start_date,
++                                              endDate: rawLessonPlan.end_date,
++                                          }
++                                        : undefined
++                                }
+                             />
+                         ))}
+                     </div>
+

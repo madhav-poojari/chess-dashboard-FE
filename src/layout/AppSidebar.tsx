@@ -10,6 +10,7 @@ import {
   GroupIcon,
   TableIcon,
   GridIcon,
+  CalenderIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "../context/AuthContext";
@@ -52,7 +53,7 @@ const AppSidebar: React.FC = () => {
 
   const students = useMemo(() => {
     if (fetchedStudents && Array.isArray(fetchedStudents)) {
-      return fetchedStudents.map((s: User) => ({
+      return fetchedStudents.filter((s: User) => s.active).map((s: User) => ({
         id: s.id,
         name: `${s.first_name} ${s.last_name}`,
         lessonPlan: s.current_lesson_plan || "No active plan"
@@ -80,38 +81,45 @@ const AppSidebar: React.FC = () => {
     {}
   );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  // Memoize navItems to depend on students and coaches
-  const navItems: NavItem[] = useMemo(() => {
-    return [
-      {
-        icon: <UserCircleIcon />,
-        name: "User Profile",
-        path: "/profile",
-        allowedRoles: [UserRole.STUDENT, UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
-      },
-      {
-        icon: <DocsIcon />,
-        name: "Notes",
-        path: "/notes",
-        allowedRoles: [UserRole.STUDENT]
-      },
-      {
-        icon: <TableIcon />,
-        name: "Attendance",
-        path: "/attendance",
-        allowedRoles: [UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
-      },
-      {
-        icon: <GroupIcon />,
-        name: "Students",
-        allowedRoles: [UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN],
-        subItems: students.map(student => ({
-          name: student.name,
-          path: `/notes?studentId=${student.id}`,
-          description: student.lessonPlan
-        }))
-      },
-      {
+
+  // Memoize navItems to depend on students
+  const navItems: NavItem[] = useMemo(() => [
+    {
+      icon: <UserCircleIcon />,
+      name: "User Profile",
+      path: "/profile",
+      allowedRoles: [UserRole.STUDENT, UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
+    },
+    {
+      icon: <DocsIcon />,
+      name: "Notes",
+      path: "/notes",
+      allowedRoles: [UserRole.STUDENT]
+    },
+    {
+      icon: <TableIcon />,
+      name: "Attendance",
+      path: "/attendance",
+      allowedRoles: [UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
+    },
+    {
+      icon: <CalenderIcon />,
+      name: "Schedule",
+      path: "/schedule",
+      allowedRoles: [UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
+    },
+    {
+      icon: <GroupIcon />,
+      name: "Students",
+
+      allowedRoles: [UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN],
+      subItems: students.map(student => ({
+        name: student.name,
+        path: `/notes?studentId=${student.id}`,
+        description: student.lessonPlan
+      }))
+    },
+    {
         icon: <GroupIcon />,
         name: "Coaches",
         allowedRoles: [UserRole.MENTOR_COACH, UserRole.ADMIN],
@@ -120,21 +128,26 @@ const AppSidebar: React.FC = () => {
           path: `/notes?coachId=${coach.id}`,
           description: coach.lessonPlan
         }))
-      },
-      {
-        icon: <TableIcon />,
-        name: "Admin",
-        path: "/admin",
-        allowedRoles: [UserRole.ADMIN]
-      },
-      {
-        icon: <GridIcon />,
-        name: "Academy Gallery",
-        path: "/academy-gallery",
-        allowedRoles: [UserRole.STUDENT, UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
-      },
-    ]
-  }, [students, coaches]);
+    },
+    {
+      icon: <TableIcon />,
+      name: "Admin",
+      path: "/admin",
+      allowedRoles: [UserRole.ADMIN]
+    },
+    {
+      icon: <GridIcon />,
+      name: "Academy Gallery",
+      path: "/academy-gallery",
+      allowedRoles: [UserRole.STUDENT, UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
+    },
+    {
+      icon: <GroupIcon />,
+      name: "Referral Graph",
+      allowedRoles: [UserRole.ADMIN],
+      path: "/referral-graph"
+    },
+  ], [students]);
 
   const isActive = useCallback(
     (path: string) => {

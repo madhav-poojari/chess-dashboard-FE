@@ -70,3 +70,13 @@ export const createUser = async (userData: {
   const data: ApiResponse<User> = res.data;
   return data.data;
 };
+
+export const setUserActive = async (userId: string, active: boolean): Promise<void> => {
+  await api.put(`/admin/user/${userId}`, { active });
+};
+
+export const fetchAllUsers = async (): Promise<User[]> => {
+  const res = await api.get("/users/");
+  const data: ApiResponse<User[]> = res.data;
+  return data.data;
+};

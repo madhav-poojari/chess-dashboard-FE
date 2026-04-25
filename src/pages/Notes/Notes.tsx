@@ -9,6 +9,7 @@ import CreateLessonPlanModal, { LessonPlan } from "./CreateLessonPlanModal";
 import api from "../../api/axiosInstance";
 import { deleteNote, getLessonPlanById } from "../../api/notes/noteService";
 import UserProfiles from "../UserProfiles";
+import { userPublicProfile } from "../../api/user/publicProfile";
 
 export default function Notes() {
     const { user } = useAuth();
@@ -27,6 +28,7 @@ export default function Notes() {
     // Detailed lesson plan data
     const [lessonPlanToEdit, setLessonPlanToEdit] = useState<LessonPlan | undefined>(undefined);
     const [rawLessonPlan, setRawLessonPlan] = useState<LessonPlan | undefined>(undefined);
+    const [studentName, setStudentName] = useState<string>("");
 
     const loadNotes = async () => {
         setLoading(true);
@@ -120,6 +122,17 @@ export default function Notes() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, studentIdParam, coachIdParam]);
+
+    // Resolve the student name for lesson plan sharing
+    useEffect(() => {
+        if (studentIdParam) {
+            userPublicProfile(studentIdParam)
+                .then((p) => setStudentName(`${p.first_name} ${p.last_name}`.trim()))
+                .catch(() => setStudentName(""));
+        } else if (user) {
+            setStudentName(user.name || "");
+        }
+    }, [studentIdParam, user]);
 
     const userRole = user?.role || '';
     const isViewingStudent = !!studentIdParam && userRole !== 'student';
@@ -268,6 +281,8 @@ export default function Notes() {
                         lessonPlanToEdit={lessonPlanToEdit}
                         loadNotes={loadNotes}
                         handleCloseModal={handleCloseModal}
+                        rawLessonPlan={rawLessonPlan}
+                        studentName={studentName}
                     />
                 )}
             </>
@@ -380,6 +395,8 @@ export default function Notes() {
                 lessonPlanToEdit={lessonPlanToEdit}
                 loadNotes={loadNotes}
                 handleCloseModal={handleCloseModal}
+                rawLessonPlan={rawLessonPlan}
+                studentName={studentName}
             />
         </>
     );
@@ -408,6 +425,8 @@ function NotesContent({
     lessonPlanToEdit,
     loadNotes,
     handleCloseModal,
+    rawLessonPlan,
+    studentName,
 }: {
     loading: boolean;
     studentIdParam?: string | null;
@@ -430,6 +449,8 @@ function NotesContent({
     lessonPlanToEdit: LessonPlan | undefined;
     loadNotes: () => void;
     handleCloseModal: () => void;
+    rawLessonPlan?: LessonPlan;
+    studentName: string;
 }) {
     if (loading) {
         return (
@@ -494,6 +515,15 @@ function NotesContent({
                                 userId={user?.id}
                                 onEdit={onEdit}
                                 onDelete={onDelete}
+                                lessonPlanMeta={
+                                    rawLessonPlan && rawLessonPlan.id === note.id
+                                        ? {
+                                              studentName,
+                                              startDate: rawLessonPlan.start_date,
+                                              endDate: rawLessonPlan.end_date,
+                                          }
+                                        : undefined
+                                }
                             />
                         ))}
                     </div>

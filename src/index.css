@@ -615,7 +615,7 @@ span.flatpickr-weekday,
   @apply text-gray-900 bg-white dark:bg-gray-800 dark:text-white;
 }
 .fc-theme-standard th {
-  @apply !border-x-0 border-t !border-gray-200 bg-gray-50 !text-left dark:!border-gray-800 dark:bg-gray-900;
+  @apply !border-x-0 border-t !border-gray-200 bg-gray-50 !text-center dark:!border-gray-800 dark:bg-gray-900;
 }
 .fc-theme-standard td,
 .fc-theme-standard .fc-scrollgrid {
@@ -685,7 +685,7 @@ span.flatpickr-weekday,
   @apply bg-orange-500;
 }
 .fc-direction-ltr .fc-timegrid-slot-label-frame {
-  @apply px-3 py-1.5 text-left text-sm font-medium text-gray-500 dark:text-gray-400;
+  @apply px-2 py-1.5 text-right text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap;
 }
 .fc .fc-timegrid-axis-cushion {
   @apply text-sm font-medium text-gray-500 dark:text-gray-400;
@@ -780,6 +780,80 @@ span.flatpickr-weekday,
 }
 .fc.fc-media-screen {
   @apply min-h-screen;
+}
+
+/* ── Schedule Calendar overrides ── */
+.schedule-calendar .fc {
+  font-family: inherit;
+}
+
+/* Center day column headers */
+.schedule-calendar .fc .fc-col-header-cell {
+  text-align: center;
+}
+.schedule-calendar .fc .fc-col-header-cell-cushion {
+  display: block;
+  text-align: center;
+  padding: 8px 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+/* Fix time axis label overflow */
+.schedule-calendar .fc .fc-timegrid-axis {
+  width: 60px !important;
+  min-width: 60px !important;
+}
+.schedule-calendar .fc .fc-timegrid-slot-label {
+  width: 60px !important;
+  min-width: 60px !important;
+}
+.schedule-calendar .fc .fc-timegrid-slot-label-cushion {
+  font-size: 0.7rem;
+  padding: 0 8px 0 4px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Compact slot height */
+.schedule-calendar .fc .fc-timegrid-slot {
+  height: 40px;
+}
+
+/* Toolbar styling */
+.schedule-calendar .fc .fc-toolbar {
+  padding: 12px 16px 8px;
+  gap: 8px;
+}
+.schedule-calendar .fc .fc-toolbar-title {
+  font-size: 1rem !important;
+  font-weight: 600;
+}
+.schedule-calendar .fc .fc-button {
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+/* Grid line colors */
+.schedule-calendar .fc td,
+.schedule-calendar .fc th {
+  border-color: var(--color-gray-200);
+}
+.dark .schedule-calendar .fc td,
+.dark .schedule-calendar .fc th {
+  border-color: var(--color-gray-800);
+}
+
+/* Now indicator */
+.schedule-calendar .fc .fc-timegrid-now-indicator-line {
+  border-color: #ef4444;
+  border-width: 2px;
+}
+.schedule-calendar .fc .fc-timegrid-now-indicator-arrow {
+  border-color: #ef4444;
 }
 
 .simplebar-scrollbar::before {

@@ -1,5 +1,6 @@
 import { Note, VISIBILITY_COLORS, canEditNote, canManageLessonPlan } from './types';
 import { PencilIcon, TrashBinIcon } from '../../icons';
+import { LessonPlanShareCard } from '../../components/share';
 
 interface NoteCardProps {
     note: Note;
@@ -7,9 +8,15 @@ interface NoteCardProps {
     onEdit?: (note: Note) => void;
     onDelete?: (note: Note) => void;
     userId?: string;
+    /** For lesson plan sharing ╬ô├ç├╢ pass raw lesson plan metadata */
+    lessonPlanMeta?: {
+        studentName: string;
+        startDate: string;
+        endDate: string;
+    };
 }
 
-export default function NoteCard({ note, userRole, onEdit, onDelete, userId }: NoteCardProps) {
+export default function NoteCard({ note, userRole, onEdit, onDelete, userId, lessonPlanMeta }: NoteCardProps) {
     const colors = VISIBILITY_COLORS[note.visibility_level];
     const isLessonPlan = note.type === 'lesson_plan';
     const isStudent = userRole === 'student';
@@ -91,6 +98,14 @@ export default function NoteCard({ note, userRole, onEdit, onDelete, userId }: N
                 </div>
 
                 <div className="flex items-start gap-2 flex-shrink-0">
+                    {isLessonPlan && lessonPlanMeta && (
+                        <LessonPlanShareCard
+                            studentName={lessonPlanMeta.studentName}
+                            startDate={lessonPlanMeta.startDate}
+                            endDate={lessonPlanMeta.endDate}
+                            description={note.content}
+                        />
+                    )}
                     {canEdit && (
                         <div className="flex items-center gap-2">
                             {onEdit && (

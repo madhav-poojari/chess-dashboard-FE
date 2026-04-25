@@ -7,6 +7,7 @@ import Label from "../form/Label";
 import { ChangeEvent, useState } from "react";
 import { PublicProfile } from "../../models/publicProfile";
 import ProfilePictureUpload from "./ProfilePictureUpload";
+import { ProfileShareCard } from "../share";
 
 //interface PlayLinksUpdate {
 //  uscf_id: string;
@@ -223,6 +224,9 @@ export default function UserMetaCard({ user, onUpdate, onSyllabusUpdate, readOnl
               Edit
             </button>
           )}
+
+          {/* Share profile */}
+          <ProfileShareCard profile={user} />
 
         </div>
       </div>
