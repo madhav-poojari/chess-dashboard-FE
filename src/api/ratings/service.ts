@@ -11,7 +11,7 @@ export interface RatingRecord {
   created_at: string;
 }
 
-export type RatingPlatform = "chesscom" | "lichess" | "fide";
+export type RatingPlatform = "chesscom" | "lichess" | "fide" | "uscf";
 
 export const fetchStudentPlatformRatings = async (
   studentId: string,
