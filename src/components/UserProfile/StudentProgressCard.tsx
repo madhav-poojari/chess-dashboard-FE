@@ -39,10 +39,18 @@ export default function StudentProgressCard({ studentId }: StudentProgressCardPr
     staleTime: STALE_TIME.fide,
   });
 
+  const uscfQuery = useQuery<RatingRecord[]>({
+    queryKey: queryKeys.ratings.byPlatform(studentId, "uscf"),
+    queryFn: () => fetchStudentPlatformRatings(studentId, "uscf"),
+    enabled: !!studentId,
+    staleTime: STALE_TIME.uscf,
+  });
+
   const queryMap: Record<RatingPlatform, typeof chesscomQuery> = {
     chesscom: chesscomQuery,
     lichess: lichessQuery,
     fide: fideQuery,
+    uscf: uscfQuery,
   };
 
   const activeQuery = queryMap[activePlatform];
