@@ -12,4 +12,12 @@ export const queryKeys = {
         all: () => ["schedules"] as const,
         students: () => ["schedule-students"] as const,
     },
+    users: {
+        students: () => ["users", "students"] as const,
+        coaches: () => ["users", "coaches"] as const,
+    },
+    attendance: {
+        list: (params: { year: number; month: number; studentId?: string; coachId?: string; excludeOwn?: boolean }) =>
+            ["attendances", params] as const,
+    },
 };

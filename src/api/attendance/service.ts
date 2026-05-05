@@ -27,6 +27,7 @@ export type ListAttendancesParams = {
   class_type?: AttendanceClassType;
   session_id?: string;
   is_verified?: boolean;
+  exclude_own_students?: boolean;
 };
 
 export const listAttendances = async (params: ListAttendancesParams): Promise<Attendance[]> => {
