@@ -335,6 +335,7 @@ export default function Notes() {
                 ) : (
                     <NotesContent
                         loading={loading}
+                        studentIdParam={studentIdParam}
                         coachIdParam={coachIdParam}
                         user={user}
                         userRole={userRole}
@@ -354,6 +355,7 @@ export default function Notes() {
                         lessonPlanToEdit={lessonPlanToEdit}
                         loadNotes={loadNotes}
                         handleCloseModal={handleCloseModal}
+                        studentName={studentName}
                     />
                 )}
             </>

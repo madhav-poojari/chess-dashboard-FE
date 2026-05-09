@@ -66,6 +66,7 @@ export const createUser = async (userData: {
   last_name: string;
   role: string;
 }): Promise<User> => {
+  
   const res = await api.post("/auth/signup", userData);
   const data: ApiResponse<User> = res.data;
   return data.data;

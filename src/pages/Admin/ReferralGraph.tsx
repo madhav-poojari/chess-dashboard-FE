@@ -42,7 +42,7 @@ export default function ReferralGraph() {
         setSelectedEdgeId(null);
     }, []);
 
-    const selectedNode = graphData?.nodes.find((n) => n.id === selectedNodeId);
+    //const selectedNode = graphData?.nodes.find((n) => n.id === selectedNodeId);
     const selectedEdge = graphData?.edges.find((e) => e.id === selectedEdgeId);
     return (< RequireRole allowedRoles={["admin"]} >
         <div className="flex flex-col h-screen bg-gray-100">
