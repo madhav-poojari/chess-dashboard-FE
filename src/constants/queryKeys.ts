@@ -24,5 +24,12 @@ export const queryKeys = {
         list: (params: { year: number; month: number; studentId?: string; coachId?: string; excludeOwn?: boolean }) =>
             ["attendances", params] as const,
     },
+    admin: {
+        unapprovedUsers: () => ["admin", "unapproved-users"] as const,
+        students: () => ["admin", "students"] as const,
+        coaches: () => ["admin", "coaches"] as const,
+        coachesPicker: () => ["admin", "coaches-picker"] as const,
+        mentorsPicker: () => ["admin", "mentors-picker"] as const,
+    },
 };
 
