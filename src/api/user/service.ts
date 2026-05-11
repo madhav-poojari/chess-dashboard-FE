@@ -82,4 +82,8 @@ export const resetOwnPassword = async (newPassword: string): Promise<void> => {
   });
 };
 
-
+export const fetchCoaches = async (): Promise<User[]> => {
+  const res = await api.get("/users/coaches");
+  const data: ApiResponse<User[]> = res.data;
+  return data.data;
+};
