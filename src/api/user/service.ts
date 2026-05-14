@@ -42,6 +42,10 @@ export const updateProfile = async (userProfle: Partial<PublicProfile>): Promise
   if (userProfle.personal_meet_link !== undefined) payload.personal_meet_link = userProfle.personal_meet_link;
   if (userProfle.added_in_whatsapp !== undefined) payload.added_in_whatsapp = userProfle.added_in_whatsapp;
 
+  // DOB and Age are mutually exclusive — backend handles clearing the other
+  if (userProfle.dob !== undefined) payload.dob = userProfle.dob;
+  if (userProfle.age !== undefined) payload.age = userProfle.age;
+
   const res = await api.put(`/users/${userId}`, payload);
   
   const data: ApiResponse<User> = res.data;

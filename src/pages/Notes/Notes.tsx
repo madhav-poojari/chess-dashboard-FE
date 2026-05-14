@@ -254,7 +254,7 @@ export default function Notes() {
                 {/* Tab Content */}
                 {activeTab === "profile" ? (
                     <div key={studentIdParam}>
-                        <UserProfiles studentId={studentIdParam} readOnly={true} galleryReadOnly={false} />
+                        <UserProfiles studentId={studentIdParam} readOnly={false} galleryReadOnly={false} />
                     </div>
                 ) : (
                     <NotesContent
