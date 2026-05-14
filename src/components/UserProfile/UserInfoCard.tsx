@@ -82,6 +82,33 @@ export default function UserInfoCard({user, onUpdate, readOnly = false}:UserInfo
     }));
   };
 
+  // useEffect(() => {
+  //   let mounted = true; // avoid state update after unmount
+
+  //   async function loadUser() {
+  //     try {
+  //       const userDict = await userPublicProfile(); // await the fetched data
+  //       if (!mounted) return;
+  //       setUser({
+  //         first_name: userDict.first_name,
+  //         last_name:  userDict.last_name,
+  //         email:      userDict.email,
+  //         uid:        userDict.uid,
+  //         bio:        userDict.bio ,
+  //       });
+  //     } catch (err) {
+  //       console.error("Failed to load user:", err);
+  //     }
+  //   }
+
+  //   loadUser();
+  //   return () => {
+  //     mounted = false;
+  //   };
+  // }, []); 
+
+
+  
    const handleSave = async () => {
     // Handle save logic here
     const patch: InfoUpdate = {
