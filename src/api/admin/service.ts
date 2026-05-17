@@ -65,11 +65,28 @@ export const createUser = async (userData: {
   first_name: string;
   last_name: string;
   role: string;
+  phone: string;
+  dob: string;
+  bio: string;
+  personal_meet_link: string;
+  syllabus_url: string;
+  added_in_whatsapp: boolean;
+  city: string;
+  state: string;
+  country: string;
+  zipcode: string;
+  lichess_username: string;
+  chesscom_username: string;
+  uscf_id: string;
+  fide_id: string;
 }): Promise<User> => {
-  
-  const res = await api.post("/auth/signup", userData);
+  const {email, password, first_name, last_name, role, ...userDetailsPayload} = userData;
+  const userPayload = {email, password, first_name, last_name, role};
+  const res = await api.post("/auth/signup", userPayload);
+  const userId = res.data.data.user_id;
+  await api.put("/users/"+userId, userDetailsPayload);
   const data: ApiResponse<User> = res.data;
-  return data.data;
+  return data.data; 
 };
 
 export const setUserActive = async (userId: string, active: boolean): Promise<void> => {

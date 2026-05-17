@@ -55,6 +55,20 @@ export default function AdminPage() {
     first_name: "",
     last_name: "",
     role: "student",
+    phone: "",
+    dob: "",
+    bio: "",
+    personal_meet_link: "",
+    syllabus_url: "",
+    added_in_whatsapp: false,
+    city: "",
+    state: "",
+    country: "",
+    zipcode: "",
+    lichess_username: "",
+    chesscom_username: "",
+    uscf_id: "",
+    fide_id: ""
   });
   const [showPassword, setShowPassword] = useState(false);
   const [manageRoleFilter, setManageRoleFilter] = useState<string>("all");
@@ -124,7 +138,21 @@ export default function AdminPage() {
           first_name: "",
           last_name: "",
           role: UserRole.STUDENT,
-        });
+          phone: "",
+          dob: "",
+          bio: "",
+          personal_meet_link: "",
+          syllabus_url: "",
+          added_in_whatsapp: false,
+          city: "",
+          state: "",
+          country: "",
+          zipcode: "",
+          lichess_username: "",
+          chesscom_username: "",
+          uscf_id: "",
+          fide_id: "",
+        })
       alert("User created successfully!");
     },
   });
@@ -321,12 +349,6 @@ export default function AdminPage() {
             className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${getTabButtonClass("add-user")}`}
           >
             Add User
-          </button>
-          <button
-            onClick={() => setActiveTab("add-referral")}
-            className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${getTabButtonClass("add-referral")}`}
-          >
-            Add Referral
           </button>
           <button
             onClick={() => setActiveTab("manage-users")}
@@ -727,116 +749,276 @@ export default function AdminPage() {
                   }
                 }}
               >
-                <div className="space-y-6">
-                  <div>
-                    <Label>
-                      Role <span className="text-error-500">*</span>
-                    </Label>
-                    <Select
-                      options={[
-                        { value: "student", label: "Student" },
-                        { value: "coach", label: "Coach" },
-                        { value: "mentor", label: "Mentor Coach" },
-                      ]}
-                      placeholder="Select Role"
-                      onChange={(role) =>
-                        setNewUserForm((prev) => ({
-                          ...prev,
-                          role,
-                        }))
-                      }
-                    />
-                  </div>
+                <div className="space-y-8">
 
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* ── Required Fields ── */}
+                  <div className="space-y-6">
+                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide dark:text-white/50">
+                      Required Info
+                    </h4>
+
                     <div>
-                      <Label>
-                        First Name <span className="text-error-500">*</span>
-                      </Label>
+                      <Label>Role <span className="text-error-500">*</span></Label>
+                      <Select
+                        options={[
+                          { value: "student", label: "Student" },
+                          { value: "coach", label: "Coach" },
+                          { value: "mentor", label: "Mentor Coach" },
+                        ]}
+                        placeholder="Select Role"
+                        onChange={(role) => setNewUserForm((prev) => ({ ...prev, role }))}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>First Name <span className="text-error-500">*</span></Label>
+                        <Input
+                          name="first_name"
+                          value={newUserForm.first_name}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, first_name: e.target.value }))}
+                          placeholder="John"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label>Last Name <span className="text-error-500">*</span></Label>
+                        <Input
+                          name="last_name"
+                          value={newUserForm.last_name}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, last_name: e.target.value }))}
+                          placeholder="Doe"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Email <span className="text-error-500">*</span></Label>
                       <Input
-                        name="first_name"
-                        value={newUserForm.first_name}
-                        onChange={(e) =>
-                          setNewUserForm((prev) => ({
-                            ...prev,
-                            first_name: e.target.value,
-                          }))
-                        }
-                        placeholder="John"
+                        type="email"
+                        name="email"
+                        value={newUserForm.email}
+                        onChange={(e) => setNewUserForm((prev) => ({ ...prev, email: e.target.value }))}
+                        placeholder="example@gmail.com"
                         required
                       />
                     </div>
+
                     <div>
-                      <Label>
-                        Last Name <span className="text-error-500">*</span>
-                      </Label>
-                      <Input
-                        name="last_name"
-                        value={newUserForm.last_name}
-                        onChange={(e) =>
-                          setNewUserForm((prev) => ({
-                            ...prev,
-                            last_name: e.target.value,
-                          }))
-                        }
-                        placeholder="Doe"
-                      />
+                      <Label>Password <span className="text-error-500">*</span></Label>
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          name="password"
+                          value={newUserForm.password}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, password: e.target.value }))}
+                          placeholder="Enter password"
+                          autoComplete="new-password"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                        >
+                          {showPassword ? (
+                            <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                          ) : (
+                            <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
 
-                  <div>
-                    <Label>
-                      Email <span className="text-error-500">*</span>
-                    </Label>
-                    <Input
-                      type="email"
-                      name="email"
-                      value={newUserForm.email}
-                      onChange={(e) =>
-                        setNewUserForm((prev) => ({
-                          ...prev,
-                          email: e.target.value,
-                        }))
-                      }
-                      placeholder="example@gmail.com"
-                      required
-                    />
-                  </div>
+                  {/* ── Personal Details ── */}
+                  <div className="space-y-6">
+                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide dark:text-white/50">
+                      Personal Details <span className="normal-case text-xs font-normal">(optional)</span>
+                    </h4>
 
-                  <div>
-                    <Label>
-                      Password <span className="text-error-500">*</span>
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        name="password"
-                        value={newUserForm.password}
-                        onChange={(e) =>
-                          setNewUserForm((prev) => ({
-                            ...prev,
-                            password: e.target.value,
-                          }))
-                        }
-                        placeholder="Enter password"
-                        autoComplete="new-password"
-                        required
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Phone</Label>
+                        <Input
+                          type="tel"
+                          name="phone"
+                          value={newUserForm.phone}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, phone: e.target.value }))}
+                          placeholder="+1 234 567 8900"
+                        />
+                      </div>
+                      <div>
+                        <Label>Date of Birth</Label>
+                        <Input
+                          type="date"
+                          name="dob"
+                          value={newUserForm.dob}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, dob: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Bio</Label>
+                      <textarea
+                        name="bio"
+                        value={newUserForm.bio}
+                        onChange={(e) => setNewUserForm((prev) => ({ ...prev, bio: e.target.value }))}
+                        placeholder="Tell us a bit about this user..."
+                        rows={3}
+                        className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/10 dark:border-white/10 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 resize-none"
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-                      >
-                        {showPassword ? (
-                          <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
-                        ) : (
-                          <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
-                        )}
-                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* <div>
+                        <Label>Profile Picture URL</Label>
+                        <Input
+                          type="url"
+                          name="profile_picture_url"
+                          value={newUserForm.profile_picture_url}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, profile_picture_url: e.target.value }))}
+                          placeholder="https://..."
+                        />
+                      </div> */}
+                      <div>
+                        <Label>Personal Meet Link</Label>
+                        <Input
+                          type="url"
+                          name="personal_meet_link"
+                          value={newUserForm.personal_meet_link}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, personal_meet_link: e.target.value }))}
+                          placeholder="https://meet.google.com/..."
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Syllabus URL</Label>
+                      <Input
+                        type="url"
+                        name="syllabus_url"
+                        value={newUserForm.syllabus_url}
+                        onChange={(e) => setNewUserForm((prev) => ({ ...prev, syllabus_url: e.target.value }))}
+                        placeholder="https://..."
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        id="added_in_whatsapp"
+                        checked={newUserForm.added_in_whatsapp}
+                        onChange={(e) => setNewUserForm((prev) => ({ ...prev, added_in_whatsapp: e.target.checked }))}
+                        className="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500 dark:border-white/10"
+                      />
+                      <label htmlFor="added_in_whatsapp" className="text-sm text-gray-700 dark:text-white/80">
+                        Added in WhatsApp
+                      </label>
                     </div>
                   </div>
 
-                  <div className="flex gap-3 pt-4">
+                  {/* ── Location ── */}
+                  <div className="space-y-6">
+                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide dark:text-white/50">
+                      Location <span className="normal-case text-xs font-normal">(optional)</span>
+                    </h4>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>City</Label>
+                        <Input
+                          name="city"
+                          value={newUserForm.city}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, city: e.target.value }))}
+                          placeholder="New York"
+                        />
+                      </div>
+                      <div>
+                        <Label>State</Label>
+                        <Input
+                          name="state"
+                          value={newUserForm.state}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, state: e.target.value }))}
+                          placeholder="NY"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Country</Label>
+                        <Input
+                          name="country"
+                          value={newUserForm.country}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, country: e.target.value }))}
+                          placeholder="United States"
+                        />
+                      </div>
+                      <div>
+                        <Label>Zipcode</Label>
+                        <Input
+                          name="zipcode"
+                          value={newUserForm.zipcode}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, zipcode: e.target.value }))}
+                          placeholder="10001"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ── Chess IDs ── */}
+                  <div className="space-y-6">
+                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide dark:text-white/50">
+                      Chess Profiles <span className="normal-case text-xs font-normal">(optional)</span>
+                    </h4>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Lichess Username</Label>
+                        <Input
+                          name="lichess_username"
+                          value={newUserForm.lichess_username}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, lichess_username: e.target.value }))}
+                          placeholder="lichess_handle"
+                        />
+                      </div>
+                      <div>
+                        <Label>Chess.com Username</Label>
+                        <Input
+                          name="chesscom_username"
+                          value={newUserForm.chesscom_username}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, chesscom_username: e.target.value }))}
+                          placeholder="chesscom_handle"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>USCF ID</Label>
+                        <Input
+                          name="uscf_id"
+                          value={newUserForm.uscf_id}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, uscf_id: e.target.value }))}
+                          placeholder="12345678"
+                        />
+                      </div>
+                      <div>
+                        <Label>FIDE ID</Label>
+                        <Input
+                          name="fide_id"
+                          value={newUserForm.fide_id}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, fide_id: e.target.value }))}
+                          placeholder="12345678"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ── Actions ── */}
+                  <div className="flex gap-3 pt-2">
                     <Button
                       variant="outline"
                       onClick={() =>
@@ -845,7 +1027,21 @@ export default function AdminPage() {
                           password: "",
                           first_name: "",
                           last_name: "",
-                          role: "student",
+                          role: UserRole.STUDENT,
+                          phone: "",
+                          dob: "",
+                          bio: "",
+                          personal_meet_link: "",
+                          syllabus_url: "",
+                          added_in_whatsapp: false,
+                          city: "",
+                          state: "",
+                          country: "",
+                          zipcode: "",
+                          lichess_username: "",
+                          chesscom_username: "",
+                          uscf_id: "",
+                          fide_id: "",
                         })
                       }
                       type="button"
@@ -855,32 +1051,30 @@ export default function AdminPage() {
                     <Button type="submit" disabled={creatingUser}>
                       {creatingUser ? "Creating User..." : "Create User"}
                     </Button>
+                    
                   </div>
+
                 </div>
               </form>
             </div>
-          </div>
-        )}
-
-        {/* Add Referral Tab */}
-        {activeTab === "add-referral" && (
-          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-            <div className="border-b border-gray-100 dark:border-white/[0.05] px-5 py-4">
-              <h3 className="font-semibold text-gray-800 text-theme-base dark:text-white/90">
-                Add Referral Relationship
-              </h3>
-            </div>
-            <div className="p-6">
-              <button
-                onClick={() => setShowAddRelationshipModal(true)}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
-              >
-                + Add New Referral
-              </button>
-              <p className="text-gray-600 dark:text-gray-400 text-theme-sm mt-4">
-                Create a new referral relationship between two users by specifying the referrer, referee, and relationship type.
-              </p>
-            </div>
+            {/* <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]"> */}
+              <div className="border-b border-gray-100 dark:border-white/[0.05] px-5 py-4">
+                <h3 className="font-semibold text-gray-800 text-theme-base dark:text-white/90">
+                  Done creating user? Add Referral Relationship...
+                </h3>
+              </div>
+              <div className="p-6">
+                <button
+                  onClick={() => setShowAddRelationshipModal(true)}
+                  className="px-6 py-3 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition font-medium"
+                >
+                  + Add New Referral
+                </button>
+                <p className="text-gray-600 dark:text-gray-400 text-theme-sm mt-4">
+                  Create a new referral relationship between two users by specifying the referrer, referee, and relationship type.
+                </p>
+              </div>
+            {/* </div> */}
           </div>
         )}
 
