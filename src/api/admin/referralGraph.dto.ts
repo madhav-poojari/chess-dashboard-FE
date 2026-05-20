@@ -1,12 +1,32 @@
 export enum RelationshipType {
-  VENDOR = "vendor",
-  CLASSMATE_COLLEGE = "classmate_college",
-  CLASSMATE_SCHOOL = "classmate_school",
-  COWORKER = "coworker",
-  FAMILY = "family",
+  // Friends
   FRIEND = "friend",
-  COACH = "coach",
-  STUDENT = "student",
+  CHILDHOOD_FRIEND = "childhood_friend",
+  BEST_FRIEND = "best_friend",
+  NEIGHBOR = "neighbor",
+
+  // Family
+  FAMILY = "family",
+  SPOUSE = "spouse",
+  PARENT = "parent",
+  SIBLING = "sibling",
+  COUSIN = "cousin",
+  RELATIVE = "relative",
+  IN_LAW = "in_law",
+
+  // School
+  CLASSMATE_SCHOOL = "classmate_school",
+  CLASSMATE_COLLEGE = "classmate_college",
+  BATCHMATE = "batchmate",
+  SENIOR_JUNIOR = "senior_junior",
+
+  // Work
+  COWORKER = "coworker",
+  MANAGER = "manager",
+  MENTOR = "mentor",
+  BUSINESS_PARTNER = "business_partner",
+  EX_COWORKER = "ex_coworker",
+
   OTHER = "other",
 }
 

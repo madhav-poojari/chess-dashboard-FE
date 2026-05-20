@@ -45,26 +45,66 @@ export const getStateColor = (state: string): string => {
 
 
 export const RELATIONSHIP_TYPE_LABELS: Record<string, string> = {
-  [RelationshipType.VENDOR]: "Vendor",
-  [RelationshipType.CLASSMATE_COLLEGE]: "College Classmate",
-  [RelationshipType.CLASSMATE_SCHOOL]: "School Classmate",
-  [RelationshipType.COWORKER]: "Coworker",
-  [RelationshipType.FAMILY]: "Family",
+  // Friends
   [RelationshipType.FRIEND]: "Friend",
-  [RelationshipType.COACH]: "Coach",
-  [RelationshipType.STUDENT]: "Student",
+  [RelationshipType.CHILDHOOD_FRIEND]: "Childhood Friend",
+  [RelationshipType.BEST_FRIEND]: "Best Friend",
+  [RelationshipType.NEIGHBOR]: "Neighbor",
+
+  // Family
+  [RelationshipType.FAMILY]: "Family",
+  [RelationshipType.SPOUSE]: "Spouse",
+  [RelationshipType.PARENT]: "Parent",
+  [RelationshipType.SIBLING]: "Sibling",
+  [RelationshipType.COUSIN]: "Cousin",
+  [RelationshipType.RELATIVE]: "Relative",
+  [RelationshipType.IN_LAW]: "In-Law",
+
+  // School
+  [RelationshipType.CLASSMATE_SCHOOL]: "School Classmate",
+  [RelationshipType.CLASSMATE_COLLEGE]: "College Classmate",
+  [RelationshipType.BATCHMATE]: "Batchmate",
+  [RelationshipType.SENIOR_JUNIOR]: "Senior / Junior",
+
+  // Work
+  [RelationshipType.COWORKER]: "Coworker",
+  [RelationshipType.MANAGER]: "Manager",
+  [RelationshipType.MENTOR]: "Mentor",
+  [RelationshipType.BUSINESS_PARTNER]: "Business Partner",
+  [RelationshipType.EX_COWORKER]: "Ex-Coworker",
+
   [RelationshipType.OTHER]: "Other",
 };
 
 export const RELATIONSHIP_TYPES = [
-  RelationshipType.VENDOR,
-  RelationshipType.CLASSMATE_COLLEGE,
-  RelationshipType.CLASSMATE_SCHOOL,
-  RelationshipType.COWORKER,
-  RelationshipType.FAMILY,
+  // Friends
   RelationshipType.FRIEND,
-  RelationshipType.COACH,
-  RelationshipType.STUDENT,
+  RelationshipType.CHILDHOOD_FRIEND,
+  RelationshipType.BEST_FRIEND,
+  RelationshipType.NEIGHBOR,
+
+  // Family
+  RelationshipType.FAMILY,
+  RelationshipType.SPOUSE,
+  RelationshipType.PARENT,
+  RelationshipType.SIBLING,
+  RelationshipType.COUSIN,
+  RelationshipType.RELATIVE,
+  RelationshipType.IN_LAW,
+
+  // School
+  RelationshipType.CLASSMATE_SCHOOL,
+  RelationshipType.CLASSMATE_COLLEGE,
+  RelationshipType.BATCHMATE,
+  RelationshipType.SENIOR_JUNIOR,
+
+  // Work
+  RelationshipType.COWORKER,
+  RelationshipType.MANAGER,
+  RelationshipType.MENTOR,
+  RelationshipType.BUSINESS_PARTNER,
+  RelationshipType.EX_COWORKER,
+
   RelationshipType.OTHER,
 ];
 

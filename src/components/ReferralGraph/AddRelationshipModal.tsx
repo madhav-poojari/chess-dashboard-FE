@@ -4,6 +4,7 @@ import { useReferralGraph } from "../../hooks/useReferralGraph";
 import { RelationshipType, CreateRelationshipRequest } from "../../api/admin/referralGraph.dto";
 import { RELATIONSHIP_TYPES, RELATIONSHIP_TYPE_LABELS } from "../../constants/referralGraphConstants";
 import { Combobox } from "./ComboBox";
+import ReferralGraph from "../../pages/Admin/ReferralGraph";
 
 interface AddRelationshipModalProps {
     onClose: () => void;
@@ -13,16 +14,22 @@ interface AddRelationshipModalProps {
 export default function AddRelationshipModal({ onClose, onSuccess }: AddRelationshipModalProps) {
     const [referrerId, setReferrerId] = useState("");
     const [refereeId, setRefereeId] = useState("");
-    const [relationshipType, setRelationshipType] = useState<string>(RelationshipType.VENDOR);
+    const [relationshipType, setRelationshipType] = useState<string>("");
+    const [otherRelation, setOtherRelation] = useState<string>("");
     const [description, setDescription] = useState("");
 
     const { data: graphData } = useReferralGraph();
     const { createMutation } = useRelationshipMutation();
+    const relationshipOptions = RELATIONSHIP_TYPES.map((type)=>({
+        id: type,
+        label: RELATIONSHIP_TYPE_LABELS[type]
+    }))
 
     useEffect(() => {
         if (createMutation.isSuccess) {
             onSuccess();
             createMutation.reset();
+            alert("Referral relation created successfully!");
         }
     }, [createMutation.isSuccess]);
 
@@ -55,7 +62,7 @@ export default function AddRelationshipModal({ onClose, onSuccess }: AddRelation
         const request: CreateRelationshipRequest = {
             referrer_id: referrerId,
             referee_id: refereeId,
-            relationship_type: relationshipType,
+            relationship_type: relationshipType===RelationshipType.OTHER?otherRelation:relationshipType,
             relationship_description: description || undefined,
         };
 
@@ -69,31 +76,6 @@ export default function AddRelationshipModal({ onClose, onSuccess }: AddRelation
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Referrer Select */}
-                    {/* <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Who referred? (Referrer)
-                        </label>
-                        <input
-                            type="text"
-                            placeholder="Search user..."
-                            value={referrerSearch}
-                            onChange={(e) => setReferrerSearch(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 text-sm"
-                        />
-                        <select
-                            value={referrerId}
-                            onChange={(e) => setReferrerId(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        >
-                            <option value="">Select referrer...</option>
-                            {filteredReferrers?.map((node) => (
-                                <option key={node.id} value={node.id}>
-                                    {node.name} ({node.state})
-                                </option>
-                            ))}
-                        </select>
-                    </div> */}
-
                     <Combobox
                         label="Who referred? (Referrer)"
                         options={graphData?.nodes ?? []} // your full nodes array
@@ -104,31 +86,6 @@ export default function AddRelationshipModal({ onClose, onSuccess }: AddRelation
                     />
 
                     {/* Referee Select */}
-                    {/* <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Who was referred? (Referee)
-                        </label>
-                        <input
-                            type="text"
-                            placeholder="Search user..."
-                            value={refereeSearch}
-                            onChange={(e) => setRefereeSearch(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 text-sm"
-                        />
-                        <select
-                            value={refereeId}
-                            onChange={(e) => setRefereeId(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        >
-                            <option value="">Select referee...</option>
-                            {filteredReferees?.map((node) => (
-                                <option key={node.id} value={node.id}>
-                                    {node.name} ({node.state})
-                                </option>
-                            ))}
-                        </select>
-                    </div> */}
-
                     <Combobox
                         label="Who was referred? (Referee)"
                         options={graphData?.nodes ?? []}
@@ -139,21 +96,31 @@ export default function AddRelationshipModal({ onClose, onSuccess }: AddRelation
                     />
 
                     {/* Relationship Type */}
+                    <Combobox
+                        label="Relationship Type"
+                        options= {relationshipOptions}
+                        displayField = "label"
+                        value={relationshipType===""?"":relationshipType === RelationshipType.OTHER || !RELATIONSHIP_TYPES.includes(relationshipType as RelationshipType)
+                            ? RelationshipType.OTHER
+                            : relationshipType}
+                        onChange={(selectedValue) => {
+                            setRelationshipType(selectedValue)
+                        }}
+                        placeholder="Search relationship..."
+                        formatOption={(option) => option.label}
+                    />
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Relationship Type
-                        </label>
-                        <select
-                            value={relationshipType}
-                            onChange={(e) => setRelationshipType(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        >
-                            {RELATIONSHIP_TYPES.map((type) => (
-                                <option key={type} value={type}>
-                                    {RELATIONSHIP_TYPE_LABELS[type]}
-                                </option>
-                            ))}
-                        </select>
+                     {(relationshipType === RelationshipType.OTHER) && (
+                                <input
+                                    type="text"
+                                    required
+                                    placeholder="Specify relationship..."
+                                    value={otherRelation}
+                                    onChange={(e) => setOtherRelation(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg mt-2"
+                                    autoFocus
+                                />
+                            )}
                     </div>
 
                     {/* Description */}
