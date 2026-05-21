@@ -27,4 +27,8 @@ export const toPublicProfile = (u: User): PublicProfile => ({
   mentorDetails: u.mentor ?? null,
   coachDetails: u.coach ?? null,
   schedule: u.schedule,
+
+  dob: u.details?.dob ?? null,
+  age: (u.details?.additional_info?.age as number) ?? null,
+  age_recorded_at: (u.details?.additional_info?.age_recorded_at as string) ?? null,
 });

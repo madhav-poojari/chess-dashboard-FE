@@ -23,6 +23,9 @@ export interface PublicProfile {
     mentorDetails: GuidanceInfo | null;
     coachDetails: GuidanceInfo | null;
     schedule?: ClassScheduleDTO[];
+    dob?: string | null;
+    age?: number | null;
+    age_recorded_at?: string | null;
   }
   
   export interface GuidanceInfo {
