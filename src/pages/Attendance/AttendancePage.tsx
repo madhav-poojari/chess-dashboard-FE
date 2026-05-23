@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import PageMeta from "../../components/common/PageMeta";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import { useAuth } from "../../context/AuthContext";
-import { fetchStudents } from "../../api/user/service";
-import { User } from "../../api/user/dto";
+import { fetchStudents, fetchCoaches } from "../../api/user/service";
+import { User, UserRole } from "../../api/user/dto";
 import { Attendance, deleteAttendance, listAttendances, ListAttendancesParams } from "../../api/attendance/service";
 import AddAttendanceModal from "./AddAttendanceModal";
 import EditAttendanceModal from "./EditAttendanceModal";
+import AttendanceTable from "./AttendanceTable";
 import { AttendanceShareCard } from "../../components/share";
+import { queryKeys } from "../../constants/queryKeys";
 
 type TabType = "student_overview" | "coach_overview";
 
@@ -27,158 +30,144 @@ function parseMonthInput(v: string): { year: number; month: number } | null {
   return { year, month };
 }
 
-function formatDateOnly(iso: string): string {
-  // backend uses date type; in JSON it may include time; normalize.
-  if (!iso) return "";
-  return iso.length >= 10 ? iso.slice(0, 10) : iso;
-}
-
 export default function AttendancePage() {
   const { user } = useAuth();
-  const role = (user?.role || "").toLowerCase().trim();
-  const canSeeCoachOverview = role === "mentor" || role === "admin";
+  const role = (user?.role || "").toLowerCase().trim() as UserRole;
+  const canSeeCoachOverview = role === UserRole.MENTOR_COACH || role === UserRole.ADMIN;
+  const canSeeOthers = role === UserRole.COACH;
 
   const [activeTab, setActiveTab] = useState<TabType>("student_overview");
   const [monthValue, setMonthValue] = useState<string>(monthInputDefault());
 
-  const [students, setStudents] = useState<User[]>([]);
-  const studentOptions = useMemo(
-    () => (students || []).filter((s) => (s.role || "").toLowerCase() === "student"),
-    [students]
-  );
-
-  const coachOptions = useMemo(
-    () => (students || []).filter((s) => {
-      const r = (s.role || "").toLowerCase();
-      return r === "coach" || r === "mentor" || r === "admin";
-    }),
-    [students]
-  );
-
   const [selectedStudentId, setSelectedStudentId] = useState<string>("");
   const [selectedCoachId, setSelectedCoachId] = useState<string>("");
-
-  const [attendances, setAttendances] = useState<Attendance[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
 
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Attendance | null>(null);
   const [deleting, setDeleting] = useState<number | null>(null);
 
-  const handleDelete = async (a: Attendance) => {
-    const label = a.student
-      ? `${a.student.first_name} ${a.student.last_name}`
-      : a.student_id;
-    if (!window.confirm(`Delete attendance for ${label} on ${formatDateOnly(a.date)}? This cannot be undone.`)) return;
-    setDeleting(a.id);
-    try {
-      await deleteAttendance(a.id);
-      loadAttendances();
-    } catch (err: unknown) {
-      console.error("Delete attendance failed", err);
-      const e2 = err as { response?: { data?: { message?: string; error?: string } }; message?: string };
-      setError(e2.response?.data?.message || e2.response?.data?.error || e2.message || "Failed to delete attendance");
-    } finally {
-      setDeleting(null);
-    }
-  };
+  const queryClient = useQueryClient();
 
-  // load students for dropdowns (coach/mentor/admin)
+  // ─── Fetch dropdown options ───────────────────────────────────────
+  const { data: students = [] } = useQuery<User[]>({
+    queryKey: queryKeys.users.students(),
+    queryFn: fetchStudents,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: coaches = [] } = useQuery<User[]>({
+    queryKey: queryKeys.users.coaches(),
+    queryFn: fetchCoaches,
+    staleTime: 5 * 60 * 1000,
+    enabled: canSeeCoachOverview,
+  });
+
+  // ─── Default selections ───────────────────────────────────────────
   useEffect(() => {
-    (async () => {
-      try {
-        const data = await fetchStudents();
-        setStudents(Array.isArray(data) ? data : []);
-      } catch (e) {
-        console.error("Failed to fetch students", e);
-        setStudents([]);
-      }
-    })();
-  }, []);
+    if (!selectedStudentId && students.length > 0) {
+      setSelectedStudentId(students[0].id);
+    }
+  }, [students, selectedStudentId]);
 
-  // default student selection when list loads
   useEffect(() => {
-    if (!selectedStudentId && studentOptions.length > 0) {
-      setSelectedStudentId(studentOptions[0].id);
+    if (!selectedCoachId && coaches.length > 0) {
+      setSelectedCoachId(coaches[0].id);
     }
-  }, [studentOptions, selectedStudentId]);
+  }, [coaches, selectedCoachId]);
 
-  // default coach selection when list loads
-  useEffect(() => {
-    if (!selectedCoachId && coachOptions.length > 0) {
-      setSelectedCoachId(coachOptions[0].id);
-    }
-  }, [coachOptions, selectedCoachId]);
+  // ─── Attendance query ─────────────────────────────────────────────
+  const parsed = parseMonthInput(monthValue);
 
-  const loadAttendances = async () => {
-    setError("");
-    const parsed = parseMonthInput(monthValue);
-    if (!parsed) {
-      setError("Invalid month selected.");
-      return;
-    }
-    setLoading(true);
-    try {
+  const isOthersSelected = selectedStudentId === "__others__";
+
+  const attendanceQueryKey = useMemo(() => {
+    if (!parsed) return queryKeys.attendance.list({ year: 0, month: 0 });
+    return queryKeys.attendance.list({
+      year: parsed.year,
+      month: parsed.month,
+      studentId: activeTab === "student_overview" && !isOthersSelected ? selectedStudentId : undefined,
+      coachId: activeTab === "coach_overview" ? selectedCoachId : undefined,
+      excludeOwn: activeTab === "student_overview" && isOthersSelected ? true : undefined,
+    });
+  }, [parsed, activeTab, selectedStudentId, selectedCoachId, isOthersSelected]);
+
+  const canFetch = useMemo(() => {
+    if (!parsed) return false;
+    if (activeTab === "student_overview" && !selectedStudentId) return false;
+    if (activeTab === "coach_overview" && !selectedCoachId) return false;
+    return true;
+  }, [parsed, activeTab, selectedStudentId, selectedCoachId]);
+
+  const {
+    data: attendances = [],
+    isLoading: loading,
+    error: queryError,
+  } = useQuery<Attendance[]>({
+    queryKey: attendanceQueryKey,
+    queryFn: async () => {
+      if (!parsed) return [];
       const params: ListAttendancesParams = { year: parsed.year, month: parsed.month };
-      // Student overview is typically filtered by a student for readability
-      if (activeTab === "student_overview" && selectedStudentId) {
-        params.student_id = selectedStudentId;
+      if (activeTab === "student_overview") {
+        if (isOthersSelected) {
+          params.exclude_own_students = true;
+        } else if (selectedStudentId) {
+          params.student_id = selectedStudentId;
+        }
       }
       if (activeTab === "coach_overview" && selectedCoachId) {
         params.coach_id = selectedCoachId;
       }
       const res = await listAttendances(params);
-      setAttendances(Array.isArray(res) ? res : []);
+      return Array.isArray(res) ? res : [];
+    },
+    enabled: canFetch,
+    staleTime: 60 * 1000,
+  });
+
+  const error = queryError
+    ? (queryError as { response?: { data?: { message?: string; error?: string } }; message?: string }).response?.data?.message ||
+      (queryError as { message?: string }).message ||
+      "Failed to load attendance"
+    : "";
+
+  // ─── Delete handler ───────────────────────────────────────────────
+  const handleDelete = async (a: Attendance) => {
+    const label = a.student
+      ? `${a.student.first_name} ${a.student.last_name}`
+      : a.student_id;
+    const dateStr = a.date && a.date.length >= 10 ? a.date.slice(0, 10) : a.date;
+    if (!window.confirm(`Delete attendance for ${label} on ${dateStr}? This cannot be undone.`)) return;
+    setDeleting(a.id);
+    try {
+      await deleteAttendance(a.id);
+      queryClient.invalidateQueries({ queryKey: ["attendances"] });
     } catch (err: unknown) {
-      console.error("Failed to load attendances", err);
-      const e2 = err as { response?: { data?: { message?: string; error?: string } }; message?: string };
-      setError(e2.response?.data?.message || e2.response?.data?.error || e2.message || "Failed to load attendance");
-      setAttendances([]);
+      console.error("Delete attendance failed", err);
     } finally {
-      setLoading(false);
+      setDeleting(null);
     }
   };
 
-  useEffect(() => {
-    // For student overview, wait until we have a selected student (if there are options)
-    if (activeTab === "student_overview" && studentOptions.length > 0 && !selectedStudentId) return;
-    // For coach overview, wait until we have a selected coach (if there are options)
-    if (activeTab === "coach_overview" && coachOptions.length > 0 && !selectedCoachId) return;
-    loadAttendances();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, monthValue, selectedStudentId, selectedCoachId]);
+  const invalidateAttendances = () => {
+    queryClient.invalidateQueries({ queryKey: ["attendances"] });
+  };
 
-  const groupedByCoach = useMemo(() => {
-    const m = new Map<string, Attendance[]>();
-    for (const a of attendances) {
-      const key = a.coach?.id || a.coach_id || "unknown";
-      if (!m.has(key)) m.set(key, []);
-      m.get(key)!.push(a);
-    }
-    return Array.from(m.entries()).map(([key, items]) => ({
-      key,
-      coachName: items[0]?.coach ? `${items[0].coach.first_name} ${items[0].coach.last_name}` : key,
-      items,
-    }));
-  }, [attendances]);
-
-  // Derived values for share card
+  // ─── Share card helpers ───────────────────────────────────────────
   const shareMonthLabel = useMemo(() => {
-    const parsed = parseMonthInput(monthValue);
     if (!parsed) return "";
     const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
     return `${months[parsed.month - 1]} ${parsed.year}`;
-  }, [monthValue]);
+  }, [parsed]);
 
   const sharePersonName = useMemo(() => {
     if (activeTab === "student_overview") {
-      const s = studentOptions.find((x) => x.id === selectedStudentId);
+      if (isOthersSelected) return "Others";
+      const s = students.find((x) => x.id === selectedStudentId);
       return s ? `${s.first_name} ${s.last_name}` : "";
     }
-    const c = coachOptions.find((x) => x.id === selectedCoachId);
+    const c = coaches.find((x) => x.id === selectedCoachId);
     return c ? `${c.first_name} ${c.last_name}` : "";
-  }, [activeTab, selectedStudentId, selectedCoachId, studentOptions, coachOptions]);
+  }, [activeTab, selectedStudentId, selectedCoachId, students, coaches, isOthersSelected]);
 
   return (
     <div>
@@ -210,16 +199,21 @@ export default function AttendancePage() {
                 onChange={(e) => setSelectedStudentId(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2 text-gray-900 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
               >
-                {studentOptions.length === 0 && (
+                {students.length === 0 && (
                   <option value="" disabled>
                     No students found
                   </option>
                 )}
-                {studentOptions.map((s) => (
+                {students.map((s) => (
                   <option key={s.id} value={s.id} className="dark:bg-gray-800">
                     {s.first_name} {s.last_name} ({s.email})
                   </option>
                 ))}
+                {canSeeOthers && (
+                  <option value="__others__" className="dark:bg-gray-800">
+                    Others (non-assigned students)
+                  </option>
+                )}
               </select>
             </div>
           )}
@@ -227,19 +221,19 @@ export default function AttendancePage() {
           {activeTab === "coach_overview" && (
             <div className="min-w-[260px]">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Coach
+                Coach / Mentor
               </label>
               <select
                 value={selectedCoachId}
                 onChange={(e) => setSelectedCoachId(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2 text-gray-900 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
               >
-                {coachOptions.length === 0 && (
+                {coaches.length === 0 && (
                   <option value="" disabled>
                     No coaches found
                   </option>
                 )}
-                {coachOptions.map((c) => (
+                {coaches.map((c) => (
                   <option key={c.id} value={c.id} className="dark:bg-gray-800">
                     {c.first_name} {c.last_name} ({c.email})
                   </option>
@@ -307,149 +301,29 @@ export default function AttendancePage() {
           <div className="flex items-center justify-center min-h-[200px]">
             <div className="text-gray-500">Loading...</div>
           </div>
-        ) : activeTab === "student_overview" ? (
-          <>
-            {attendances.length === 0 ? (
-              <p className="text-gray-600 dark:text-gray-400">No attendance records for this month.</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-sm">
-                  <thead className="border-b border-gray-200 dark:border-gray-800">
-                    <tr>
-                      <th className="text-left py-2 pr-4 text-gray-500 font-medium">Date</th>
-                      <th className="text-left py-2 pr-4 text-gray-500 font-medium">Type</th>
-                      <th className="text-left py-2 pr-4 text-gray-500 font-medium">Coach</th>
-                      <th className="text-left py-2 pr-4 text-gray-500 font-medium">Verified</th>
-                      <th className="text-left py-2 pr-4 text-gray-500 font-medium">Highlights</th>
-                      <th className="text-left py-2 pr-4 text-gray-500 font-medium">Homework</th>
-                      <th className="text-left py-2 pr-4 text-gray-500 font-medium">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                    {attendances.map((a) => (
-                      <tr key={a.id}>
-                        <td className="py-3 pr-4 text-gray-800 dark:text-white/90">{formatDateOnly(a.date)}</td>
-                        <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">{a.class_type}</td>
-                        <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
-                          {a.coach ? `${a.coach.first_name} ${a.coach.last_name}` : a.coach_id}
-                        </td>
-                        <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
-                          {a.is_verified ? "Yes" : "No"}
-                        </td>
-                        <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
-                          {a.class_highlights || "-"}
-                        </td>
-                        <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
-                          {a.homework || "-"}
-                        </td>
-                        <td className="py-3 pr-4">
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => setEditTarget(a)}
-                              className="text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDelete(a)}
-                              disabled={deleting === a.id}
-                              className="text-xs font-medium text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50"
-                            >
-                              {deleting === a.id ? "Deleting..." : "Delete"}
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </>
         ) : (
-          <>
-            {groupedByCoach.length === 0 ? (
-              <p className="text-gray-600 dark:text-gray-400">No attendance records for this month.</p>
-            ) : (
-              <div className="space-y-6">
-
-                {groupedByCoach.map((g) => (
-                  <div key={g.key} className="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="font-semibold text-gray-800 dark:text-white/90">
-                        {g.coachName}
-                      </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                        {g.items.length} record(s)
-                      </div>
-                    </div>
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full text-sm">
-                        <thead className="border-b border-gray-200 dark:border-gray-800">
-                          <tr>
-                            <th className="text-left py-2 pr-4 text-gray-500 font-medium">Date</th>
-                            <th className="text-left py-2 pr-4 text-gray-500 font-medium">Type</th>
-                            <th className="text-left py-2 pr-4 text-gray-500 font-medium">Student</th>
-                            <th className="text-left py-2 pr-4 text-gray-500 font-medium">Verified</th>
-                            <th className="text-left py-2 pr-4 text-gray-500 font-medium">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                          {g.items.map((a) => (
-                            <tr key={a.id}>
-                              <td className="py-3 pr-4 text-gray-800 dark:text-white/90">{formatDateOnly(a.date)}</td>
-                              <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">{a.class_type}</td>
-                              <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
-                                {a.student ? `${a.student.first_name} ${a.student.last_name}` : a.student_id}
-                              </td>
-                              <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">{a.is_verified ? "Yes" : "No"}</td>
-                              <td className="py-3 pr-4">
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    onClick={() => setEditTarget(a)}
-                                    className="text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                                  >
-                                    Edit
-                                  </button>
-                                  <button
-                                    onClick={() => handleDelete(a)}
-                                    disabled={deleting === a.id}
-                                    className="text-xs font-medium text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50"
-                                  >
-                                    {deleting === a.id ? "Deleting..." : "Delete"}
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
+          <AttendanceTable
+            attendances={attendances}
+            viewType={activeTab}
+            onEdit={setEditTarget}
+            onDelete={handleDelete}
+            deletingId={deleting}
+          />
         )}
       </div>
 
       <AddAttendanceModal
         isOpen={isAddOpen}
         onClose={() => setIsAddOpen(false)}
-        onSuccess={() => {
-          loadAttendances();
-        }}
+        onSuccess={invalidateAttendances}
       />
 
       <EditAttendanceModal
         isOpen={!!editTarget}
         attendance={editTarget}
         onClose={() => setEditTarget(null)}
-        onSuccess={() => {
-          loadAttendances();
-        }}
+        onSuccess={invalidateAttendances}
       />
     </div>
   );
 }
-

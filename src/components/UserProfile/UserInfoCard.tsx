@@ -6,10 +6,47 @@ import Label from "../form/Label";
 import {  useState } from "react";
 import { PublicProfile } from "../../models/publicProfile";
 
+/** Compute current age from a DOB ISO string. */
+function ageFromDob(dob: string): number {
+  const birth = new Date(dob);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
+}
+
+/** Compute current age from a stored age + the date it was recorded. */
+function ageFromRecorded(age: number, recordedAt: string): number {
+  const recorded = new Date(recordedAt);
+  const today = new Date();
+  const yearsDiff = today.getFullYear() - recorded.getFullYear();
+  // Check if the anniversary has passed this year
+  const monthDiff = today.getMonth() - recorded.getMonth();
+  const dayDiff = today.getDate() - recorded.getDate();
+  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+    return age + yearsDiff - 1;
+  }
+  return age + yearsDiff;
+}
+
+/** Format an ISO date string as MM/DD/YYYY for display. */
+function formatDate(isoDate: string): string {
+  const d = new Date(isoDate);
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${month}/${day}/${year}`;
+}
+
 interface InfoUpdate{
   first_name: string;
   last_name: string;
   bio: string;
+  dob?: string | null;
+  age?: number | null;
 }
 interface UserInfoCardProps {
   user: PublicProfile;            // Connects to the interface above
@@ -25,6 +62,18 @@ export default function UserInfoCard({user, onUpdate, readOnly = false}:UserInfo
     uid:user.uid,
     bio:user.bio
   });
+
+  // DOB/Age edit state
+  type DobAgeMode = "dob" | "age";
+  const initialMode: DobAgeMode = user.dob ? "dob" : "age";
+  const [dobAgeMode, setDobAgeMode] = useState<DobAgeMode>(initialMode);
+  // Convert DOB ISO string to YYYY-MM-DD for date input
+  const initialDobInput = user.dob ? user.dob.slice(0, 10) : "";
+  const [dobInput, setDobInput] = useState(initialDobInput);
+  const [ageInput, setAgeInput] = useState<string>(
+    user.age != null ? String(user.age) : ""
+  );
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({
@@ -57,17 +106,44 @@ export default function UserInfoCard({user, onUpdate, readOnly = false}:UserInfo
   //     mounted = false;
   //   };
   // }, []); 
+
+
   
-
-
    const handleSave = async () => {
     // Handle save logic here
+    const patch: InfoUpdate = {
+      ...user,
+      first_name: form.first_name,
+      last_name: form.last_name,
+      bio: form.bio,
+    };
+
+    if (dobAgeMode === "dob" && dobInput) {
+      // Send as RFC3339 to match backend expectation
+      patch.dob = new Date(dobInput).toISOString();
+      patch.age = undefined; // don't send age
+    } else if (dobAgeMode === "age" && ageInput) {
+      patch.age = parseInt(ageInput, 10);
+      patch.dob = undefined; // don't send dob
+    }
+
     if (onUpdate) {
-      await onUpdate({...user, first_name: form.first_name, last_name: form.last_name ,bio:form.bio });
+      await onUpdate(patch);
     }
 
     closeModal();
   };
+
+  // Compute display values for DOB/Age
+  let ageDisplay = "Not provided";
+  if (user.dob) {
+    const computed = ageFromDob(user.dob);
+    ageDisplay = `${formatDate(user.dob)} (${computed} yrs)`;
+  } else if (user.age != null && user.age_recorded_at) {
+    const computed = ageFromRecorded(user.age, user.age_recorded_at);
+    ageDisplay = `${computed} yrs (approx.)`;
+  }
+
   if (Object.keys(user).length === 0) return <div>Loading...</div>;
  return (
     <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
@@ -118,6 +194,14 @@ export default function UserInfoCard({user, onUpdate, readOnly = false}:UserInfo
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
                 {form.bio}
+              </p>
+            </div>
+            <div>
+              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                Date of Birth / Age
+              </p>
+              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                {ageDisplay}
               </p>
             </div>
           </div>
@@ -190,6 +274,51 @@ export default function UserInfoCard({user, onUpdate, readOnly = false}:UserInfo
                   <div className="col-span-2">
                     <Label>Bio</Label>
                     <Input type="text" name="bio" value={form.bio} onChange={handleChange}/>
+                  </div>
+
+                  {/* DOB / Age toggle */}
+                  <div className="col-span-2">
+                    <Label>Date of Birth / Age</Label>
+                    <div className="flex items-center gap-4 mb-3 mt-1">
+                      <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300">
+                        <input
+                          type="radio"
+                          name="dob_age_mode"
+                          value="dob"
+                          checked={dobAgeMode === "dob"}
+                          onChange={() => setDobAgeMode("dob")}
+                          className="accent-brand-500"
+                        />
+                        Date of Birth
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300">
+                        <input
+                          type="radio"
+                          name="dob_age_mode"
+                          value="age"
+                          checked={dobAgeMode === "age"}
+                          onChange={() => setDobAgeMode("age")}
+                          className="accent-brand-500"
+                        />
+                        Age
+                      </label>
+                    </div>
+                    {dobAgeMode === "dob" ? (
+                      <Input
+                        type="date"
+                        name="dob"
+                        value={dobInput}
+                        onChange={(e) => setDobInput(e.target.value)}
+                      />
+                    ) : (
+                      <Input
+                        type="number"
+                        name="age"
+                        value={ageInput}
+                        onChange={(e) => setAgeInput(e.target.value)}
+                        placeholder="Enter age in years"
+                      />
+                    )}
                   </div>
                 </div>
               </div>

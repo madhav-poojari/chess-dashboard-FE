@@ -10,10 +10,12 @@ import {
   setStudentCoachAssignment,
   setCoachMentorAssignment,
   createUser,
+  setUserActive,
+  fetchAllUsers,
   StudentWithAssignment,
   CoachWithAssignment,
 } from "../../api/admin/service";
-import { User } from "../../api/user/dto";
+import { User, UserRole } from "../../api/user/dto";
 import Button from "../../components/ui/button/Button";
 import {
   Table,
@@ -28,12 +30,13 @@ import { EyeCloseIcon, EyeIcon, MoreDotIcon } from "../../icons";
 import { useAuth } from "../../context/AuthContext";
 import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
+import AddRelationshipModal from "../../components/ReferralGraph/AddRelationshipModal";
 
-type TabType = "pending" | "students" | "coaches" | "add-user";
+type TabType = "pending" | "students" | "coaches" | "add-user" | "add-referral" | "manage-users";
 
 export default function AdminPage() {
   const { user } = useAuth();
-  const isAdmin = user?.role?.toLowerCase() === "admin";
+  const isAdmin = user?.role?.toLowerCase() === UserRole.ADMIN;
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabType>("pending");
   const [assigningStudentId, setAssigningStudentId] = useState<string | null>(null);
@@ -52,9 +55,25 @@ export default function AdminPage() {
     first_name: "",
     last_name: "",
     role: "student",
+    phone: "",
+    dob: "",
+    bio: "",
+    personal_meet_link: "",
+    syllabus_url: "",
+    added_in_whatsapp: false,
+    city: "",
+    state: "",
+    country: "",
+    zipcode: "",
+    lichess_username: "",
+    chesscom_username: "",
+    uscf_id: "",
+    fide_id: ""
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [manageRoleFilter, setManageRoleFilter] = useState<string>("all");
   const [creatingUser, setCreatingUser] = useState(false);
+  const [showAddRelationshipModal, setShowAddRelationshipModal] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const { data: unapprovedUsers = [], isLoading: unapprovedLoading } = useQuery<User[]>({
@@ -75,7 +94,13 @@ export default function AdminPage() {
     enabled: !!user && isAdmin,
   });
 
-  const loading = unapprovedLoading || studentsLoading || coachesLoading;
+  const { data: allUsers = [], isLoading: allUsersLoading } = useQuery<User[]>({
+    queryKey: ["admin", "all-users"],
+    queryFn: fetchAllUsers,
+    enabled: !!user && isAdmin,
+  });
+
+  const loading = unapprovedLoading || studentsLoading || coachesLoading || allUsersLoading;
 
   const approveMutation = useMutation({
     mutationFn: approveUser,
@@ -112,9 +137,32 @@ export default function AdminPage() {
           password: "",
           first_name: "",
           last_name: "",
-          role: "student",
-        });
+          role: UserRole.STUDENT,
+          phone: "",
+          dob: "",
+          bio: "",
+          personal_meet_link: "",
+          syllabus_url: "",
+          added_in_whatsapp: false,
+          city: "",
+          state: "",
+          country: "",
+          zipcode: "",
+          lichess_username: "",
+          chesscom_username: "",
+          uscf_id: "",
+          fide_id: "",
+        })
       alert("User created successfully!");
+    },
+  });
+
+  const toggleActiveMutation = useMutation({
+    mutationFn: async (vars: { userId: string; active: boolean }) =>
+      setUserActive(vars.userId, vars.active),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin"] });
+      await queryClient.invalidateQueries({ queryKey: ["students"] });
     },
   });
 
@@ -272,7 +320,7 @@ export default function AdminPage() {
 
       {/* Tab Navigation */}
       <div className="mt-6 mb-6">
-        <div className="flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5 dark:bg-gray-900 max-w-2xl">
+        <div className="flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5 dark:bg-gray-900 max-w-4xl">
           <button
             onClick={() => setActiveTab("pending")}
             className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${getTabButtonClass("pending")}`}
@@ -301,6 +349,12 @@ export default function AdminPage() {
             className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${getTabButtonClass("add-user")}`}
           >
             Add User
+          </button>
+          <button
+            onClick={() => setActiveTab("manage-users")}
+            className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${getTabButtonClass("manage-users")}`}
+          >
+            Manage Users
           </button>
         </div>
       </div>
@@ -695,116 +749,276 @@ export default function AdminPage() {
                   }
                 }}
               >
-                <div className="space-y-6">
-                  <div>
-                    <Label>
-                      Role <span className="text-error-500">*</span>
-                    </Label>
-                    <Select
-                      options={[
-                        { value: "student", label: "Student" },
-                        { value: "coach", label: "Coach" },
-                        { value: "mentor", label: "Mentor Coach" },
-                      ]}
-                      placeholder="Select Role"
-                      onChange={(role) =>
-                        setNewUserForm((prev) => ({
-                          ...prev,
-                          role,
-                        }))
-                      }
-                    />
-                  </div>
+                <div className="space-y-8">
 
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* ── Required Fields ── */}
+                  <div className="space-y-6">
+                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide dark:text-white/50">
+                      Required Info
+                    </h4>
+
                     <div>
-                      <Label>
-                        First Name <span className="text-error-500">*</span>
-                      </Label>
+                      <Label>Role <span className="text-error-500">*</span></Label>
+                      <Select
+                        options={[
+                          { value: "student", label: "Student" },
+                          { value: "coach", label: "Coach" },
+                          { value: "mentor", label: "Mentor Coach" },
+                        ]}
+                        placeholder="Select Role"
+                        onChange={(role) => setNewUserForm((prev) => ({ ...prev, role }))}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>First Name <span className="text-error-500">*</span></Label>
+                        <Input
+                          name="first_name"
+                          value={newUserForm.first_name}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, first_name: e.target.value }))}
+                          placeholder="John"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label>Last Name <span className="text-error-500">*</span></Label>
+                        <Input
+                          name="last_name"
+                          value={newUserForm.last_name}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, last_name: e.target.value }))}
+                          placeholder="Doe"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Email <span className="text-error-500">*</span></Label>
                       <Input
-                        name="first_name"
-                        value={newUserForm.first_name}
-                        onChange={(e) =>
-                          setNewUserForm((prev) => ({
-                            ...prev,
-                            first_name: e.target.value,
-                          }))
-                        }
-                        placeholder="John"
+                        type="email"
+                        name="email"
+                        value={newUserForm.email}
+                        onChange={(e) => setNewUserForm((prev) => ({ ...prev, email: e.target.value }))}
+                        placeholder="example@gmail.com"
                         required
                       />
                     </div>
+
                     <div>
-                      <Label>
-                        Last Name <span className="text-error-500">*</span>
-                      </Label>
-                      <Input
-                        name="last_name"
-                        value={newUserForm.last_name}
-                        onChange={(e) =>
-                          setNewUserForm((prev) => ({
-                            ...prev,
-                            last_name: e.target.value,
-                          }))
-                        }
-                        placeholder="Doe"
-                      />
+                      <Label>Password <span className="text-error-500">*</span></Label>
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          name="password"
+                          value={newUserForm.password}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, password: e.target.value }))}
+                          placeholder="Enter password"
+                          autoComplete="new-password"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                        >
+                          {showPassword ? (
+                            <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                          ) : (
+                            <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
 
-                  <div>
-                    <Label>
-                      Email <span className="text-error-500">*</span>
-                    </Label>
-                    <Input
-                      type="email"
-                      name="email"
-                      value={newUserForm.email}
-                      onChange={(e) =>
-                        setNewUserForm((prev) => ({
-                          ...prev,
-                          email: e.target.value,
-                        }))
-                      }
-                      placeholder="example@gmail.com"
-                      required
-                    />
-                  </div>
+                  {/* ── Personal Details ── */}
+                  <div className="space-y-6">
+                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide dark:text-white/50">
+                      Personal Details <span className="normal-case text-xs font-normal">(optional)</span>
+                    </h4>
 
-                  <div>
-                    <Label>
-                      Password <span className="text-error-500">*</span>
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        name="password"
-                        value={newUserForm.password}
-                        onChange={(e) =>
-                          setNewUserForm((prev) => ({
-                            ...prev,
-                            password: e.target.value,
-                          }))
-                        }
-                        placeholder="Enter password"
-                        autoComplete="new-password"
-                        required
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Phone</Label>
+                        <Input
+                          type="tel"
+                          name="phone"
+                          value={newUserForm.phone}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, phone: e.target.value }))}
+                          placeholder="+1 234 567 8900"
+                        />
+                      </div>
+                      <div>
+                        <Label>Date of Birth</Label>
+                        <Input
+                          type="date"
+                          name="dob"
+                          value={newUserForm.dob}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, dob: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Bio</Label>
+                      <textarea
+                        name="bio"
+                        value={newUserForm.bio}
+                        onChange={(e) => setNewUserForm((prev) => ({ ...prev, bio: e.target.value }))}
+                        placeholder="Tell us a bit about this user..."
+                        rows={3}
+                        className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/10 dark:border-white/10 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 resize-none"
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-                      >
-                        {showPassword ? (
-                          <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
-                        ) : (
-                          <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
-                        )}
-                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* <div>
+                        <Label>Profile Picture URL</Label>
+                        <Input
+                          type="url"
+                          name="profile_picture_url"
+                          value={newUserForm.profile_picture_url}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, profile_picture_url: e.target.value }))}
+                          placeholder="https://..."
+                        />
+                      </div> */}
+                      <div>
+                        <Label>Personal Meet Link</Label>
+                        <Input
+                          type="url"
+                          name="personal_meet_link"
+                          value={newUserForm.personal_meet_link}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, personal_meet_link: e.target.value }))}
+                          placeholder="https://meet.google.com/..."
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Syllabus URL</Label>
+                      <Input
+                        type="url"
+                        name="syllabus_url"
+                        value={newUserForm.syllabus_url}
+                        onChange={(e) => setNewUserForm((prev) => ({ ...prev, syllabus_url: e.target.value }))}
+                        placeholder="https://..."
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        id="added_in_whatsapp"
+                        checked={newUserForm.added_in_whatsapp}
+                        onChange={(e) => setNewUserForm((prev) => ({ ...prev, added_in_whatsapp: e.target.checked }))}
+                        className="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500 dark:border-white/10"
+                      />
+                      <label htmlFor="added_in_whatsapp" className="text-sm text-gray-700 dark:text-white/80">
+                        Added in WhatsApp
+                      </label>
                     </div>
                   </div>
 
-                  <div className="flex gap-3 pt-4">
+                  {/* ── Location ── */}
+                  <div className="space-y-6">
+                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide dark:text-white/50">
+                      Location <span className="normal-case text-xs font-normal">(optional)</span>
+                    </h4>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>City</Label>
+                        <Input
+                          name="city"
+                          value={newUserForm.city}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, city: e.target.value }))}
+                          placeholder="New York"
+                        />
+                      </div>
+                      <div>
+                        <Label>State</Label>
+                        <Input
+                          name="state"
+                          value={newUserForm.state}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, state: e.target.value }))}
+                          placeholder="NY"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Country</Label>
+                        <Input
+                          name="country"
+                          value={newUserForm.country}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, country: e.target.value }))}
+                          placeholder="United States"
+                        />
+                      </div>
+                      <div>
+                        <Label>Zipcode</Label>
+                        <Input
+                          name="zipcode"
+                          value={newUserForm.zipcode}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, zipcode: e.target.value }))}
+                          placeholder="10001"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ── Chess IDs ── */}
+                  <div className="space-y-6">
+                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide dark:text-white/50">
+                      Chess Profiles <span className="normal-case text-xs font-normal">(optional)</span>
+                    </h4>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Lichess Username</Label>
+                        <Input
+                          name="lichess_username"
+                          value={newUserForm.lichess_username}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, lichess_username: e.target.value }))}
+                          placeholder="lichess_handle"
+                        />
+                      </div>
+                      <div>
+                        <Label>Chess.com Username</Label>
+                        <Input
+                          name="chesscom_username"
+                          value={newUserForm.chesscom_username}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, chesscom_username: e.target.value }))}
+                          placeholder="chesscom_handle"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>USCF ID</Label>
+                        <Input
+                          name="uscf_id"
+                          value={newUserForm.uscf_id}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, uscf_id: e.target.value }))}
+                          placeholder="12345678"
+                        />
+                      </div>
+                      <div>
+                        <Label>FIDE ID</Label>
+                        <Input
+                          name="fide_id"
+                          value={newUserForm.fide_id}
+                          onChange={(e) => setNewUserForm((prev) => ({ ...prev, fide_id: e.target.value }))}
+                          placeholder="12345678"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ── Actions ── */}
+                  <div className="flex gap-3 pt-2">
                     <Button
                       variant="outline"
                       onClick={() =>
@@ -813,7 +1027,21 @@ export default function AdminPage() {
                           password: "",
                           first_name: "",
                           last_name: "",
-                          role: "student",
+                          role: UserRole.STUDENT,
+                          phone: "",
+                          dob: "",
+                          bio: "",
+                          personal_meet_link: "",
+                          syllabus_url: "",
+                          added_in_whatsapp: false,
+                          city: "",
+                          state: "",
+                          country: "",
+                          zipcode: "",
+                          lichess_username: "",
+                          chesscom_username: "",
+                          uscf_id: "",
+                          fide_id: "",
                         })
                       }
                       type="button"
@@ -823,13 +1051,152 @@ export default function AdminPage() {
                     <Button type="submit" disabled={creatingUser}>
                       {creatingUser ? "Creating User..." : "Create User"}
                     </Button>
+                    
                   </div>
+
                 </div>
               </form>
+            </div>
+            {/* <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]"> */}
+              <div className="border-b border-gray-100 dark:border-white/[0.05] px-5 py-4">
+                <h3 className="font-semibold text-gray-800 text-theme-base dark:text-white/90">
+                  Done creating user? Add Referral Relationship...
+                </h3>
+              </div>
+              <div className="p-6">
+                <button
+                  onClick={() => setShowAddRelationshipModal(true)}
+                  className="px-6 py-3 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition font-medium"
+                >
+                  + Add New Referral
+                </button>
+                <p className="text-gray-600 dark:text-gray-400 text-theme-sm mt-4">
+                  Create a new referral relationship between two users by specifying the referrer, referee, and relationship type.
+                </p>
+              </div>
+            {/* </div> */}
+          </div>
+        )}
+
+        {/* Manage Users Tab */}
+        {activeTab === "manage-users" && (
+          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+            <div className="border-b border-gray-100 dark:border-white/[0.05] px-5 py-4 flex items-center justify-between">
+              <h3 className="font-semibold text-gray-800 text-theme-base dark:text-white/90">
+                Manage Users
+              </h3>
+              <div className="w-48">
+                <Select
+                  options={[
+                    { value: "all", label: "All Roles" },
+                    { value: UserRole.STUDENT, label: "Students" },
+                    { value: UserRole.COACH, label: "Coaches" },
+                    { value: UserRole.MENTOR_COACH, label: "Mentors" },
+                  ]}
+                  placeholder="Filter by Role"
+                  onChange={(val) => setManageRoleFilter(val)}
+                  className="text-theme-xs"
+                />
+              </div>
+            </div>
+            <div className="max-w-full overflow-x-auto">
+              <Table>
+                <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+                  <TableRow>
+                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Name</TableCell>
+                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Email</TableCell>
+                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">Role</TableCell>
+                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">Status</TableCell>
+                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">Action</TableCell>
+                  </TableRow>
+                </TableHeader>
+                <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                  {(() => {
+                    const filtered = allUsers
+                      .filter((u) => u.approved)
+                      .filter((u) => u.role?.toLowerCase() !== UserRole.ADMIN)
+                      .filter((u) =>
+                        manageRoleFilter === "all"
+                          ? true
+                          : u.role?.toLowerCase() === manageRoleFilter
+                      );
+
+                    if (filtered.length === 0) {
+                      return (
+                        <TableRow>
+                          <TableCell colSpan={5} className="px-5 py-8 text-center text-gray-500 text-theme-sm">
+                            No users found
+                          </TableCell>
+                        </TableRow>
+                      );
+                    }
+
+                    return filtered.map((u) => (
+                      <TableRow key={u.id}>
+                        <TableCell className="px-5 py-4 text-start">
+                          <div className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                            {u.first_name} {u.last_name}
+                          </div>
+                          <div className="text-gray-500 text-theme-xs dark:text-gray-400 mt-0.5">
+                            {u.id}
+                          </div>
+                        </TableCell>
+                        <TableCell className="px-5 py-4 text-start">
+                          <span className="text-gray-700 text-theme-sm dark:text-gray-300">{u.email}</span>
+                        </TableCell>
+                        <TableCell className="px-5 py-4 text-center">
+                          <Badge
+                            size="sm"
+                            color={
+                              u.role?.toLowerCase() === UserRole.MENTOR_COACH
+                                ? "primary"
+                                : u.role?.toLowerCase() === UserRole.COACH
+                                  ? "info"
+                                  : "light"
+                            }
+                          >
+                            {u.role?.toLowerCase() === UserRole.MENTOR_COACH
+                              ? "Mentor"
+                              : u.role?.charAt(0).toUpperCase() + u.role?.slice(1)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="px-5 py-4 text-center">
+                          <Badge size="sm" color={u.active ? "success" : "error"}>
+                            {u.active ? "Active" : "Inactive"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="px-5 py-4 text-center">
+                          <Button
+                            size="sm"
+                            variant={u.active ? "outline" : "primary"}
+                            onClick={() => {
+                              const action = u.active ? "deactivate" : "activate";
+                              if (confirm(`Are you sure you want to ${action} ${u.first_name} ${u.last_name}?`)) {
+                                toggleActiveMutation.mutate({ userId: u.id, active: !u.active });
+                              }
+                            }}
+                            disabled={toggleActiveMutation.isPending}
+                          >
+                            {u.active ? "Deactivate" : "Activate"}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ));
+                  })()}
+                </TableBody>
+              </Table>
             </div>
           </div>
         )}
       </div>
+
+      {/* Add Relationship Modal */}
+      {showAddRelationshipModal && (
+        <AddRelationshipModal
+          onClose={() => setShowAddRelationshipModal(false)}
+          onSuccess={() => setShowAddRelationshipModal(false)}
+        />
+      )}
 
       {/* Update Assignment Modal */}
       {updateModalOpen && updateType && updateTargetId && (
@@ -845,10 +1212,7 @@ export default function AdminPage() {
                     Select Coach
                   </label>
                   <Select
-                    options={[
-                      { value: "", label: "None (Remove Assignment)" },
-                      ...getAvailableCoaches()
-                    ]}
+                    options={[{ value: "", label: "None (Remove Assignment)" }, ...getAvailableCoaches()]}
                     placeholder="Select Coach"
                     onChange={(coachId) => setUpdateSelectedCoach(coachId)}
                     className="text-theme-xs"
@@ -862,10 +1226,7 @@ export default function AdminPage() {
                     Select Mentor Coach
                   </label>
                   <Select
-                    options={[
-                      { value: "", label: "None (Remove Assignment)" },
-                      ...getAvailableMentorCoaches()
-                    ]}
+                    options={[{ value: "", label: "None (Remove Assignment)" }, ...getAvailableMentorCoaches()]}
                     placeholder="Select Mentor"
                     onChange={(mentorId) => setUpdateSelectedMentor(mentorId)}
                     className="text-theme-xs"
@@ -886,9 +1247,7 @@ export default function AdminPage() {
               >
                 Cancel
               </Button>
-              <Button onClick={handleSaveUpdate}>
-                Save
-              </Button>
+              <Button onClick={handleSaveUpdate}>Save</Button>
             </div>
           </div>
         </div>
