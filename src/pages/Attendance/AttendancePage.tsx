@@ -169,6 +169,23 @@ export default function AttendancePage() {
     return c ? `${c.first_name} ${c.last_name}` : "";
   }, [activeTab, selectedStudentId, selectedCoachId, students, coaches, isOthersSelected]);
 
+  // Derived values for share card
+  const shareMonthLabel = useMemo(() => {
+    const parsed = parseMonthInput(monthValue);
+    if (!parsed) return "";
+    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    return `${months[parsed.month - 1]} ${parsed.year}`;
+  }, [monthValue]);
+
+  const sharePersonName = useMemo(() => {
+    if (activeTab === "student_overview") {
+      const s = studentOptions.find((x) => x.id === selectedStudentId);
+      return s ? `${s.first_name} ${s.last_name}` : "";
+    }
+    const c = coachOptions.find((x) => x.id === selectedCoachId);
+    return c ? `${c.first_name} ${c.last_name}` : "";
+  }, [activeTab, selectedStudentId, selectedCoachId, studentOptions, coachOptions]);
+
   return (
     <div>
       <PageMeta title="Attendance" description="Track class attendance" />

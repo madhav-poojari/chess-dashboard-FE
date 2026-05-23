@@ -1,4 +1,4 @@
-// Centralized TanStack Query keys for gallery & profile features
+// Centralized TanStack Query keys for gallery, profile & schedule features
 export const queryKeys = {
     gallery: {
         images: (userId: string) => ["gallery", userId] as const,

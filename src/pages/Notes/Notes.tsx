@@ -134,6 +134,17 @@ export default function Notes() {
         }
     }, [studentIdParam, user]);
 
+    // Resolve the student name for lesson plan sharing
+    useEffect(() => {
+        if (studentIdParam) {
+            userPublicProfile(studentIdParam)
+                .then((p) => setStudentName(`${p.first_name} ${p.last_name}`.trim()))
+                .catch(() => setStudentName(""));
+        } else if (user) {
+            setStudentName(user.name || "");
+        }
+    }, [studentIdParam, user]);
+
     const userRole = user?.role || '';
     const isViewingStudent = !!studentIdParam && userRole !== 'student';
     const isViewingCoach = !!coachIdParam && userRole !== 'coach' && userRole !== 'student';
@@ -355,6 +366,7 @@ export default function Notes() {
                         lessonPlanToEdit={lessonPlanToEdit}
                         loadNotes={loadNotes}
                         handleCloseModal={handleCloseModal}
+                        rawLessonPlan={rawLessonPlan}
                         studentName={studentName}
                     />
                 )}
