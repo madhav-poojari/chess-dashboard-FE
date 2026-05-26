@@ -5,6 +5,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  ReferenceLine,
   ResponsiveContainer,
 } from "recharts";
 import { PlatformConfig } from "./progressConstants";
@@ -28,14 +29,15 @@ function CustomTooltip({ active, payload, label }: { active?: boolean; payload?:
 }
 
 export default function RatingAreaChart({ chartData, yDomain, platformConfig, strokeColor }: RatingAreaChartProps) {
+  const currentRating = chartData.length > 0 ? chartData[chartData.length - 1].rating : null;
   return (
     <div className="h-72 sm:h-80">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
           <defs>
             <linearGradient id={platformConfig.gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={strokeColor} stopOpacity={0.25} />
-              <stop offset="95%" stopColor={strokeColor} stopOpacity={0.02} />
+              <stop offset="0%" stopColor={strokeColor} stopOpacity={0.4} />
+              <stop offset="95%" stopColor={strokeColor} stopOpacity={0.05} />
             </linearGradient>
           </defs>
           <CartesianGrid
@@ -59,8 +61,17 @@ export default function RatingAreaChart({ chartData, yDomain, platformConfig, st
             width={45}
           />
           <Tooltip content={<CustomTooltip />} />
+          {currentRating !== null && (
+            <ReferenceLine
+              y={currentRating}
+              stroke={strokeColor}
+              strokeDasharray="4 4"
+              strokeOpacity={0.45}
+              strokeWidth={1}
+            />
+          )}
           <Area
-            type="monotone"
+            type="linear"
             dataKey="rating"
             stroke={strokeColor}
             strokeWidth={2}
