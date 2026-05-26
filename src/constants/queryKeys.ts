@@ -30,6 +30,7 @@ export const queryKeys = {
         coaches: () => ["admin", "coaches"] as const,
         coachesPicker: () => ["admin", "coaches-picker"] as const,
         mentorsPicker: () => ["admin", "mentors-picker"] as const,
+        allUsers: () => ["admin", "all-users"] as const,
     },
 };
 
