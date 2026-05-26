@@ -5,6 +5,7 @@ import UserAddressCard from "../components/UserProfile/UserAddressCard";
 import PageMeta from "../components/common/PageMeta";
 import StudentGallery from "../components/UserProfile/StudentGallery";
 import StudentScheduleCard from "../components/UserProfile/StudentScheduleCard";
+import StudentProgressCard from "../components/UserProfile/StudentProgressCard";
 
 import { useEffect, useState, useCallback } from "react";
 import { userPublicProfile } from "../api/user/publicProfile";
@@ -53,7 +54,7 @@ export default function UserProfiles({ studentId, readOnly = false, galleryReadO
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [activeTab, setActiveTab] = useState<"profile" | "gallery">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "gallery" | "progress">("profile");
 
   useEffect(() => {
     let mounted = true;
@@ -159,6 +160,21 @@ export default function UserProfiles({ studentId, readOnly = false, galleryReadO
           >
             Gallery
           </button>
+          {/* Progress tab — only shown for student profiles */}
+          {(profile.role?.toLowerCase() === UserRole.STUDENT || studentId) && (
+            <>
+              <div className="h-5 w-px bg-gray-300 dark:bg-gray-700" />
+              <button
+                onClick={() => setActiveTab("progress")}
+                className={`text-lg font-semibold transition-colors ${activeTab === "progress"
+                  ? "text-gray-800 dark:text-white/90"
+                  : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                  }`}
+              >
+                Progress
+              </button>
+            </>
+          )}
         </div>
 
         {activeTab === "profile" ? (
@@ -177,9 +193,11 @@ export default function UserProfiles({ studentId, readOnly = false, galleryReadO
               />
             )}
           </div>
-        ) : (
+        ) : activeTab === "gallery" ? (
           <StudentGallery userId={profile.uid} readOnly={isGalleryReadOnly} />
-        )}
+        ) : activeTab === "progress" ? (
+          <StudentProgressCard studentId={profile.uid} />
+        ) : null}
       </div>
     </>
   ));
