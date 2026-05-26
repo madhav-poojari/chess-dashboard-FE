@@ -7,13 +7,14 @@ export interface PlatformConfig {
   label: string;
   color: string;
   gradientId: string;
+  timeFormat: string;
 }
 
 export const PLATFORMS: PlatformConfig[] = [
-  { key: "chesscom", label: "Chess.com", color: "#81b64c", gradientId: "colorChesscom" },
-  { key: "lichess",  label: "Lichess",   color: "#e6e6e6", gradientId: "colorLichess" },
-  { key: "fide",     label: "FIDE",      color: "#c4a35a", gradientId: "colorFide" },
-  { key: "uscf",     label: "USCF",      color: "#1a4d8f", gradientId: "colorUscf" },
+  { key: "chesscom", label: "Chess.com", color: "#81b64c", gradientId: "colorChesscom", timeFormat: "Rapid" },
+  { key: "lichess",  label: "Lichess",   color: "#e6e6e6", gradientId: "colorLichess",  timeFormat: "Rapid" },
+  { key: "fide",     label: "FIDE",      color: "#c4a35a", gradientId: "colorFide",     timeFormat: "Classical" },
+  { key: "uscf",     label: "USCF",      color: "#1a4d8f", gradientId: "colorUscf",     timeFormat: "Classical" },
 ];
 
 // staleTime per platform — data updates weekly for chesscom/lichess, monthly for fide
