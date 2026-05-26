@@ -85,23 +85,31 @@ export default function StudentProgressCard({ studentId }: StudentProgressCardPr
         </h4>
       </div>
 
-      {/* Platform tabs */}
-      <div className="flex flex-wrap items-center gap-2 mb-4">
-        {PLATFORMS.map((p) => (
-          <button
-            key={p.key}
-            id={`progress-tab-${p.key}`}
-            onClick={() => { setActivePlatform(p.key); setTimeRange("all"); }}
-            className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-              activePlatform === p.key
-                ? "text-white shadow-sm"
-                : "text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
-            }`}
-            style={activePlatform === p.key ? { backgroundColor: p.key === "lichess" ? "#555" : p.color } : undefined}
-          >
-            {p.label}
-          </button>
-        ))}
+      {/* Platform tabs + time format */}
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <div className="flex flex-wrap items-center gap-2">
+          {PLATFORMS.map((p) => (
+            <button
+              key={p.key}
+              id={`progress-tab-${p.key}`}
+              onClick={() => { setActivePlatform(p.key); setTimeRange("all"); }}
+              className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                activePlatform === p.key
+                  ? "text-white shadow-sm"
+                  : "text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
+              }`}
+              style={activePlatform === p.key ? { backgroundColor: p.key === "lichess" ? "#555" : p.color } : undefined}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800">
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          {platformConfig.timeFormat}
+        </span>
       </div>
 
       {/* Time range selector */}
