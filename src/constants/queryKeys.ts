@@ -31,6 +31,8 @@ export const queryKeys = {
         coachesPicker: () => ["admin", "coaches-picker"] as const,
         mentorsPicker: () => ["admin", "mentors-picker"] as const,
         allUsers: () => ["admin", "all-users"] as const,
+        adminAttendance: (year: number, month: number) =>
+            ["admin", "attendance", year, month] as const,
     },
 };
 

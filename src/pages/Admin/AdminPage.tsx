@@ -4,6 +4,8 @@ import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import {
   fetchUnapprovedUsers,
+  approveUser,
+  createUser,
   fetchAllUsers,
   approveUser,
   createUser,
@@ -12,14 +14,6 @@ import {
 import { User, UserRole } from "../../api/user/dto";
 import { queryKeys } from "../../constants/queryKeys";
 import Button from "../../components/ui/button/Button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "../../components/ui/table";
-import Badge from "../../components/ui/badge/Badge";
 import Select from "../../components/form/Select";
 import { EyeCloseIcon, EyeIcon } from "../../icons";
 import { useAuth } from "../../context/AuthContext";
@@ -28,13 +22,15 @@ import Label from "../../components/form/Label";
 import AddRelationshipModal from "../../components/ReferralGraph/AddRelationshipModal";
 import AssignCoachTab from "./AssignCoachTab";
 import AssignMentorTab from "./AssignMentorTab";
+import UserActivityTab from "./UserActivityTab";
 
-type TabType = "pending" | "students" | "coaches" | "add-user" | "add-referral" | "manage-users";
+type TabType = "user-activity" | "pending" | "students" | "coaches" | "add-user" | "add-referral";
 
 export default function AdminPage() {
   const { user } = useAuth();
   const isAdmin = user?.role?.toLowerCase() === UserRole.ADMIN;
   const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState<TabType>("user-activity");
   const [activeTab, setActiveTab] = useState<TabType>("pending");
   const [newUserForm, setNewUserForm] = useState({
     email: "",
@@ -58,7 +54,7 @@ export default function AdminPage() {
     fide_id: "",
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [manageRoleFilter, setManageRoleFilter] = useState<string>("all");
+
   const [creatingUser, setCreatingUser] = useState(false);
   const [showAddRelationshipModal, setShowAddRelationshipModal] = useState(false);
 
@@ -165,6 +161,12 @@ export default function AdminPage() {
       <div className="mt-6 mb-6">
         <div className="flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5 dark:bg-gray-900 max-w-4xl">
           <button
+            onClick={() => setActiveTab("user-activity")}
+            className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${getTabButtonClass("user-activity")}`}
+          >
+            User Activity
+          </button>
+          <button
             onClick={() => setActiveTab("pending")}
             className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${getTabButtonClass("pending")}`}
           >
@@ -193,17 +195,14 @@ export default function AdminPage() {
           >
             Add User
           </button>
-          <button
-            onClick={() => setActiveTab("manage-users")}
-            className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${getTabButtonClass("manage-users")}`}
-          >
-            Manage Users
-          </button>
         </div>
       </div>
 
       {/* Tab Content */}
       <div className="mt-6">
+        {/* User Activity Tab */}
+        {activeTab === "user-activity" && <UserActivityTab />}
+
         {/* Pending Approvals Tab */}
         {activeTab === "pending" && (
           <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
@@ -605,117 +604,6 @@ export default function AdminPage() {
                 </p>
               </div>
             {/* </div> */}
-          </div>
-        )}
-
-        {/* Manage Users Tab */}
-        {activeTab === "manage-users" && (
-          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-            <div className="border-b border-gray-100 dark:border-white/[0.05] px-5 py-4 flex items-center justify-between">
-              <h3 className="font-semibold text-gray-800 text-theme-base dark:text-white/90">
-                Manage Users
-              </h3>
-              <div className="w-48">
-                <Select
-                  options={[
-                    { value: "all", label: "All Roles" },
-                    { value: UserRole.STUDENT, label: "Students" },
-                    { value: UserRole.COACH, label: "Coaches" },
-                    { value: UserRole.MENTOR_COACH, label: "Mentors" },
-                  ]}
-                  placeholder="Filter by Role"
-                  onChange={(val) => setManageRoleFilter(val)}
-                  className="text-theme-xs"
-                />
-              </div>
-            </div>
-            <div className="max-w-full overflow-x-auto">
-              <Table>
-                <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
-                  <TableRow>
-                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Name</TableCell>
-                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Email</TableCell>
-                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">Role</TableCell>
-                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">Status</TableCell>
-                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">Action</TableCell>
-                  </TableRow>
-                </TableHeader>
-                <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                  {(() => {
-                    const filtered = allUsers
-                      .filter((u) => u.approved)
-                      .filter((u) => u.role?.toLowerCase() !== UserRole.ADMIN)
-                      .filter((u) =>
-                        manageRoleFilter === "all"
-                          ? true
-                          : u.role?.toLowerCase() === manageRoleFilter
-                      );
-
-                    if (filtered.length === 0) {
-                      return (
-                        <TableRow>
-                          <TableCell colSpan={5} className="px-5 py-8 text-center text-gray-500 text-theme-sm">
-                            No users found
-                          </TableCell>
-                        </TableRow>
-                      );
-                    }
-
-                    return filtered.map((u) => (
-                      <TableRow key={u.id}>
-                        <TableCell className="px-5 py-4 text-start">
-                          <div className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                            {u.first_name} {u.last_name}
-                          </div>
-                          <div className="text-gray-500 text-theme-xs dark:text-gray-400 mt-0.5">
-                            {u.id}
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-5 py-4 text-start">
-                          <span className="text-gray-700 text-theme-sm dark:text-gray-300">{u.email}</span>
-                        </TableCell>
-                        <TableCell className="px-5 py-4 text-center">
-                          <Badge
-                            size="sm"
-                            color={
-                              u.role?.toLowerCase() === UserRole.MENTOR_COACH
-                                ? "primary"
-                                : u.role?.toLowerCase() === UserRole.COACH
-                                  ? "info"
-                                  : "light"
-                            }
-                          >
-                            {u.role?.toLowerCase() === UserRole.MENTOR_COACH
-                              ? "Mentor"
-                              : u.role?.charAt(0).toUpperCase() + u.role?.slice(1)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="px-5 py-4 text-center">
-                          <Badge size="sm" color={u.active ? "success" : "error"}>
-                            {u.active ? "Active" : "Inactive"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="px-5 py-4 text-center">
-                          <Button
-                            size="sm"
-                            variant={u.active ? "outline" : "primary"}
-                            onClick={() => {
-                              const action = u.active ? "deactivate" : "activate";
-                              if (confirm(`Are you sure you want to ${action} ${u.first_name} ${u.last_name}?`)) {
-                                toggleActiveMutation.mutate({ userId: u.id, active: !u.active });
-                              }
-                            }}
-                            disabled={toggleActiveMutation.isPending}
-                          >
-                            {u.active ? "Deactivate" : "Activate"}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ));
-                  })()}
-                </TableBody>
-              </Table>
-            </div>
           </div>
         )}
       </div>
