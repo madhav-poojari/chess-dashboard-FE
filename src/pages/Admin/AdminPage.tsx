@@ -6,8 +6,8 @@ import {
   fetchUnapprovedUsers,
   approveUser,
   createUser,
-  fetchAllUsers,
-  setUserActive,
+  // fetchAllUsers,
+  // setUserActive,
 } from "../../api/admin/service";
 import { User, UserRole } from "../../api/user/dto";
 import { queryKeys } from "../../constants/queryKeys";
@@ -61,11 +61,11 @@ export default function AdminPage() {
     enabled: !!user && isAdmin,
   });
 
-  const { data: allUsers = [] } = useQuery<User[]>({
-    queryKey: queryKeys.admin.allUsers(),
-    queryFn: fetchAllUsers,
-    enabled: !!user && isAdmin,
-  });
+  // const { data: allUsers = [] } = useQuery<User[]>({
+  //   queryKey: queryKeys.admin.allUsers(),
+  //   queryFn: fetchAllUsers,
+  //   enabled: !!user && isAdmin,
+  // });
 
   const approveMutation = useMutation({
     mutationFn: approveUser,
@@ -108,14 +108,14 @@ export default function AdminPage() {
     },
   });
 
-  const toggleActiveMutation = useMutation({
-    mutationFn: async (vars: { userId: string; active: boolean }) =>
-      setUserActive(vars.userId, vars.active),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.admin.allUsers() });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.admin.students() });
-    },
-  });
+  // const toggleActiveMutation = useMutation({
+  //   mutationFn: async (vars: { userId: string; active: boolean }) =>
+  //     setUserActive(vars.userId, vars.active),
+  //   onSuccess: async () => {
+  //     await queryClient.invalidateQueries({ queryKey: queryKeys.admin.allUsers() });
+  //     await queryClient.invalidateQueries({ queryKey: queryKeys.admin.students() });
+  //   },
+  // });
 
   const handleApprove = async (userId: string) => {
     try {
