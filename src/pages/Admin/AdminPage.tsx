@@ -7,8 +7,6 @@ import {
   approveUser,
   createUser,
   fetchAllUsers,
-  approveUser,
-  createUser,
   setUserActive,
 } from "../../api/admin/service";
 import { User, UserRole } from "../../api/user/dto";
