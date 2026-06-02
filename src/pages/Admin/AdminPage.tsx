@@ -31,7 +31,6 @@ export default function AdminPage() {
   const isAdmin = user?.role?.toLowerCase() === UserRole.ADMIN;
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabType>("user-activity");
-  const [activeTab, setActiveTab] = useState<TabType>("pending");
   const [newUserForm, setNewUserForm] = useState({
     email: "",
     password: "",
