@@ -6,6 +6,10 @@ import {
   fetchUnapprovedUsers,
   approveUser,
   createUser,
+  fetchAllUsers,
+  approveUser,
+  createUser,
+  setUserActive,
 } from "../../api/admin/service";
 import { User, UserRole } from "../../api/user/dto";
 import { queryKeys } from "../../constants/queryKeys";
@@ -27,6 +31,7 @@ export default function AdminPage() {
   const isAdmin = user?.role?.toLowerCase() === UserRole.ADMIN;
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabType>("user-activity");
+  const [activeTab, setActiveTab] = useState<TabType>("pending");
   const [newUserForm, setNewUserForm] = useState({
     email: "",
     password: "",
@@ -56,6 +61,12 @@ export default function AdminPage() {
   const { data: unapprovedUsers = [], isLoading } = useQuery<User[]>({
     queryKey: queryKeys.admin.unapprovedUsers(),
     queryFn: fetchUnapprovedUsers,
+    enabled: !!user && isAdmin,
+  });
+
+  const { data: allUsers = [] } = useQuery<User[]>({
+    queryKey: queryKeys.admin.allUsers(),
+    queryFn: fetchAllUsers,
     enabled: !!user && isAdmin,
   });
 
@@ -97,6 +108,15 @@ export default function AdminPage() {
         fide_id: "",
       });
       alert("User created successfully!");
+    },
+  });
+
+  const toggleActiveMutation = useMutation({
+    mutationFn: async (vars: { userId: string; active: boolean }) =>
+      setUserActive(vars.userId, vars.active),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.admin.allUsers() });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.admin.students() });
     },
   });
 
@@ -598,3 +618,4 @@ export default function AdminPage() {
     </div>
   );
 }
+
