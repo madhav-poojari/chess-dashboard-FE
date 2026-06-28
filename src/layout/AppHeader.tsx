@@ -3,9 +3,12 @@ import { Link } from "react-router";
 import { useSidebar } from "../context/SidebarContext";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import UserDropdown from "../components/header/UserDropdown";
+import NotificationBell from "../components/notifications/NotificationBell";
+import NotificationPanel from "../components/notifications/NotificationPanel";
 
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
+  const [isNotificationPanelOpen, setNotificationPanelOpen] = useState(false);
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
 
@@ -108,11 +111,19 @@ const AppHeader: React.FC = () => {
           <div className="flex items-center gap-2 2xsm:gap-3">
             {/* <!-- Dark Mode Toggler --> */}
             <ThemeToggleButton />
+            {/* <!-- Notification Bell --> */}
+            <NotificationBell onClick={() => setNotificationPanelOpen(true)} />
           </div>
           {/* <!-- User Area --> */}
           <UserDropdown />
         </div>
       </div>
+
+      {/* Notification Panel Overlay */}
+      <NotificationPanel
+        isOpen={isNotificationPanelOpen}
+        onClose={() => setNotificationPanelOpen(false)}
+      />
     </header>
   );
 };
