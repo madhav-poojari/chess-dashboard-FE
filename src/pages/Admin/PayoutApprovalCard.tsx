@@ -10,6 +10,7 @@ import {
 } from "../../components/ui/table";
 import Badge from "../../components/ui/badge/Badge";
 import Button from "../../components/ui/button/Button";
+import { getImageUrl } from "../../utils/imageUrl";
 
 const TYPE_LABELS: Record<TransactionType, string> = {
   [TransactionType.PAYMENT]: "Payment",
@@ -111,7 +112,7 @@ export default function PayoutApprovalCard() {
         <TableCell className="px-5 py-4 text-center">
           {tx.screenshot_url ? (
             <a
-              href={tx.screenshot_url}
+              href={getImageUrl(tx.screenshot_url)}
               target="_blank"
               rel="noopener noreferrer"
               className="text-brand-500 hover:underline text-theme-xs"
