@@ -44,7 +44,8 @@ export function useApproveTransaction() {
   const toast = useToast();
 
   return useMutation({
-    mutationFn: (id: number) => approveTransaction(id),
+    mutationFn: (vars: { id: number; units?: number; reason?: string }) =>
+      approveTransaction(vars.id, { units: vars.units, reason: vars.reason }),
     onSuccess: async () => {
       toast.success("Transaction approved");
       await queryClient.invalidateQueries({ queryKey: queryKeys.payouts.pending() });

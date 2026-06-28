@@ -15,8 +15,11 @@ export const fetchPendingTransactions = async (): Promise<UnitTransaction[]> => 
   return data.data;
 };
 
-export const approveTransaction = async (id: number): Promise<void> => {
-  await api.post(`/payouts/approve/${id}`);
+export const approveTransaction = async (
+  id: number,
+  overrides?: { units?: number; reason?: string }
+): Promise<void> => {
+  await api.post(`/payouts/approve/${id}`, overrides || {});
 };
 
 export const rejectTransaction = async (id: number): Promise<void> => {
