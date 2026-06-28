@@ -35,26 +35,17 @@ function formatDate(dateStr: string): string {
   });
 }
 
-function formatBreakdown(details: Record<string, number> | null): string {
-  if (!details) return "";
-  return Object.entries(details)
-    .map(([classType, count]) => `${count} ${classType.replace(/_/g, " ")}`)
-    .join(", ");
-}
-
 // ── Row-level edit state ──────────────────────────────────
 interface RowEdits {
   [txId: number]: { units: string; reason: string };
 }
 
 interface CardState {
-  expandedRows: Set<number>;
   editingRows: Set<number>;
   rowEdits: RowEdits;
 }
 
 type CardAction =
-  | { type: "TOGGLE_EXPAND"; id: number }
   | { type: "START_EDIT"; id: number; units: number; reason: string }
   | { type: "CANCEL_EDIT"; id: number }
   | { type: "SET_EDIT_FIELD"; id: number; field: "units" | "reason"; value: string }
@@ -62,12 +53,6 @@ type CardAction =
 
 function cardReducer(state: CardState, action: CardAction): CardState {
   switch (action.type) {
-    case "TOGGLE_EXPAND": {
-      const next = new Set(state.expandedRows);
-      if (next.has(action.id)) next.delete(action.id);
-      else next.add(action.id);
-      return { ...state, expandedRows: next };
-    }
     case "START_EDIT": {
       const editing = new Set(state.editingRows);
       editing.add(action.id);
@@ -106,7 +91,6 @@ function cardReducer(state: CardState, action: CardAction): CardState {
 }
 
 const initialState: CardState = {
-  expandedRows: new Set(),
   editingRows: new Set(),
   rowEdits: {},
 };
@@ -137,8 +121,6 @@ export default function PayoutApprovalCard() {
   };
 
   const renderRow = (tx: UnitTransaction) => {
-    const isDeduction = tx.type === TransactionType.CLASS_DEDUCTION;
-    const isExpanded = state.expandedRows.has(tx.id);
     const isEditing = state.editingRows.has(tx.id);
     const edit = state.rowEdits[tx.id];
     const studentName = tx.user
@@ -201,24 +183,9 @@ export default function PayoutApprovalCard() {
               className="w-full rounded-md border border-gray-300 bg-transparent px-2 py-1 text-sm text-gray-800 focus:border-brand-400 focus:outline-none dark:border-white/10 dark:text-white/90 resize-none"
             />
           ) : (
-            <>
-              <div className="text-gray-700 text-theme-sm dark:text-gray-300 truncate">
-                {tx.reason || "—"}
-              </div>
-              {isDeduction && tx.details && (
-                <button
-                  onClick={() => dispatch({ type: "TOGGLE_EXPAND", id: tx.id })}
-                  className="text-brand-500 text-theme-xs mt-1 hover:underline"
-                >
-                  {isExpanded ? "Hide breakdown" : "Show breakdown"}
-                </button>
-              )}
-              {isDeduction && isExpanded && tx.details && (
-                <div className="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">
-                  {formatBreakdown(tx.details)}
-                </div>
-              )}
-            </>
+            <div className="text-gray-700 text-theme-sm dark:text-gray-300">
+              {tx.reason || "—"}
+            </div>
           )}
         </TableCell>
 

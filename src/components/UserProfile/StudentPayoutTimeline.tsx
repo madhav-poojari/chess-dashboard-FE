@@ -36,13 +36,6 @@ function formatDate(dateStr: string): string {
   });
 }
 
-function formatBreakdown(details: Record<string, number> | null): string {
-  if (!details) return "";
-  return Object.entries(details)
-    .map(([classType, count]) => `${count} ${classType.replace(/_/g, " ")}`)
-    .join(", ");
-}
-
 /** Group transactions by month-year */
 function groupByMonth(txs: UnitTransaction[]): { label: string; year: number; month: number; items: UnitTransaction[] }[] {
   const groups: Record<string, UnitTransaction[]> = {};
@@ -93,10 +86,7 @@ function buildShareText(
     for (const tx of group.items) {
       const sign = tx.units > 0 ? "+" : "";
       const typeLabel = TYPE_LABELS[tx.type] || tx.type;
-      let line = `  ${sign}${tx.units} units — ${typeLabel}`;
-      if (tx.type === TransactionType.CLASS_DEDUCTION && tx.details) {
-        line += ` (${formatBreakdown(tx.details)})`;
-      }
+      let line = `  ${sign}${tx.units} units — ${typeLabel} (${tx.reason})`;
       if (tx.status === TransactionStatus.APPROVED && tx.approved_at) {
         line += ` (Approved ${formatDate(tx.approved_at)})`;
       }
@@ -228,20 +218,12 @@ export default function StudentPayoutTimeline({
                               </Badge>
                             </div>
 
-                            {/* Reason */}
+                            {/* Reason — already contains breakdown for cron deductions */}
                             {tx.reason && (
                               <p className="text-gray-600 dark:text-gray-400 text-xs mt-1">
                                 {tx.reason}
                               </p>
                             )}
-
-                            {/* Breakdown for class deductions */}
-                            {tx.type === TransactionType.CLASS_DEDUCTION &&
-                              tx.details && (
-                                <p className="text-gray-500 dark:text-gray-500 text-xs mt-1 italic">
-                                  Breakdown: {formatBreakdown(tx.details)}
-                                </p>
-                              )}
                           </div>
 
                           {/* Date */}

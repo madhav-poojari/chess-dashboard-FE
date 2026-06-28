@@ -31,7 +31,6 @@ export interface UnitTransaction {
   status: TransactionStatus;
   approved_by: string;
   approved_at: string | null;
-  details: Record<string, number> | null; // class breakdown for cron deductions
   period_year: number;
   period_month: number;
   created_by: string;
