@@ -34,5 +34,9 @@ export const queryKeys = {
         adminAttendance: (year: number, month: number) =>
             ["admin", "attendance", year, month] as const,
     },
+    notifications: {
+        list: () => ["notifications"] as const,
+        unreadCount: () => ["notifications", "unread-count"] as const,
+    },
 };
 
