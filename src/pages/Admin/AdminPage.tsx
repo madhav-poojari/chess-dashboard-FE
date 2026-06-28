@@ -21,8 +21,9 @@ import AddRelationshipModal from "../../components/ReferralGraph/AddRelationship
 import AssignCoachTab from "./AssignCoachTab";
 import AssignMentorTab from "./AssignMentorTab";
 import UserActivityTab from "./UserActivityTab";
+import PayoutsTab from "./PayoutsTab";
 
-type TabType = "user-activity" | "pending" | "students" | "coaches" | "add-user" | "add-referral";
+type TabType = "user-activity" | "pending" | "students" | "coaches" | "add-user" | "add-referral" | "payouts";
 
 export default function AdminPage() {
   const { user } = useAuth();
@@ -192,6 +193,12 @@ export default function AdminPage() {
           >
             Add User
           </button>
+          <button
+            onClick={() => setActiveTab("payouts")}
+            className={`px-6 py-2.5 font-medium flex-1 rounded-md text-theme-sm hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap ${getTabButtonClass("payouts")}`}
+          >
+            Payouts
+          </button>
         </div>
       </div>
 
@@ -251,6 +258,9 @@ export default function AdminPage() {
 
         {/* Assign Mentor Coach Tab */}
         {activeTab === "coaches" && <AssignMentorTab />}
+
+        {/* Payouts Tab */}
+        {activeTab === "payouts" && <PayoutsTab />}
 
         {/* Add User Tab */}
         {activeTab === "add-user" && (
