@@ -3,7 +3,7 @@ import { Network, DataSet } from "vis-network/standalone";
 import { GraphData, GraphNode as IGraphNode, GraphEdge as IGraphEdge } from "../../api/admin/referralGraph.dto";
 import { VIS_GRAPH_OPTIONS, getStateColor } from "../../constants/referralGraphConstants";
 import NodeHoverPopup from "./NodeHoverPopup";
-import EdgeHoverPopup from "./EdgeHoverPopup"
+import EdgeHoverPopup from "./EdgeHoverPopup";
 
 interface GraphProps {
     data: GraphData;
@@ -36,6 +36,32 @@ interface HoverEdgeEvent {
     event: MouseEvent;
 }
 
+interface GraphTheme {
+    nodeBorder: string;
+    nodeBorderSelected: string;
+    nodeLabel: string;
+    edgeColor: string;
+    edgeColorSelected: string;
+    edgeLabel: string;
+}
+
+// Reads the --graph-* custom properties defined in index.css. These resolve
+// to whatever is active for :root vs .dark at call time, so re-running this
+// after a theme toggle is enough to re-theme the canvas — no hardcoded hex.
+function readGraphTheme(): GraphTheme {
+    const styles = getComputedStyle(document.documentElement);
+    const read = (name: string) => styles.getPropertyValue(name).trim();
+
+    return {
+        nodeBorder: read("--graph-node-border"),
+        nodeBorderSelected: read("--graph-node-border-selected"),
+        nodeLabel: read("--graph-node-label"),
+        edgeColor: read("--graph-edge-color"),
+        edgeColorSelected: read("--graph-edge-color-selected"),
+        edgeLabel: read("--graph-edge-label"),
+    };
+}
+
 export default function Graph({
     data,
     selectedNodeId,
@@ -47,10 +73,25 @@ export default function Graph({
     const networkRef = useRef<Network | null>(null);
     const [hoveredPopup, setHoveredPopup] = useState<HoverPopup | null>(null);
 
+    // Bumped whenever the `dark` class on <html> changes, to trigger a
+    // re-read of the CSS vars and a network rebuild with the new theme.
+    const [themeVersion, setThemeVersion] = useState(0);
+
+    useEffect(() => {
+        const root = document.documentElement;
+        const observer = new MutationObserver(() => {
+            setThemeVersion((v) => v + 1);
+        });
+        observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+        return () => observer.disconnect();
+    }, []);
+
     useEffect(() => {
         if (!containerRef.current) return;
 
-        //creating anchor nodes to cluster by state
+        const theme = readGraphTheme();
+
+        // creating anchor nodes to cluster by state
         const uniqueStates = [...new Set(data.nodes.map((n: IGraphNode) => n.state ?? ''))];
 
         const anchorRadius = 350;
@@ -77,14 +118,14 @@ export default function Graph({
                 title: `${node.name} (${node.state})`,
                 color: {
                     background: getStateColor(node.state),
-                    border: selectedNodeId === node.id ? "#FF6B6B" : "#333",
+                    border: selectedNodeId === node.id ? theme.nodeBorderSelected : theme.nodeBorder,
                     highlight: {
                         background: getStateColor(node.state),
-                        border: "#FF6B6B",
+                        border: theme.nodeBorderSelected,
                     },
                 },
                 borderWidth: selectedNodeId === node.id ? 3 : 2,
-                font: { size: 14, color: "#000" },
+                font: { size: 14, color: theme.nodeLabel },
                 shape: "dot",
                 size: 25,
             })),
@@ -113,13 +154,13 @@ export default function Graph({
                 title: edge.relationship_type,
                 label: edge.relationship_type,
                 color: {
-                    color: selectedEdgeId === edge.id ? "#FF6B6B" : "#969696",
-                    highlight: "#FF6B6B",
+                    color: selectedEdgeId === edge.id ? theme.edgeColorSelected : theme.edgeColor,
+                    highlight: theme.edgeColorSelected,
                 },
                 width: selectedEdgeId === edge.id ? 3 : 1.5,
-                arrows: "to",
+                arrows: "to", // inherits color.color above; no separate arrow token needed
                 smooth: { enabled: true, type: "continuous", roundness: 0.5 },
-                font: { size: 12, color: "#333", align: "middle" },
+                font: { size: 12, color: theme.edgeLabel, align: "middle" },
             })),
             ...anchorEdges
         ]);
@@ -133,7 +174,7 @@ export default function Graph({
                     enabled: true,
                     solver: "forceAtlas2Based",
                     forceAtlas2Based: {
-                        gravitationalConstant: -30,  // Less repulsion (tune: -20 to -100)
+                        gravitationalConstant: -70,
                         centralGravity: 0.005,
                         springLength: 100,
                         springConstant: 0.08,
@@ -147,27 +188,20 @@ export default function Graph({
             }
         );
 
-        // Step 6: Event handlers - ignore anchors
         network.on("click", (params: ClickEvent) => {
             if (params.nodes && params.nodes.length > 0) {
                 const nodeId = params.nodes[0];
-                console.log("Clicked node:", nodeId);
-                // Skip anchor nodes
                 if (typeof nodeId === 'string' && nodeId.startsWith('anchor-')) {
                     return;
                 }
                 setHoveredPopup(null);
                 onNodeClick(nodeId);
-            }
-
-            else if (params.edges && params.edges.length > 0) {
-                console.log("Clicked edge:", params.edges[0]);
+            } else if (params.edges && params.edges.length > 0) {
                 onEdgeClick(params.edges[0]);
             }
         });
 
         network.on("hoverNode", (params: HoverNodeEvent) => {
-            // Skip anchors
             if (params.node.startsWith('anchor-')) {
                 setHoveredPopup(null);
                 return;
@@ -189,7 +223,6 @@ export default function Graph({
         network.on("blurNode", () => setHoveredPopup(null));
 
         network.on("hoverEdge", (params: HoverEdgeEvent) => {
-            // Skip anchor edges (they have no ID in our setup, but check source/target)
             const edge = visEdges.get(params.edge);
             if (edge && edge.to && typeof edge.to === 'string' && edge.to.startsWith('anchor-')) {
                 return;
@@ -214,24 +247,33 @@ export default function Graph({
             network.destroy();
             networkRef.current = null;
         };
-    }, [data, selectedNodeId, selectedEdgeId, onNodeClick, onEdgeClick]);
+    }, [data, selectedNodeId, selectedEdgeId, onNodeClick, onEdgeClick, themeVersion]);
 
     return (
         <div className="relative w-full h-full">
-            <div ref={containerRef} className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-50" />
+            <div
+                ref={containerRef}
+                className="w-full h-full bg-gradient-to-br
+                           from-brand-25 via-blue-light-25 to-gray-50
+                           dark:from-gray-900 dark:via-gray-950 dark:to-gray-900
+                           transition-colors"
+            />
 
-            {/* Hover Popups */}
             {hoveredPopup && (
                 <div
-                    className="absolute pointer-events-none"
+                    className="absolute pointer-events-none z-99 animate-in fade-in zoom-in-95 duration-150"
                     style={{ left: `${hoveredPopup.x + 10}px`, top: `${hoveredPopup.y + 10}px` }}
                 >
-                    {hoveredPopup.type === "node" && (
-                        <NodeHoverPopup nodeId={hoveredPopup.id} data={data} />
-                    )}
-                    {hoveredPopup.type === "edge" && (
-                        <EdgeHoverPopup edgeId={hoveredPopup.id} data={data} />
-                    )}
+                    <div className="rounded-lg border border-gray-200 dark:border-gray-800
+                                    bg-white/95 dark:bg-gray-dark/95 backdrop-blur-md
+                                    shadow-theme-lg overflow-hidden">
+                        {hoveredPopup.type === "node" && (
+                            <NodeHoverPopup nodeId={hoveredPopup.id} data={data} />
+                        )}
+                        {hoveredPopup.type === "edge" && (
+                            <EdgeHoverPopup edgeId={hoveredPopup.id} data={data} />
+                        )}
+                    </div>
                 </div>
             )}
         </div>

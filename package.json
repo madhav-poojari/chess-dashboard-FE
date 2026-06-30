@@ -19,6 +19,8 @@
     "@react-jvectormap/core": "^1.0.4",
     "@react-jvectormap/world": "^1.1.2",
     "@tanstack/react-query": "^5.90.20",
+    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.14.4",
     "@types/luxon": "^3.7.1",
     "apexcharts": "^4.1.0",
     "axios": "^1.13.2",

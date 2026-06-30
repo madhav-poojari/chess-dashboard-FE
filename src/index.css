@@ -867,3 +867,37 @@ span.flatpickr-weekday,
 .simplebar-scrollbar.simplebar-visible:before {
   @apply opacity-100;
 }
+
+/* ── Referral Graph (vis-network canvas) ──
+   Canvas can't read Tailwind classes, so we expose semantic vars here
+   that reference the existing theme tokens. Graph.tsx reads these via
+   getComputedStyle at render time. */
+   @layer base {
+    :root {
+      --graph-node-border: var(--color-gray-300);
+      --graph-node-border-selected: var(--color-error-400);
+      --graph-node-label: var(--color-gray-800);
+  
+      --graph-edge-color: var(--color-gray-300);
+      --graph-edge-color-selected: var(--color-error-400);
+      --graph-edge-label: var(--color-gray-600);
+  
+      --graph-canvas-from: var(--color-brand-25);
+      --graph-canvas-via: var(--color-blue-light-25);
+      --graph-canvas-to: var(--color-gray-50);
+    }
+  
+    .dark {
+      --graph-node-border: var(--color-gray-600);
+      --graph-node-border-selected: var(--color-error-400);
+      --graph-node-label: var(--color-gray-100);
+  
+      --graph-edge-color: var(--color-gray-700);
+      --graph-edge-color-selected: var(--color-error-400);
+      --graph-edge-label: var(--color-gray-400);
+  
+      --graph-canvas-from: var(--color-gray-900);
+      --graph-canvas-via: var(--color-gray-950);
+      --graph-canvas-to: var(--color-gray-900);
+    }
+  }

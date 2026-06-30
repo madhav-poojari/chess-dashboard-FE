@@ -98,10 +98,11 @@ export function Combobox({
     return (
         <div ref={containerRef} className="relative">
             {label && (
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                     {label}
                 </label>
             )}
+    
             <input
                 ref={inputRef}
                 type="text"
@@ -110,30 +111,70 @@ export function Combobox({
                 onFocus={() => setIsOpen(true)}
                 onKeyDown={handleKeyDown}
                 placeholder={placeholder}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 role="combobox"
                 aria-expanded={isOpen}
                 aria-autocomplete="list"
+                className="
+                    w-full rounded-xl border border-gray-300
+                    bg-white px-4 py-3
+                    text-sm text-gray-900
+                    placeholder:text-gray-400
+                    transition
+                    outline-none
+                    focus:border-blue-500
+                    focus:ring-3 focus:ring-blue-500/10
+    
+                    dark:border-gray-700
+                    dark:bg-gray-800
+                    dark:text-white
+                    dark:placeholder:text-gray-500
+                    dark:focus:border-blue-500
+                    dark:focus:ring-blue-500/10
+                "
             />
-            {/* Dropdown */}
+    
             {isOpen && (
                 <ul
-                    className="absolute z-50 w-full mt-1 max-h-60 overflow-auto bg-white border border-gray-200 rounded-lg shadow-lg"
                     role="listbox"
+                    className="
+                        custom-scrollbar
+                        absolute z-50 mt-2
+                        max-h-64 w-full overflow-y-auto
+                        rounded-xl border border-gray-200
+                        bg-white
+                        py-2
+                        shadow-xl
+    
+                        dark:border-gray-700
+                        dark:bg-gray-800
+                    "
                 >
                     {filtered.length === 0 ? (
-                        <li className="px-3 py-2 text-sm text-gray-500">No results found</li>
+                        <li className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                            No results found
+                        </li>
                     ) : (
                         filtered.map((opt, idx) => (
                             <li
                                 key={opt[idField]}
-                                onClick={() => handleSelect(opt)}
-                                className={`px-3 py-2 cursor-pointer text-sm ${idx === highlightedIndex
-                                    ? "bg-blue-50 text-blue-900"
-                                    : "hover:bg-gray-50 text-gray-900"
-                                    } ${opt[idField] === value ? "font-semibold bg-blue-50" : ""}`}
                                 role="option"
                                 aria-selected={opt[idField] === value}
+                                onClick={() => handleSelect(opt)}
+                                className={`
+                                    cursor-pointer px-4 py-3 text-sm transition-colors
+    
+                                    ${
+                                        idx === highlightedIndex
+                                            ? "bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
+                                            : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+                                    }
+    
+                                    ${
+                                        opt[idField] === value
+                                            ? "font-semibold"
+                                            : ""
+                                    }
+                                `}
                             >
                                 {formatOption(opt)}
                             </li>

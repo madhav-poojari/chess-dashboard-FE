@@ -167,27 +167,29 @@ const AppSidebar: React.FC = () => {
 
   // Effect to auto-open submenu based on current path
   useEffect(() => {
-    if (loading) return; // Skip if still loading
+    if (loading) return;
 
-    let submenuMatched = false;
+    let matchedIndex: number | null = null;
+
     navItems.forEach((nav, index) => {
       if (nav.subItems) {
         nav.subItems.forEach((subItem) => {
           if (isActive(subItem.path)) {
-            setOpenSubmenu({
-              type: "main",
-              index,
-            });
-            submenuMatched = true;
+            matchedIndex = index;
           }
         });
       }
     });
 
-    if (!submenuMatched) {
-      setOpenSubmenu(null);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Only call setState if the value actually needs to change
+    setOpenSubmenu(prev => {
+      const prevIndex = prev?.index ?? null;
+      if (prevIndex === matchedIndex) return prev; // ← nothing changed, skip re-render
+      return matchedIndex !== null
+        ? { type: "main", index: matchedIndex }
+        : null;
+    });
+
   }, [location, isActive, loading]);
 
   useEffect(() => {
