@@ -122,7 +122,7 @@ export default function UserMetaCard({ user, onUpdate, onSyllabusUpdate, readOnl
             </div>
 
             {/* Platform icons */}
-            <div className="flex items-center order-2 gap-2 grow xl:order-3 xl:justify-end">
+            <div className="flex flex-wrap justify-center items-center order-2 gap-2 grow xl:order-3 xl:justify-end">
 
               {/* Lichess */}
               {displayLinks.lichessId ? (
