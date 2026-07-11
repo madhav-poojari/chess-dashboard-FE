@@ -19,6 +19,7 @@ import AcademyGallery from "./pages/AcademyGallery/AcademyGallery";
 import { ToastProvider } from "./context/ToastContext";
 import ToastContainer from "./components/ui/Toast";
 import ReferralGraph from "./pages/Admin/ReferralGraph";
+import StudentsPage from "./pages/Students/StudentsPage";
 
 export default function App() {
   return (
@@ -40,6 +41,16 @@ export default function App() {
 
                   {/* Academy Gallery */}
                   <Route path="/academy-gallery" element={<AcademyGallery />} />
+
+                  {/* Students */}
+                  <Route
+                    path="/students"
+                    element={
+                      <RequireRole allowedRoles={["admin", "mentor", "coach"]}>
+                        <StudentsPage />
+                      </RequireRole>
+                    }
+                  />
 
                   {/* Admin */}
                   <Route
