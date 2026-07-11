@@ -1,4 +1,3 @@
-import PayoutApprovalCard from "./PayoutApprovalCard";
 import PayoutStudentListCard from "./PayoutStudentListCard";
 import { useTriggerDeduction } from "../../hooks/usePayouts";
 import Button from "../../components/ui/button/Button";
@@ -29,9 +28,6 @@ export default function PayoutsTab() {
             : "Trigger Monthly Deduction"}
         </Button>
       </div>
-
-      {/* Pending Approval Requests */}
-      <PayoutApprovalCard />
 
       {/* Student Balances */}
       <PayoutStudentListCard />

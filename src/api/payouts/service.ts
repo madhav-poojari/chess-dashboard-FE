@@ -35,7 +35,18 @@ export const fetchStudentBalances = async (): Promise<StudentWithBalance[]> => {
 export const adminAdjustUnits = async (
   payload: AdminAdjustPayload
 ): Promise<UnitTransaction> => {
-  const res = await api.post("/payouts/adjust", payload);
+  const formData = new FormData();
+  formData.append("user_id", payload.user_id);
+  formData.append("units", String(payload.units));
+  formData.append("reason", payload.reason);
+  formData.append("type", payload.type);
+  if (payload.screenshot) {
+    formData.append("screenshot", payload.screenshot);
+  }
+
+  const res = await api.post("/payouts/adjust", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   const data: ApiResponse<UnitTransaction> = res.data;
   return data.data;
 };
@@ -50,31 +61,4 @@ export const fetchStudentTimeline = async (
 
 export const triggerDeduction = async (): Promise<void> => {
   await api.post("/payouts/trigger-deduction");
-};
-
-// ── Student endpoint ─────────────────────────────────────
-
-export const submitPaymentRequest = async (
-  file: File | null,
-  transactionId: string,
-  units?: number,
-  reason?: string
-): Promise<{ id: number; screenshot_url: string }> => {
-  const formData = new FormData();
-  if (file) {
-    formData.append("screenshot", file);
-  }
-  formData.append("transaction_id", transactionId);
-  if (units && units > 0) {
-    formData.append("units", String(units));
-  }
-  if (reason) {
-    formData.append("reason", reason);
-  }
-
-  const res = await api.post("/payouts/payment-request", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  const data: ApiResponse<{ id: number; screenshot_url: string }> = res.data;
-  return data.data;
 };

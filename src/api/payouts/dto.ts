@@ -55,4 +55,5 @@ export interface AdminAdjustPayload {
   units: number;
   reason: string;
   type: TransactionType;
+  screenshot?: File | null;
 }

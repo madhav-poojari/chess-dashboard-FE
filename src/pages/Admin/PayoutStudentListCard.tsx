@@ -10,7 +10,7 @@ import {
 } from "../../components/ui/table";
 import Input from "../../components/form/input/InputField";
 import Button from "../../components/ui/button/Button";
-import PayoutAdjustModal from "./PayoutAdjustModal";
+import PayoutStudentDetailModal from "./PayoutStudentDetailModal";
 
 interface ListState {
   search: string;
@@ -157,7 +157,7 @@ export default function PayoutStudentListCard() {
                           dispatch({ type: "OPEN_MODAL", student })
                         }
                       >
-                        Adjust Units
+                        More Info
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -170,11 +170,12 @@ export default function PayoutStudentListCard() {
 
       {/* Adjust Modal */}
       {state.selectedStudent && (
-        <PayoutAdjustModal
+        <PayoutStudentDetailModal
           isOpen={state.modalOpen}
           onClose={() => dispatch({ type: "CLOSE_MODAL" })}
           studentId={state.selectedStudent.id}
           studentName={`${state.selectedStudent.first_name} ${state.selectedStudent.last_name}`}
+          studentEmail={state.selectedStudent.email}
         />
       )}
     </>

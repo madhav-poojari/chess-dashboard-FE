@@ -7,7 +7,6 @@ import {
   fetchStudentBalances,
   adminAdjustUnits,
   fetchStudentTimeline,
-  submitPaymentRequest,
   triggerDeduction,
 } from "../api/payouts/service";
 import { AdminAdjustPayload } from "../api/payouts/dto";
@@ -50,6 +49,8 @@ export function useApproveTransaction() {
       toast.success("Transaction approved");
       await queryClient.invalidateQueries({ queryKey: queryKeys.payouts.pending() });
       await queryClient.invalidateQueries({ queryKey: queryKeys.payouts.balances() });
+      // Also invalidate all timeline queries so the modal refreshes
+      await queryClient.invalidateQueries({ queryKey: ["payouts", "timeline"] });
     },
     onError: () => {
       toast.error("Failed to approve transaction");
@@ -66,6 +67,8 @@ export function useRejectTransaction() {
     onSuccess: async () => {
       toast.success("Transaction rejected");
       await queryClient.invalidateQueries({ queryKey: queryKeys.payouts.pending() });
+      // Also invalidate all timeline queries so the modal refreshes
+      await queryClient.invalidateQueries({ queryKey: ["payouts", "timeline"] });
     },
     onError: () => {
       toast.error("Failed to reject transaction");
@@ -79,33 +82,16 @@ export function useAdminAdjust() {
 
   return useMutation({
     mutationFn: (payload: AdminAdjustPayload) => adminAdjustUnits(payload),
-    onSuccess: async () => {
+    onSuccess: async (_data, variables) => {
       toast.success("Units adjusted successfully");
       await queryClient.invalidateQueries({ queryKey: queryKeys.payouts.balances() });
+      // Invalidate the specific student's timeline so the modal refreshes
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.payouts.timeline(variables.user_id),
+      });
     },
     onError: () => {
       toast.error("Failed to adjust units");
-    },
-  });
-}
-
-export function useSubmitPayment() {
-  const queryClient = useQueryClient();
-  const toast = useToast();
-
-  return useMutation({
-    mutationFn: (vars: {
-      file: File | null;
-      transactionId: string;
-      units?: number;
-      reason?: string;
-    }) => submitPaymentRequest(vars.file, vars.transactionId, vars.units, vars.reason),
-    onSuccess: async () => {
-      toast.success("Payment request submitted");
-      await queryClient.invalidateQueries({ queryKey: queryKeys.payouts.pending() });
-    },
-    onError: () => {
-      toast.error("Failed to submit payment request");
     },
   });
 }

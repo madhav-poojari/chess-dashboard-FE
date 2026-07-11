@@ -6,8 +6,6 @@ import PageMeta from "../components/common/PageMeta";
 import StudentGallery from "../components/UserProfile/StudentGallery";
 import StudentScheduleCard from "../components/UserProfile/StudentScheduleCard";
 import StudentProgressCard from "../components/UserProfile/StudentProgressCard";
-import StudentPayoutTimeline from "../components/UserProfile/StudentPayoutTimeline";
-import StudentPaymentForm from "../components/UserProfile/StudentPaymentForm";
 
 import { useEffect, useState, useCallback } from "react";
 import { userPublicProfile } from "../api/user/publicProfile";
@@ -56,7 +54,7 @@ export default function UserProfiles({ studentId, readOnly = false, galleryReadO
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [activeTab, setActiveTab] = useState<"profile" | "gallery" | "progress" | "payouts">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "gallery" | "progress">("profile");
 
   useEffect(() => {
     let mounted = true;
@@ -177,22 +175,7 @@ export default function UserProfiles({ studentId, readOnly = false, galleryReadO
               </button>
             </>
           )}
-          {/* Payouts tab — students see it on own profile, admin sees it on student profiles */}
-          {((profile.role?.toLowerCase() === UserRole.STUDENT && !studentId) ||
-            (user?.role?.toLowerCase() === UserRole.ADMIN && (profile.role?.toLowerCase() === UserRole.STUDENT || studentId))) && (
-            <>
-              <div className="h-5 w-px bg-gray-300 dark:bg-gray-700" />
-              <button
-                onClick={() => setActiveTab("payouts")}
-                className={`text-lg font-semibold transition-colors ${activeTab === "payouts"
-                  ? "text-gray-800 dark:text-white/90"
-                  : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
-                  }`}
-              >
-                Payouts
-              </button>
-            </>
-          )}
+
         </div>
 
         {activeTab === "profile" ? (
@@ -215,15 +198,7 @@ export default function UserProfiles({ studentId, readOnly = false, galleryReadO
           <StudentGallery userId={profile.uid} readOnly={isGalleryReadOnly} />
         ) : activeTab === "progress" ? (
           <StudentProgressCard studentId={profile.uid} />
-        ) : activeTab === "payouts" ? (
-          user?.role?.toLowerCase() === UserRole.ADMIN ? (
-            <StudentPayoutTimeline
-              studentId={profile.uid}
-              studentName={`${profile.first_name} ${profile.last_name}`}
-            />
-          ) : (
-            <StudentPaymentForm />
-          )
+
         ) : null}
       </div>
     </>
