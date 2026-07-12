@@ -117,6 +117,12 @@ const AppSidebar: React.FC = () => {
       allowedRoles: [UserRole.STUDENT, UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
     },
     {
+      icon: <DocsIcon />,
+      name: "Blogs",
+      path: "/blogs",
+      allowedRoles: [UserRole.STUDENT, UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN]
+    },
+    {
       icon: <GroupIcon />,
       name: "Referral Graph",
       allowedRoles: [UserRole.ADMIN],

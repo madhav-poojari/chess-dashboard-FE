@@ -48,5 +48,13 @@ export const queryKeys = {
         list: () => ["notifications"] as const,
         unreadCount: () => ["notifications", "unread-count"] as const,
     },
+    blogs: {
+        list: (page: number, pageSize: number) =>
+            ["blogs", "list", page, pageSize] as const,
+        detail: (slug: string) => ["blogs", "detail", slug] as const,
+        myDrafts: () => ["blogs", "my-drafts"] as const,
+        tags: () => ["blogs", "tags"] as const,
+        images: (blogId: string) => ["blogs", "images", blogId] as const,
+    },
 };
 

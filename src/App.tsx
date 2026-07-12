@@ -20,6 +20,9 @@ import { ToastProvider } from "./context/ToastContext";
 import ToastContainer from "./components/ui/Toast";
 import ReferralGraph from "./pages/Admin/ReferralGraph";
 import StudentsPage from "./pages/Students/StudentsPage";
+import BlogsPage from "./pages/Blogs/BlogsPage";
+import BlogDetailPage from "./pages/Blogs/BlogDetailPage";
+import BlogEditorPage from "./pages/Blogs/BlogEditorPage";
 
 export default function App() {
   return (
@@ -38,6 +41,12 @@ export default function App() {
 
                   {/* Notes */}
                   <Route path="/notes" element={<Notes />} />
+
+                  {/* Blogs */}
+                  <Route path="/blogs" element={<BlogsPage />} />
+                  <Route path="/blogs/new" element={<BlogEditorPage />} />
+                  <Route path="/blogs/:slug" element={<BlogDetailPage />} />
+                  <Route path="/blogs/:slug/edit" element={<BlogEditorPage />} />
 
                   {/* Academy Gallery */}
                   <Route path="/academy-gallery" element={<AcademyGallery />} />
