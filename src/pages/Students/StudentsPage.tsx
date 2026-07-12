@@ -1,58 +1,16 @@
 import { useMemo } from "react";
-import { useQuery, useQueries } from "@tanstack/react-query";
 import PageMeta from "../../components/common/PageMeta";
 import { useAuth } from "../../context/AuthContext";
-import { fetchStudents } from "../../api/user/service";
-import { fetchStudentsWithAssignments, StudentWithAssignment } from "../../api/admin/service";
+import { UserRole } from "../../api/user/dto";
+import { StudentWithAssignment } from "../../api/admin/service";
 import { StudentWithRelations } from "../../api/user/dto";
-import api from "../../api/axiosInstance";
+import {
+  useStudentsQuery,
+  useAdminStudentsQuery,
+  useStudentNotesSummaryQueries,
+  useNotesSummaryMap,
+} from "../../hooks/useStudentQueries";
 import StudentCard from "./StudentCard";
-
-// Lightweight note/lesson-plan summary per student
-interface StudentNotesSummary {
-  lessonPlanTitle?: string;
-  lessonPlanBody?: string;
-  latestNoteTitle?: string;
-}
-
-// Fetch notes summary for a single student
-const fetchStudentNotesSummary = async (
-  studentId: string
-): Promise<StudentNotesSummary> => {
-  try {
-    const response = await api.get(`/notes/?user_id=${studentId}`);
-    const data = response.data;
-    if (!data.success || !data.data) return {};
-
-    const { notes, lesson_plan } = data.data;
-
-    const result: StudentNotesSummary = {};
-
-    // Extract lesson plan info
-    if (lesson_plan && lesson_plan.active) {
-      result.lessonPlanTitle = lesson_plan.title;
-      if (Array.isArray(lesson_plan.description)) {
-        result.lessonPlanBody = lesson_plan.description.join("\n");
-      } else if (lesson_plan.description) {
-        result.lessonPlanBody = lesson_plan.description;
-      }
-    }
-
-    // Get latest note title
-    if (Array.isArray(notes) && notes.length > 0) {
-      // Notes are already sorted by created_at desc from backend
-      const sorted = [...notes].sort(
-        (a: { created_at: string }, b: { created_at: string }) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
-      result.latestNoteTitle = sorted[0]?.title;
-    }
-
-    return result;
-  } catch {
-    return {};
-  }
-};
 
 // Normalize admin StudentWithAssignment and coach/mentor StudentWithRelations
 // into a common shape
@@ -92,64 +50,27 @@ function normalizeFromAssignment(s: StudentWithAssignment): NormalizedStudent {
 
 export default function StudentsPage() {
   const { user } = useAuth();
-  const userRole = user?.role?.toLowerCase().trim() || "";
-  const isAdmin = userRole === "admin";
+  const userRole = (user?.role?.toLowerCase().trim() ?? "") as UserRole;
+  const isAdmin = userRole === UserRole.ADMIN;
 
-  // Admin uses /admin/students (has full assignment data)
-  // Coach/Mentor uses /users/ (enriched with coach/mentor relations)
-  const {
-    data: studentsRaw = [],
-    isLoading: studentsLoading,
-  } = useQuery<StudentWithRelations[]>({
-    queryKey: ["students"],
-    queryFn: fetchStudents,
-    enabled: !isAdmin,
-    staleTime: 5 * 60 * 1000,
-    refetchInterval: 5 * 60 * 1000,
-  });
+  const { data: studentsRaw = [], isLoading: studentsLoading } =
+    useStudentsQuery(!isAdmin);
 
-  const {
-    data: adminStudentsRaw = [],
-    isLoading: adminStudentsLoading,
-  } = useQuery<StudentWithAssignment[]>({
-    queryKey: ["admin-students-assignments"],
-    queryFn: fetchStudentsWithAssignments,
-    enabled: isAdmin,
-    staleTime: 5 * 60 * 1000,
-    refetchInterval: 5 * 60 * 1000,
-  });
+  const { data: adminStudentsRaw = [], isLoading: adminStudentsLoading } =
+    useAdminStudentsQuery(isAdmin);
 
-  // Normalize both data sources
+  // Normalize both data sources into a common shape
   const students: NormalizedStudent[] = useMemo(() => {
     if (isAdmin) {
-      return adminStudentsRaw
-        .filter((s) => s.active)
-        .map(normalizeFromAssignment);
+      return adminStudentsRaw.filter((s) => s.active).map(normalizeFromAssignment);
     }
     return studentsRaw.filter((s) => s.active).map(normalizeFromRelations);
   }, [isAdmin, studentsRaw, adminStudentsRaw]);
 
-  // Fetch notes/lesson plan summaries for each student using useQueries
-  const noteQueries = useQueries({
-    queries: students.map((student) => ({
-      queryKey: ["student-notes-summary", student.id],
-      queryFn: () => fetchStudentNotesSummary(student.id),
-      staleTime: 5 * 60 * 1000,
-      refetchInterval: 5 * 60 * 1000,
-      enabled: students.length > 0,
-    })),
-  });
+  const studentIds = useMemo(() => students.map((s) => s.id), [students]);
 
-  // Build a map of studentId -> notes summary
-  const notesSummaryMap = useMemo(() => {
-    const map = new Map<string, StudentNotesSummary>();
-    students.forEach((student, index) => {
-      if (noteQueries[index]?.data) {
-        map.set(student.id, noteQueries[index].data);
-      }
-    });
-    return map;
-  }, [students, noteQueries]);
+  const noteQueries = useStudentNotesSummaryQueries(studentIds);
+  const notesSummaryMap = useNotesSummaryMap(studentIds, noteQueries);
 
   const isLoading = isAdmin ? adminStudentsLoading : studentsLoading;
 
@@ -157,7 +78,7 @@ export default function StudentsPage() {
 
   const renderStudentCard = (student: NormalizedStudent) => {
     const summary = notesSummaryMap.get(student.id);
-    const noteQueryIdx = students.findIndex((s) => s.id === student.id);
+    const noteQueryIdx = studentIds.indexOf(student.id);
     const noteLoading = noteQueryIdx >= 0 ? noteQueries[noteQueryIdx]?.isLoading : false;
 
     return (
@@ -242,11 +163,7 @@ export default function StudentsPage() {
 
   // Admin view: grouped by mentor -> coach -> students
   const renderAdminView = () => {
-    // Build nested grouping: mentor -> coach -> students
-    const mentorMap = new Map<
-      string,
-      Map<string, NormalizedStudent[]>
-    >();
+    const mentorMap = new Map<string, Map<string, NormalizedStudent[]>>();
     const noMentorCoachMap = new Map<string, NormalizedStudent[]>();
     const fullyUnassigned: NormalizedStudent[] = [];
 
@@ -260,7 +177,6 @@ export default function StudentsPage() {
       }
 
       if (!mentorKey) {
-        // Has a coach but no mentor
         if (!noMentorCoachMap.has(coachKey)) noMentorCoachMap.set(coachKey, []);
         noMentorCoachMap.get(coachKey)!.push(student);
         return;
@@ -294,28 +210,26 @@ export default function StudentsPage() {
 
             {/* Coach sub-groups */}
             <div className="ml-4 border-l-2 border-violet-200 dark:border-violet-800 pl-5 space-y-6">
-              {Array.from(coachMap.entries()).map(
-                ([coachName, groupStudents]) => (
-                  <div key={coachName}>
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="h-7 w-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-                          {coachName.split(" ").map(n => n.charAt(0)).join("")}
-                        </span>
-                      </div>
-                      <h3 className="text-base font-semibold text-gray-700 dark:text-gray-200">
-                        {coachName}
-                      </h3>
-                      <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
-                        {groupStudents.length} student{groupStudents.length !== 1 ? "s" : ""}
+              {Array.from(coachMap.entries()).map(([coachName, groupStudents]) => (
+                <div key={coachName}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="h-7 w-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                      <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                        {coachName.split(" ").map(n => n.charAt(0)).join("")}
                       </span>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {groupStudents.map(renderStudentCard)}
-                    </div>
+                    <h3 className="text-base font-semibold text-gray-700 dark:text-gray-200">
+                      {coachName}
+                    </h3>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
+                      {groupStudents.length} student{groupStudents.length !== 1 ? "s" : ""}
+                    </span>
                   </div>
-                )
-              )}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {groupStudents.map(renderStudentCard)}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         ))}
@@ -332,28 +246,26 @@ export default function StudentsPage() {
               </h2>
             </div>
             <div className="ml-4 border-l-2 border-gray-200 dark:border-gray-700 pl-5 space-y-6">
-              {Array.from(noMentorCoachMap.entries()).map(
-                ([coachName, groupStudents]) => (
-                  <div key={coachName}>
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="h-7 w-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-                          {coachName.split(" ").map(n => n.charAt(0)).join("")}
-                        </span>
-                      </div>
-                      <h3 className="text-base font-semibold text-gray-700 dark:text-gray-200">
-                        {coachName}
-                      </h3>
-                      <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
-                        {groupStudents.length}
+              {Array.from(noMentorCoachMap.entries()).map(([coachName, groupStudents]) => (
+                <div key={coachName}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="h-7 w-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                      <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                        {coachName.split(" ").map(n => n.charAt(0)).join("")}
                       </span>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {groupStudents.map(renderStudentCard)}
-                    </div>
+                    <h3 className="text-base font-semibold text-gray-700 dark:text-gray-200">
+                      {coachName}
+                    </h3>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
+                      {groupStudents.length}
+                    </span>
                   </div>
-                )
-              )}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {groupStudents.map(renderStudentCard)}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -383,8 +295,8 @@ export default function StudentsPage() {
 
   // Choose render based on role
   const renderContent = () => {
-    if (userRole === "admin") return renderAdminView();
-    if (userRole === "mentor") return renderMentorView();
+    if (userRole === UserRole.ADMIN) return renderAdminView();
+    if (userRole === UserRole.MENTOR_COACH) return renderMentorView();
     return renderCoachView();
   };
 

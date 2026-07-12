@@ -9,7 +9,7 @@
 
 import { PublicProfile } from "../../models/publicProfile";
 import api from "../axiosInstance";
-import { ApiResponse, StudentSummary, StudentWithRelations, User } from "./dto";
+import { ApiResponse, StudentSummary, StudentWithRelations, User, UserRole } from "./dto";
 
 export const fetchMe = async (): Promise<User> => {
   const res = await api.get("/users/me");
@@ -57,7 +57,7 @@ export const fetchStudents = async (): Promise<StudentWithRelations[]> => {
   const res = await api.get("/users/");
   const data: ApiResponse<StudentWithRelations[]> = res.data;
   // For admin, this returns ALL users; filter to students only
-  return data.data.filter((user) => user.role.toLowerCase() === "student");
+  return data.data.filter((user) => user.role.toLowerCase() === UserRole.STUDENT);
 };
 
 export const fetchStudentSummaries = async (): Promise<StudentSummary[]> => {
