@@ -34,6 +34,11 @@ export const queryKeys = {
         adminAttendance: (year: number, month: number) =>
             ["admin", "attendance", year, month] as const,
     },
+    payouts: {
+        pending: () => ["payouts", "pending"] as const,
+        balances: () => ["payouts", "balances"] as const,
+        timeline: (userId: string) => ["payouts", "timeline", userId] as const,
+    },
     students: {
         list: () => ["students"] as const,
         adminAssignments: () => ["admin-students-assignments"] as const,
