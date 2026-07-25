@@ -175,6 +175,7 @@ export default function UserProfiles({ studentId, readOnly = false, galleryReadO
               </button>
             </>
           )}
+
         </div>
 
         {activeTab === "profile" ? (
@@ -197,6 +198,7 @@ export default function UserProfiles({ studentId, readOnly = false, galleryReadO
           <StudentGallery userId={profile.uid} readOnly={isGalleryReadOnly} />
         ) : activeTab === "progress" ? (
           <StudentProgressCard studentId={profile.uid} />
+
         ) : null}
       </div>
     </>
