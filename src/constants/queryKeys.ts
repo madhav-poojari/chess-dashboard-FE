@@ -1,4 +1,4 @@
-// Centralized TanStack Query keys for gallery, profile & schedule features
+// Centralized TanStack Query keys for gallery, profile, schedule & student features
 export const queryKeys = {
     gallery: {
         images: (userId: string) => ["gallery", userId] as const,
@@ -33,6 +33,11 @@ export const queryKeys = {
         allUsers: () => ["admin", "all-users"] as const,
         adminAttendance: (year: number, month: number) =>
             ["admin", "attendance", year, month] as const,
+    },
+    students: {
+        list: () => ["students"] as const,
+        adminAssignments: () => ["admin-students-assignments"] as const,
+        notesSummary: (studentId: string) => ["student-notes-summary", studentId] as const,
     },
 };
 
