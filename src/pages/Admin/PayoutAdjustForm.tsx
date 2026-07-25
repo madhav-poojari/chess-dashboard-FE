@@ -143,7 +143,6 @@ export default function PayoutAdjustForm({
       <div>
         <Label>
           Units <span className="text-error-500">*</span>
-          <span className="text-xs text-gray-400 ml-1">(max 3)</span>
         </Label>
         <Input
           type="number"
