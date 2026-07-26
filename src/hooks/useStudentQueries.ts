@@ -1,5 +1,4 @@
-import { useMemo } from "react";
-import { useQuery, useQueries } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import api from "../api/axiosInstance";
 import { fetchStudents } from "../api/user/service";
 import { fetchStudentsWithAssignments } from "../api/admin/service";
@@ -14,39 +13,45 @@ export interface StudentNotesSummary {
   latestNoteTitle?: string;
 }
 
-// Fetch notes summary for a single student
-const fetchStudentNotesSummary = async (
-  studentId: string
-): Promise<StudentNotesSummary> => {
+// Backend response shape: map of studentId -> summary
+interface BulkSummaryBackendEntry {
+  lesson_plan_title?: string;
+  lesson_plan_description?: string[];
+  latest_note_title?: string;
+}
+
+// Fetch notes + lesson plan summaries for all students in one call
+const fetchBulkNotesSummary = async (): Promise<
+  Map<string, StudentNotesSummary>
+> => {
   try {
-    const response = await api.get(`/notes/?user_id=${studentId}`);
+    const response = await api.get("/notes/bulk-summary");
     const data = response.data;
-    if (!data.success || !data.data) return {};
+    if (!data.success || !data.data) return new Map();
 
-    const { notes, lesson_plan } = data.data;
+    const raw: Record<string, BulkSummaryBackendEntry> = data.data;
+    const map = new Map<string, StudentNotesSummary>();
 
-    const result: StudentNotesSummary = {};
-
-    if (lesson_plan && lesson_plan.active) {
-      result.lessonPlanTitle = lesson_plan.title;
-      if (Array.isArray(lesson_plan.description)) {
-        result.lessonPlanBody = lesson_plan.description.join("\n");
-      } else if (lesson_plan.description) {
-        result.lessonPlanBody = lesson_plan.description;
+    for (const [studentId, entry] of Object.entries(raw)) {
+      const summary: StudentNotesSummary = {};
+      if (entry.lesson_plan_title) {
+        summary.lessonPlanTitle = entry.lesson_plan_title;
+        if (
+          Array.isArray(entry.lesson_plan_description) &&
+          entry.lesson_plan_description.length > 0
+        ) {
+          summary.lessonPlanBody = entry.lesson_plan_description.join("\n");
+        }
       }
+      if (entry.latest_note_title) {
+        summary.latestNoteTitle = entry.latest_note_title;
+      }
+      map.set(studentId, summary);
     }
 
-    if (Array.isArray(notes) && notes.length > 0) {
-      const sorted = [...notes].sort(
-        (a: { created_at: string }, b: { created_at: string }) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
-      result.latestNoteTitle = sorted[0]?.title;
-    }
-
-    return result;
+    return map;
   } catch {
-    return {};
+    return new Map();
   }
 };
 
@@ -72,30 +77,12 @@ export function useAdminStudentsQuery(enabled: boolean) {
   });
 }
 
-export function useStudentNotesSummaryQueries(studentIds: string[]) {
-  return useQueries({
-    queries: studentIds.map((id) => ({
-      queryKey: queryKeys.students.notesSummary(id),
-      queryFn: () => fetchStudentNotesSummary(id),
-      staleTime: STALE_TIME,
-      refetchInterval: STALE_TIME,
-      enabled: studentIds.length > 0,
-    })),
+// Single query that returns a Map<studentId, summary> for all students
+export function useBulkNotesSummaryQuery() {
+  return useQuery<Map<string, StudentNotesSummary>>({
+    queryKey: queryKeys.students.bulkNotesSummary(),
+    queryFn: fetchBulkNotesSummary,
+    staleTime: STALE_TIME,
+    refetchInterval: STALE_TIME,
   });
-}
-
-// Build a map of studentId -> notes summary from the parallel queries
-export function useNotesSummaryMap(
-  studentIds: string[],
-  noteQueries: ReturnType<typeof useStudentNotesSummaryQueries>
-) {
-  return useMemo(() => {
-    const map = new Map<string, StudentNotesSummary>();
-    studentIds.forEach((id, index) => {
-      if (noteQueries[index]?.data) {
-        map.set(id, noteQueries[index].data as StudentNotesSummary);
-      }
-    });
-    return map;
-  }, [studentIds, noteQueries]);
 }
