@@ -30,6 +30,7 @@ export interface Blog {
     created_at: string;
     updated_at: string;
     tags: BlogTag[];
+    can_edit: boolean;
 }
 
 export interface BlogImage {
