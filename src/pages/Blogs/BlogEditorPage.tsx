@@ -1,4 +1,4 @@
-import { useReducer, useMemo, useCallback, useRef } from "react";
+import { useReducer, useMemo, useCallback, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { Helmet } from "react-helmet-async";
 import { useEditor, EditorContent } from "@tiptap/react";
@@ -8,6 +8,7 @@ import TextAlign from "@tiptap/extension-text-align";
 import ImageExt from "@tiptap/extension-image";
 import LinkExt from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
+import { Markdown } from "tiptap-markdown";
 import BlogEditorToolbar from "./components/BlogEditorToolbar";
 import TagInput from "./components/TagInput";
 import {
@@ -76,6 +77,8 @@ export default function BlogEditorPage() {
     const navigate = useNavigate();
     const toast = useToast();
     const coverInputRef = useRef<HTMLInputElement>(null);
+    const [editorMode, setEditorMode] = useState<"richtext" | "markdown">("richtext");
+    const [markdownSource, setMarkdownSource] = useState("");
 
     const [state, dispatch] = useReducer(editorReducer, initialState);
 
@@ -116,21 +119,17 @@ export default function BlogEditorPage() {
             Placeholder.configure({
                 placeholder: "Start writing your blog post...",
             }),
+            Markdown,
         ],
         editorProps: {
             attributes: {
-                class: "blog-editor-content prose prose-lg dark:prose-invert max-w-none focus:outline-none min-h-[400px] px-5 py-4",
+                class: "blog-editor-content blog-rich-text prose prose-lg dark:prose-invert max-w-none focus:outline-none min-h-[400px] px-5 py-4",
             },
         },
         onCreate: ({ editor: ed }) => {
             // Load existing content if in edit mode
             if (existingBlog?.content) {
-                try {
-                    const json = JSON.parse(existingBlog.content);
-                    ed.commands.setContent(json);
-                } catch {
-                    ed.commands.setContent(existingBlog.content);
-                }
+                ed.commands.setContent(existingBlog.content);
                 dispatch({
                     type: "LOAD_BLOG",
                     payload: {
@@ -150,12 +149,7 @@ export default function BlogEditorPage() {
     // Re-populate editor when existing blog loads (for edit mode)
     useMemo(() => {
         if (existingBlog && editor && isEditMode) {
-            try {
-                const json = JSON.parse(existingBlog.content);
-                editor.commands.setContent(json);
-            } catch {
-                editor.commands.setContent(existingBlog.content);
-            }
+            editor.commands.setContent(existingBlog.content);
             dispatch({
                 type: "LOAD_BLOG",
                 payload: {
@@ -234,6 +228,24 @@ export default function BlogEditorPage() {
 
     // ─── Save / Publish ─────────────────────────────────────────────────────
 
+    // ─── Mode toggle ────────────────────────────────────────────────────────
+
+    const handleToggleMode = useCallback(() => {
+        if (!editor) return;
+        if (editorMode === "richtext") {
+            // Switching to markdown: serialize editor content to markdown
+            const md = editor.storage.markdown.getMarkdown();
+            setMarkdownSource(md);
+            setEditorMode("markdown");
+        } else {
+            // Switching to rich text: parse markdown back into the editor
+            editor.commands.setContent(markdownSource, true);
+            setEditorMode("richtext");
+        }
+    }, [editor, editorMode, markdownSource]);
+
+    // ─── Save / Publish ─────────────────────────────────────────────────────
+
     const handleSave = useCallback(
         async (status: "draft" | "published") => {
             if (!editor) return;
@@ -244,7 +256,12 @@ export default function BlogEditorPage() {
 
             dispatch({ type: "SET_SAVING", value: true });
 
-            const content = JSON.stringify(editor.getJSON());
+            // If in markdown mode, sync markdown back to editor before saving
+            if (editorMode === "markdown") {
+                editor.commands.setContent(markdownSource, true);
+            }
+
+            const content = editor.getJSON();
 
             try {
                 if (isEditMode && existingBlog) {
@@ -311,6 +328,8 @@ export default function BlogEditorPage() {
             uploadCoverMutation,
             navigate,
             toast,
+            editorMode,
+            markdownSource,
         ]
     );
 
@@ -521,33 +540,79 @@ export default function BlogEditorPage() {
 
                     {/* Editor */}
                     <div className="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-900">
-                        <BlogEditorToolbar editor={editor} />
-
-                        {/* Image upload button below toolbar */}
-                        <div className="flex items-center gap-2 px-3 py-1.5 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30">
+                        {/* Toolbar + Mode Toggle */}
+                        <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                            <div className="flex-1">
+                                {editorMode === "richtext" && (
+                                    <BlogEditorToolbar editor={editor} />
+                                )}
+                                {editorMode === "markdown" && (
+                                    <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 italic">
+                                        Markdown mode — write raw markdown below
+                                    </div>
+                                )}
+                            </div>
                             <button
                                 type="button"
-                                onClick={handleEditorImageUpload}
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                                onClick={handleToggleMode}
+                                className="flex items-center gap-1.5 px-3 py-1.5 mr-2 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shrink-0"
                             >
-                                <svg
-                                    className="w-4 h-4"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                    />
-                                </svg>
-                                Insert Image
+                                {editorMode === "richtext" ? (
+                                    <>
+                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                        </svg>
+                                        Markdown
+                                    </>
+                                ) : (
+                                    <>
+                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                        Rich Text
+                                    </>
+                                )}
                             </button>
                         </div>
 
-                        <EditorContent editor={editor} />
+                        {/* Image upload button (only in rich text mode) */}
+                        {editorMode === "richtext" && (
+                            <div className="flex items-center gap-2 px-3 py-1.5 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30">
+                                <button
+                                    type="button"
+                                    onClick={handleEditorImageUpload}
+                                    className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                                >
+                                    <svg
+                                        className="w-4 h-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                        />
+                                    </svg>
+                                    Insert Image
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Editor content or Markdown textarea */}
+                        {editorMode === "richtext" ? (
+                            <EditorContent editor={editor} />
+                        ) : (
+                            <textarea
+                                value={markdownSource}
+                                onChange={(e) => setMarkdownSource(e.target.value)}
+                                className="blog-markdown-textarea"
+                                placeholder="Write your content in markdown..."
+                                spellCheck={false}
+                            />
+                        )}
                     </div>
                 </div>
             </div>

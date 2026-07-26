@@ -196,7 +196,7 @@ export default function BlogEditorToolbar({ editor }: BlogEditorToolbarProps) {
     ];
 
     return (
-        <div className="flex flex-wrap items-center gap-1 p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-t-xl">
+        <div className="flex flex-wrap items-center gap-1 p-2 bg-gray-50 dark:bg-gray-800/50">
             {groups.map((group, gi) => (
                 <div key={gi} className="flex items-center gap-0.5">
                     {group.map((btn) => (

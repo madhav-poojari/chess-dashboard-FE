@@ -27,8 +27,7 @@ export default function BlogDetailPage() {
     const htmlContent = useMemo(() => {
         if (!blog?.content) return "";
         try {
-            const json = JSON.parse(blog.content);
-            return generateHTML(json, [
+            return generateHTML(blog.content, [
                 StarterKit,
                 Underline,
                 TextAlign.configure({ types: ["heading", "paragraph"] }),
@@ -36,8 +35,7 @@ export default function BlogDetailPage() {
                 LinkExt.configure({ openOnClick: false }),
             ]);
         } catch {
-            // Fallback: content might already be HTML or plain text
-            return blog.content;
+            return "";
         }
     }, [blog?.content]);
 
@@ -252,7 +250,7 @@ export default function BlogDetailPage() {
 
                 {/* Content */}
                 <section
-                    className="blog-content prose prose-lg dark:prose-invert max-w-none"
+                    className="blog-rich-text prose prose-lg dark:prose-invert max-w-none"
                     dangerouslySetInnerHTML={{ __html: htmlContent }}
                 />
             </article>

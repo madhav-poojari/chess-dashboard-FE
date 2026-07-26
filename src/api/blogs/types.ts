@@ -20,7 +20,7 @@ export interface Blog {
     slug: string;
     title: string;
     summary: string;
-    content: string; // TipTap JSON as string
+    content: Record<string, unknown>; // TipTap JSON object (JSONB)
     cover_image_url: string;
     author_id: string;
     author: BlogAuthor;
@@ -43,7 +43,7 @@ export interface BlogImage {
 export interface CreateBlogPayload {
     title: string;
     summary: string;
-    content: string;
+    content: Record<string, unknown>;
     visibility: "public" | "internal";
     status: "draft" | "published";
     tags: string[];
@@ -52,7 +52,7 @@ export interface CreateBlogPayload {
 export interface UpdateBlogPayload {
     title?: string;
     summary?: string;
-    content?: string;
+    content?: Record<string, unknown>;
     visibility?: "public" | "internal";
     status?: "draft" | "published";
     tags?: string[];
