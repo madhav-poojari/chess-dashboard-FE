@@ -19,7 +19,7 @@ import {
     useUploadCoverImage,
     useDeleteCoverImage,
 } from "../../hooks/useBlogs";
-import { uploadBlogImage } from "../../api/blogs/blogService";
+import { uploadBlogImage, updateBlog as updateBlogApi } from "../../api/blogs/blogService";
 import { useToast } from "../../context/ToastContext";
 
 // ─── State ──────────────────────────────────────────────────────────────────────
@@ -79,6 +79,7 @@ export default function BlogEditorPage() {
     const coverInputRef = useRef<HTMLInputElement>(null);
     const [editorMode, setEditorMode] = useState<"richtext" | "markdown">("richtext");
     const [markdownSource, setMarkdownSource] = useState("");
+    const pendingImagesRef = useRef<Map<string, File>>(new Map());
 
     const [state, dispatch] = useReducer(editorReducer, initialState);
 
@@ -195,16 +196,14 @@ export default function BlogEditorPage() {
                     toast.error("Failed to upload image.");
                 }
             } else {
-                // For unsaved blogs, use a temporary object URL
+                // For unsaved blogs, use a temporary object URL and track the file
                 const tempUrl = URL.createObjectURL(file);
+                pendingImagesRef.current.set(tempUrl, file);
                 editor
                     .chain()
                     .focus()
                     .setImage({ src: tempUrl, alt: file.name })
                     .run();
-                toast.success(
-                    "Image added. Save the blog first, then re-upload images."
-                );
             }
         };
         input.click();
@@ -304,6 +303,30 @@ export default function BlogEditorPage() {
                             blogId: newBlog.id,
                             file: state.coverFile,
                         });
+                    }
+
+                    // Upload pending content images and replace blob URLs
+                    if (pendingImagesRef.current.size > 0 && newBlog?.id) {
+                        const urlReplacements = new Map<string, string>();
+
+                        for (const [blobUrl, imgFile] of pendingImagesRef.current.entries()) {
+                            try {
+                                const result = await uploadBlogImage(newBlog.id, imgFile);
+                                const realUrl = `${r2BaseUrl}/${result.url_suffix}`;
+                                urlReplacements.set(blobUrl, realUrl);
+                            } catch {
+                                toast.error(`Failed to upload image: ${imgFile.name}`);
+                            }
+                            // Revoke the temporary blob URL to free memory
+                            URL.revokeObjectURL(blobUrl);
+                        }
+
+                        if (urlReplacements.size > 0) {
+                            const patchedContent = replaceBlobUrls(content, urlReplacements);
+                            await updateBlogApi(newBlog.id, { content: patchedContent });
+                        }
+
+                        pendingImagesRef.current.clear();
                     }
 
                     if (status === "published" && newBlog?.slug) {
@@ -618,4 +641,35 @@ export default function BlogEditorPage() {
             </div>
         </>
     );
+}
+
+// ─── Helpers ────────────────────────────────────────────────────────────────────
+
+/**
+ * Recursively walks a TipTap JSON content tree, replacing image `src` values
+ * that match blob: URLs with their real R2-hosted URLs.
+ */
+function replaceBlobUrls(
+    node: Record<string, unknown>,
+    replacements: Map<string, string>
+): Record<string, unknown> {
+    const result = { ...node };
+
+    // Replace src on image nodes
+    if (result.type === "image" && typeof result.attrs === "object" && result.attrs) {
+        const attrs = { ...(result.attrs as Record<string, unknown>) };
+        if (typeof attrs.src === "string" && replacements.has(attrs.src)) {
+            attrs.src = replacements.get(attrs.src);
+        }
+        result.attrs = attrs;
+    }
+
+    // Recurse into child content
+    if (Array.isArray(result.content)) {
+        result.content = (result.content as Record<string, unknown>[]).map(
+            (child) => replaceBlobUrls(child, replacements)
+        );
+    }
+
+    return result;
 }

@@ -2,8 +2,6 @@ import { useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router";
 import { Helmet } from "react-helmet-async";
 import { useBlogDetail, useDeleteBlog } from "../../hooks/useBlogs";
-import { useAuth } from "../../context/AuthContext";
-import { UserRole } from "../../api/user/dto";
 import { DateTime } from "luxon";
 import { generateHTML } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
@@ -15,7 +13,6 @@ import LinkExt from "@tiptap/extension-link";
 export default function BlogDetailPage() {
     const { slug } = useParams<{ slug: string }>();
     const navigate = useNavigate();
-    const { user } = useAuth();
     const { data: blog, isLoading, isError } = useBlogDetail(slug || "");
     const deleteMutation = useDeleteBlog();
 
@@ -39,20 +36,7 @@ export default function BlogDetailPage() {
         }
     }, [blog?.content]);
 
-    const canEdit = useMemo(() => {
-        if (!user || !blog) return false;
-        if (user.id === blog.author_id) return true;
-        if (user.role === UserRole.ADMIN) return true;
-        // Higher-role related users can also edit (handled server-side,
-        // but we show the button optimistically for mentor/coach roles)
-        if (
-            user.role === UserRole.MENTOR_COACH ||
-            user.role === UserRole.COACH
-        ) {
-            return true; // server will enforce the actual relation check
-        }
-        return false;
-    }, [user, blog]);
+    const canEdit = blog?.can_edit ?? false;
 
     const handleDelete = () => {
         if (!blog) return;
