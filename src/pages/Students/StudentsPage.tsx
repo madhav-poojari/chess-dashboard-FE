@@ -7,8 +7,7 @@ import { StudentWithRelations } from "../../api/user/dto";
 import {
   useStudentsQuery,
   useAdminStudentsQuery,
-  useStudentNotesSummaryQueries,
-  useNotesSummaryMap,
+  useBulkNotesSummaryQuery,
 } from "../../hooks/useStudentQueries";
 import StudentCard from "./StudentCard";
 
@@ -67,10 +66,8 @@ export default function StudentsPage() {
     return studentsRaw.filter((s) => s.active).map(normalizeFromRelations);
   }, [isAdmin, studentsRaw, adminStudentsRaw]);
 
-  const studentIds = useMemo(() => students.map((s) => s.id), [students]);
-
-  const noteQueries = useStudentNotesSummaryQueries(studentIds);
-  const notesSummaryMap = useNotesSummaryMap(studentIds, noteQueries);
+  const { data: notesSummaryMap = new Map(), isLoading: notesLoading } =
+    useBulkNotesSummaryQuery();
 
   const isLoading = isAdmin ? adminStudentsLoading : studentsLoading;
 
@@ -78,8 +75,6 @@ export default function StudentsPage() {
 
   const renderStudentCard = (student: NormalizedStudent) => {
     const summary = notesSummaryMap.get(student.id);
-    const noteQueryIdx = studentIds.indexOf(student.id);
-    const noteLoading = noteQueryIdx >= 0 ? noteQueries[noteQueryIdx]?.isLoading : false;
 
     return (
       <StudentCard
@@ -90,7 +85,7 @@ export default function StudentsPage() {
         lessonPlanTitle={summary?.lessonPlanTitle}
         lessonPlanBody={summary?.lessonPlanBody}
         latestNoteTitle={summary?.latestNoteTitle}
-        isLoading={noteLoading}
+        isLoading={notesLoading}
       />
     );
   };

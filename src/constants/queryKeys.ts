@@ -42,7 +42,7 @@ export const queryKeys = {
     students: {
         list: () => ["students"] as const,
         adminAssignments: () => ["admin-students-assignments"] as const,
-        notesSummary: (studentId: string) => ["student-notes-summary", studentId] as const,
+        bulkNotesSummary: () => ["bulk-notes-summary"] as const,
     },
 };
 
