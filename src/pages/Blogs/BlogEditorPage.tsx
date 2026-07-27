@@ -225,8 +225,6 @@ export default function BlogEditorPage() {
         dispatch({ type: "SET_COVER", file: null, preview: null });
     };
 
-    // ─── Save / Publish ─────────────────────────────────────────────────────
-
     // ─── Mode toggle ────────────────────────────────────────────────────────
 
     const handleToggleMode = useCallback(() => {
