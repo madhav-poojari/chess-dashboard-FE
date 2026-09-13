@@ -41,6 +41,7 @@ export const queryKeys = {
         myDrafts: () => ["blogs", "my-drafts"] as const,
         tags: () => ["blogs", "tags"] as const,
         images: (blogId: string) => ["blogs", "images", blogId] as const,
+    }
     students: {
         list: () => ["students"] as const,
         adminAssignments: () => ["admin-students-assignments"] as const,
