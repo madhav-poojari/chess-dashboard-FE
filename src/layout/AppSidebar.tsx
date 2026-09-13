@@ -15,7 +15,7 @@ import {
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "../context/AuthContext";
 
-import { fetchStudents, fetchCoaches } from "../api/user/service";
+import { fetchCoaches } from "../api/user/service";
 
 import { User, UserRole } from "../api/user/dto";
 
@@ -33,15 +33,6 @@ const AppSidebar: React.FC = () => {
   const location = useLocation();
 
   const userRole = user?.role?.toLowerCase().trim() || "";
-  const permittedRoles = [UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN];
-  const shouldFetchStudents = user && permittedRoles.includes(userRole as UserRole);
-
-  const { data: fetchedStudents = [] } = useQuery<User[]>({
-    queryKey: ["students"],
-    queryFn: fetchStudents,
-    enabled: !!(!loading && shouldFetchStudents),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
 
   const shouldFetchCoaches = user && [UserRole.MENTOR_COACH, UserRole.ADMIN].includes(userRole as UserRole);
   const { data: fetchedCoaches = [] } = useQuery<User[]>({
@@ -50,17 +41,6 @@ const AppSidebar: React.FC = () => {
     enabled: !!(!loading && shouldFetchCoaches),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
-
-  const students = useMemo(() => {
-    if (fetchedStudents && Array.isArray(fetchedStudents)) {
-      return fetchedStudents.filter((s: User) => s.active).map((s: User) => ({
-        id: s.id,
-        name: `${s.first_name} ${s.last_name}`,
-        lessonPlan: s.current_lesson_plan || "No active plan"
-      }));
-    }
-    return [];
-  }, [fetchedStudents, user?.id, userRole]);
 
   const coaches = useMemo(() => {
     if (fetchedCoaches && Array.isArray(fetchedCoaches)) {
@@ -111,13 +91,8 @@ const AppSidebar: React.FC = () => {
     {
       icon: <GroupIcon />,
       name: "Students",
-
+      path: "/students",
       allowedRoles: [UserRole.COACH, UserRole.MENTOR_COACH, UserRole.ADMIN],
-      subItems: students.map(student => ({
-        name: student.name,
-        path: `/notes?studentId=${student.id}`,
-        description: student.lessonPlan
-      }))
     },
     {
         icon: <GroupIcon />,
@@ -147,7 +122,7 @@ const AppSidebar: React.FC = () => {
       allowedRoles: [UserRole.ADMIN],
       path: "/referral-graph"
     },
-  ], [students, coaches]);
+  ], [coaches]);
 
   const isActive = useCallback(
     (path: string) => {
