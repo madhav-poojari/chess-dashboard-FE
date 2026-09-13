@@ -55,6 +55,14 @@ export interface User {
   schedule?: ClassScheduleDTO[];
 }
 
+// Enriched student returned by GET /users/ for coach/mentor callers
+export interface StudentWithRelations extends User {
+  coach_id?: string;
+  coach_name?: string;
+  mentor_id?: string;
+  mentor_name?: string;
+}
+
 export interface StudentSummary {
   id: string;
   first_name: string;

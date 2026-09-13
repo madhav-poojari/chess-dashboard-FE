@@ -22,6 +22,7 @@ import ReferralGraph from "./pages/Admin/ReferralGraph";
 import BlogsPage from "./pages/Blogs/BlogsPage";
 import BlogDetailPage from "./pages/Blogs/BlogDetailPage";
 import BlogEditorPage from "./pages/Blogs/BlogEditorPage";
+import StudentsPage from "./pages/Students/StudentsPage";
 
 export default function App() {
   return (
@@ -49,6 +50,16 @@ export default function App() {
 
                   {/* Academy Gallery */}
                   <Route path="/academy-gallery" element={<AcademyGallery />} />
+
+                  {/* Students */}
+                  <Route
+                    path="/students"
+                    element={
+                      <RequireRole allowedRoles={["admin", "mentor", "coach"]}>
+                        <StudentsPage />
+                      </RequireRole>
+                    }
+                  />
 
                   {/* Admin */}
                   <Route
