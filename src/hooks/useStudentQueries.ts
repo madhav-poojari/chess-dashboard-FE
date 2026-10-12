@@ -11,6 +11,7 @@ export interface StudentNotesSummary {
   lessonPlanTitle?: string;
   lessonPlanBody?: string;
   latestNoteTitle?: string;
+  latestNoteFollowup?: boolean;
 }
 
 // Backend response shape: map of studentId -> summary
@@ -18,6 +19,7 @@ interface BulkSummaryBackendEntry {
   lesson_plan_title?: string;
   lesson_plan_description?: string[];
   latest_note_title?: string;
+  latest_note_followup?: boolean;
 }
 
 // Fetch notes + lesson plan summaries for all students in one call
@@ -45,6 +47,7 @@ const fetchBulkNotesSummary = async (): Promise<
       }
       if (entry.latest_note_title) {
         summary.latestNoteTitle = entry.latest_note_title;
+        summary.latestNoteFollowup = entry.latest_note_followup === true;
       }
       map.set(studentId, summary);
     }

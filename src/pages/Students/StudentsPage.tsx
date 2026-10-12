@@ -85,6 +85,7 @@ export default function StudentsPage() {
         lessonPlanTitle={summary?.lessonPlanTitle}
         lessonPlanBody={summary?.lessonPlanBody}
         latestNoteTitle={summary?.latestNoteTitle}
+        latestNoteFollowup={summary?.latestNoteFollowup}
         isLoading={notesLoading}
       />
     );

@@ -93,6 +93,11 @@ export default function NoteCard({ note, userRole, onEdit, onDelete, userId, les
                                 {note.visibility_level}
                             </span>
                         )}
+                        {note.followup && !isLessonPlan && (
+                            <span className="inline-flex items-center rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
+                                Follow-up
+                            </span>
+                        )}
                     </div>
                     {renderContent()}
                 </div>

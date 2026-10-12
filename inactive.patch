@@ -1,0 +1,670 @@
+diff --git a/.gitignore b/.gitignore
+index a7759af..72a941e 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -23,4 +23,4 @@ dist-ssr
+ *.sln
+ *.sw?
+ .env
+-.env.stage
+\ No newline at end of file
++.env.stage
+diff --git a/package-lock.json b/package-lock.json
+index dfa6394..ddd4f8c 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -112,6 +112,7 @@
+       "integrity": "sha512-RgHBCvtjbOK2gXSNBNIkNoEc9qoVEtau3hj8gEqKQuL3HZAibKarWFEI3Lfm6EYKkLalOh8eSrj9b+ch9H/VBA==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@babel/code-frame": "^7.29.7",
+         "@babel/generator": "^7.29.7",
+@@ -1037,6 +1038,7 @@
+       "resolved": "https://registry.npmjs.org/@fullcalendar/core/-/core-6.1.15.tgz",
+       "integrity": "sha512-BuX7o6ALpLb84cMw1FCB9/cSgF4JbVO894cjJZ6kP74jzbUZNjtwffwRdA+Id8rrLjT30d/7TrkW90k4zbXB5Q==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "preact": "~10.12.1"
+       }
+@@ -1742,6 +1744,7 @@
+       "resolved": "https://registry.npmjs.org/@svgdotjs/svg.js/-/svg.js-3.2.4.tgz",
+       "integrity": "sha512-BjJ/7vWNowlX3Z8O4ywT58DqbNRyYlkk6Yz/D13aB7hGmfQTvGX4Tkgtm/ApYlu9M7lCQi15xUEidqMUmdMYwg==",
+       "license": "MIT",
++      "peer": true,
+       "funding": {
+         "type": "github",
+         "url": "https://github.com/sponsors/Fuzzyma"
+@@ -1765,6 +1768,7 @@
+       "resolved": "https://registry.npmjs.org/@svgdotjs/svg.select.js/-/svg.select.js-4.0.2.tgz",
+       "integrity": "sha512-5gWdrvoQX3keo03SCmgaBbD+kFftq0F/f2bzCbNnpkkvW6tk4rl4MakORzFuNjvXPWwB4az9GwuvVxQVnjaK2g==",
+       "license": "MIT",
++      "peer": true,
+       "engines": {
+         "node": ">= 14.18"
+       },
+@@ -1941,6 +1945,7 @@
+       "integrity": "sha512-8QqtOQT5ACVlmsvKOJNEaWmRPmcojMOzCz4Hs2BGG/toAp/K38LcsMRyLp349glq5AzJbCEeimEoxaX6v/fLrA==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@babel/core": "^7.21.3",
+         "@svgr/babel-preset": "8.1.0",
+@@ -2275,6 +2280,7 @@
+       "resolved": "https://registry.npmjs.org/@tiptap/core/-/core-2.27.2.tgz",
+       "integrity": "sha512-ABL1N6eoxzDzC1bYvkMbvyexHacszsKdVPYqhl5GwHLOvpZcv9VE9QaKwDILTyz5voCA0lGcAAXZp+qnXOk5lQ==",
+       "license": "MIT",
++      "peer": true,
+       "funding": {
+         "type": "github",
+         "url": "https://github.com/sponsors/ueberdosis"
+@@ -2644,6 +2650,7 @@
+       "resolved": "https://registry.npmjs.org/@tiptap/pm/-/pm-2.27.2.tgz",
+       "integrity": "sha512-kaEg7BfiJPDQMKbjVIzEPO3wlcA+pZb2tlcK9gPrdDnEFaec2QTF1sXz2ak2IIb2curvnIrQ4yrfHgLlVA72wA==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "prosemirror-changeset": "^2.3.0",
+         "prosemirror-collab": "^1.3.1",
+@@ -2844,8 +2851,7 @@
+       "version": "2.0.46",
+       "resolved": "https://registry.npmjs.org/@types/hammerjs/-/hammerjs-2.0.46.tgz",
+       "integrity": "sha512-ynRvcq6wvqexJ9brDMS4BnBLzmr0e14d6ZJTEShTBWKymQiHwlAyGu0ZPEFI2Fh1U53F7tN9ufClWM5KvqkKOw==",
+-      "license": "MIT",
+-      "peer": true
++      "license": "MIT"
+     },
+     "node_modules/@types/json-schema": {
+       "version": "7.0.15",
+@@ -2888,6 +2894,7 @@
+       "integrity": "sha512-V6Ar115dBDrjbtXSrS+/Oruobc+qVbbUxDFC1RSbRqLt5SYvxxyIDrSC85RWml54g+jfNeEMZhEj7wW07ONQhA==",
+       "devOptional": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "csstype": "^3.0.2"
+       }
+@@ -2954,6 +2961,7 @@
+       "integrity": "sha512-MFDaO9CYiard9j9VepMNa9MTcqVvSny2N4hkY6roquzj8pdCBRENhErrteaQuu7Yjn1ppk0v1/ZF9CG3KIlrTA==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@typescript-eslint/scope-manager": "8.24.0",
+         "@typescript-eslint/types": "8.24.0",
+@@ -3143,6 +3151,7 @@
+       "integrity": "sha512-UVJyE9MttOsBQIDKw1skb9nAwQuR5wuGD3+82K6JgJlm/Y+KI92oNsMNGZCYdDsVtRHSak0pcV5Dno5+4jh9sw==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "bin": {
+         "acorn": "bin/acorn"
+       },
+@@ -3210,6 +3219,7 @@
+       "resolved": "https://registry.npmjs.org/apexcharts/-/apexcharts-4.4.0.tgz",
+       "integrity": "sha512-JGsHeQEKDlQh1rob8aBai9/HKvXIpbZ83TnobKZAcdOELf+oQZaxZyAnbbldr6PPBdCgG2zzzLaP1dtEsJxzWw==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@svgdotjs/svg.draggable.js": "^3.0.4",
+         "@svgdotjs/svg.filter.js": "^3.0.8",
+@@ -3315,6 +3325,7 @@
+         }
+       ],
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "baseline-browser-mapping": "^2.10.42",
+         "caniuse-lite": "^1.0.30001803",
+@@ -3918,6 +3929,7 @@
+       "integrity": "sha512-XoMjdBOwe/esVgEvLmNsD3IRHkm7fbKIUGvrleloJXUZgDHig2IPWNniv+GwjyJXzuNqVjlr5+4yVUZjycJwfQ==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@eslint-community/eslint-utils": "^4.8.0",
+         "@eslint-community/regexpp": "^4.12.1",
+@@ -4620,7 +4632,8 @@
+       "version": "3.7.1",
+       "resolved": "https://registry.npmjs.org/jquery/-/jquery-3.7.1.tgz",
+       "integrity": "sha512-m4avr8yL8kmFN8psrbFFFmB/If14iN5o9nw/NgnnM+kybDJpRsAynV2BsfpTYrTRysYUdADVD7CkUUizgkpLfg==",
+-      "license": "MIT"
++      "license": "MIT",
++      "peer": true
+     },
+     "node_modules/js-tokens": {
+       "version": "4.0.0",
+@@ -5570,6 +5583,7 @@
+       "resolved": "https://registry.npmjs.org/prosemirror-model/-/prosemirror-model-1.25.11.tgz",
+       "integrity": "sha512-QWg9RhnpLlogAmp3p96uEFrE5txQpFynd4vhBAELkwgOCWQs/X0yCzB3/hrHqiPwf91RG5KyWq6553zs9JqIOQ==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "orderedmap": "^2.0.0"
+       }
+@@ -5599,6 +5613,7 @@
+       "resolved": "https://registry.npmjs.org/prosemirror-state/-/prosemirror-state-1.4.4.tgz",
+       "integrity": "sha512-6jiYHH2CIGbCfnxdHbXZ12gySFY/fz/ulZE333G6bPqIZ4F+TXo9ifiR86nAHpWnfoNjOb3o5ESi7J8Uz1jXHw==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "prosemirror-model": "^1.0.0",
+         "prosemirror-transform": "^1.0.0",
+@@ -5647,6 +5662,7 @@
+       "resolved": "https://registry.npmjs.org/prosemirror-view/-/prosemirror-view-1.42.1.tgz",
+       "integrity": "sha512-rRqzZnRgkyh69XoOMrfFJHwauHscLBmHbq772kwbic1ymQAM8gXjzEbJse5j1ep2UO2HRIAQL0bY3kZ/RoqjVw==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "prosemirror-model": "^1.25.8",
+         "prosemirror-state": "^1.0.0",
+@@ -5707,6 +5723,7 @@
+       "resolved": "https://registry.npmjs.org/react/-/react-19.0.0.tgz",
+       "integrity": "sha512-V8AVnmPIICiWpGfm6GLzCR/W5FXLchHop40W4nXBmdlEceh16rCN8O8LNWm5bh5XUX91fh7KpA+W0TgMKmgTpQ==",
+       "license": "MIT",
++      "peer": true,
+       "engines": {
+         "node": ">=0.10.0"
+       }
+@@ -5768,6 +5785,7 @@
+       "resolved": "https://registry.npmjs.org/react-dom/-/react-dom-19.0.0.tgz",
+       "integrity": "sha512-4GV5sHFG0e/0AD4X+ySy6UJd3jVl1iNsNHdpad0qhABJ11twS3TTBnseqsKurKcsNqCEFeGL3uLpVChpIO3QfQ==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "scheduler": "^0.25.0"
+       },
+@@ -5816,7 +5834,8 @@
+       "version": "16.13.1",
+       "resolved": "https://registry.npmjs.org/react-is/-/react-is-16.13.1.tgz",
+       "integrity": "sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==",
+-      "license": "MIT"
++      "license": "MIT",
++      "peer": true
+     },
+     "node_modules/react-refresh": {
+       "version": "0.14.2",
+@@ -5937,6 +5956,7 @@
+       "resolved": "https://registry.npmjs.org/react-redux/-/react-redux-9.2.0.tgz",
+       "integrity": "sha512-ROY9fvHhwOD9ySfrF0wmvu//bKCQ6AeZZq1nJNtbDC+kk5DuSuNX/n6YWYF/SYy7bSba4D4FSz8DJeKY/S/r+g==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@types/use-sync-external-store": "^0.0.6",
+         "use-sync-external-store": "^1.4.0"
+@@ -5959,7 +5979,8 @@
+       "version": "5.0.1",
+       "resolved": "https://registry.npmjs.org/redux/-/redux-5.0.1.tgz",
+       "integrity": "sha512-M9/ELqF6fy8FwmkpnF0S3YKOqMyoWJ4+CS5Efg2ct3oY9daQvd/Pc71FpGZsVsbl3Cpb+IIcjBDUnnyBdQbq4w==",
+-      "license": "MIT"
++      "license": "MIT",
++      "peer": true
+     },
+     "node_modules/recharts/node_modules/redux-thunk": {
+       "version": "3.1.0",
+@@ -6279,6 +6300,7 @@
+       "integrity": "sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "engines": {
+         "node": ">=12"
+       },
+@@ -6386,6 +6408,7 @@
+       "integrity": "sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw==",
+       "dev": true,
+       "license": "Apache-2.0",
++      "peer": true,
+       "bin": {
+         "tsc": "bin/tsc",
+         "tsserver": "bin/tsserver"
+@@ -6514,6 +6537,7 @@
+       "resolved": "https://registry.npmjs.org/vis-data/-/vis-data-8.0.4.tgz",
+       "integrity": "sha512-TsN0sMHqIRpdfg6TNPtfdINpkgxtnQP6JNWCaiSwvou5seXqKiP5eERkaBg+Y56wyJ4FZTeOEs/dEmWEPrpltQ==",
+       "license": "(Apache-2.0 OR MIT)",
++      "peer": true,
+       "funding": {
+         "type": "opencollective",
+         "url": "https://opencollective.com/visjs"
+@@ -6565,6 +6589,7 @@
+       "integrity": "sha512-NTKlcQjlAK7MlQoyb6LgaqHc8sso/pVyUJYWMws3jg21uTJw/LddqIFPcPqP6PzpgbIcZyKI85sFE4HBrQDA8A==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "esbuild": "^0.25.0",
+         "fdir": "^6.4.4",
+@@ -6673,6 +6698,7 @@
+       "integrity": "sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "engines": {
+         "node": ">=12"
+       },
+diff --git a/src/api/notes/noteService.ts b/src/api/notes/noteService.ts
+index 531dbef..0a97542 100644
+--- a/src/api/notes/noteService.ts
++++ b/src/api/notes/noteService.ts
+@@ -7,6 +7,7 @@ export interface CreateNotePayload {
+     content: string;
+     visibility_level: string;
+     type: string;
++    followup: boolean;
+     studentId?: string;
+ }
+ 
+@@ -39,7 +40,8 @@ export const createNote = async (note: CreateNotePayload): Promise<Note> => {
+         tags: [],
+         visibility: mapVisibilityToInt(note.visibility_level),
+         additional_info: {
+-            created_type: note.type // Store original type if needed
++            created_type: note.type,
++            followup: note.followup,
+         }
+     };
+ 
+@@ -55,7 +57,8 @@ export const updateNote = async (id: string, note: CreateNotePayload): Promise<N
+         primary_tag: note.type === 'lesson_plan' ? 'Lesson Plan' : 'General',
+         visibility: mapVisibilityToInt(note.visibility_level),
+         additional_info: {
+-            created_type: note.type
++            created_type: note.type,
++            followup: note.followup,
+         }
+     };
+     const response = await api.patch(`/notes/${id}`, payload);
+diff --git a/src/hooks/useStudentQueries.ts b/src/hooks/useStudentQueries.ts
+index 969c7fc..619c1ab 100644
+--- a/src/hooks/useStudentQueries.ts
++++ b/src/hooks/useStudentQueries.ts
+@@ -11,6 +11,7 @@ export interface StudentNotesSummary {
+   lessonPlanTitle?: string;
+   lessonPlanBody?: string;
+   latestNoteTitle?: string;
++  latestNoteFollowup?: boolean;
+ }
+ 
+ // Backend response shape: map of studentId -> summary
+@@ -18,6 +19,7 @@ interface BulkSummaryBackendEntry {
+   lesson_plan_title?: string;
+   lesson_plan_description?: string[];
+   latest_note_title?: string;
++  latest_note_followup?: boolean;
+ }
+ 
+ // Fetch notes + lesson plan summaries for all students in one call
+@@ -45,6 +47,7 @@ const fetchBulkNotesSummary = async (): Promise<
+       }
+       if (entry.latest_note_title) {
+         summary.latestNoteTitle = entry.latest_note_title;
++        summary.latestNoteFollowup = entry.latest_note_followup === true;
+       }
+       map.set(studentId, summary);
+     }
+diff --git a/src/pages/Attendance/AttendancePage.tsx b/src/pages/Attendance/AttendancePage.tsx
+index a372838..d751ff5 100644
+--- a/src/pages/Attendance/AttendancePage.tsx
++++ b/src/pages/Attendance/AttendancePage.tsx
+@@ -14,10 +14,13 @@ import { queryKeys } from "../../constants/queryKeys";
+ 
+ type TabType = "student_overview" | "coach_overview";
+ 
+-function monthInputDefault(): string {
++function monthInputDefault(usePreviousMonth: boolean): string {
+   const d = new Date();
+-  const yyyy = d.getFullYear();
+-  const mm = String(d.getMonth() + 1).padStart(2, "0");
++  const date = usePreviousMonth
++    ? new Date(d.getFullYear(), d.getMonth() - 1, 1)
++    : d;
++  const yyyy = date.getFullYear();
++  const mm = String(date.getMonth() + 1).padStart(2, "0");
+   return `${yyyy}-${mm}`;
+ }
+ 
+@@ -37,7 +40,9 @@ export default function AttendancePage() {
+   const canSeeOthers = role === UserRole.COACH;
+ 
+   const [activeTab, setActiveTab] = useState<TabType>("student_overview");
+-  const [monthValue, setMonthValue] = useState<string>(monthInputDefault());
++  const [monthValue, setMonthValue] = useState<string>(
++    monthInputDefault(role === UserRole.ADMIN),
++  );
+ 
+   const [selectedStudentId, setSelectedStudentId] = useState<string>("");
+   const [selectedCoachId, setSelectedCoachId] = useState<string>("");
+diff --git a/src/pages/Attendance/AttendanceTable.tsx b/src/pages/Attendance/AttendanceTable.tsx
+index 8b52e3f..143ccd6 100644
+--- a/src/pages/Attendance/AttendanceTable.tsx
++++ b/src/pages/Attendance/AttendanceTable.tsx
+@@ -1,3 +1,4 @@
++import { Fragment } from "react";
+ import { Attendance } from "../../api/attendance/service";
+ 
+ interface AttendanceTableProps {
+@@ -30,6 +31,23 @@ export default function AttendanceTable({
+   }
+ 
+   const isStudentView = viewType === "student_overview";
++  const studentGroups = isStudentView
++    ? [{ studentId: "all", label: "", records: attendances }]
++    : Array.from(
++        attendances.reduce((groups, attendance) => {
++          const records = groups.get(attendance.student_id) ?? [];
++          records.push(attendance);
++          groups.set(attendance.student_id, records);
++          return groups;
++        }, new Map<string, Attendance[]>()),
++        ([studentId, records]) => ({
++          studentId,
++          label: records[0].student
++            ? `${records[0].student.first_name} ${records[0].student.last_name}`
++            : studentId,
++          records,
++        }),
++      );
+ 
+   return (
+     <div className="overflow-x-auto">
+@@ -38,9 +56,9 @@ export default function AttendanceTable({
+           <tr>
+             <th className="text-left py-2 pr-4 text-gray-500 font-medium">Date</th>
+             <th className="text-left py-2 pr-4 text-gray-500 font-medium">Type</th>
+-            <th className="text-left py-2 pr-4 text-gray-500 font-medium">
+-              {isStudentView ? "Coach" : "Student"}
+-            </th>
++            {isStudentView && (
++              <th className="text-left py-2 pr-4 text-gray-500 font-medium">Coach</th>
++            )}
+             <th className="text-left py-2 pr-4 text-gray-500 font-medium">Verified</th>
+             <th className="text-left py-2 pr-4 text-gray-500 font-medium">Highlights</th>
+             <th className="text-left py-2 pr-4 text-gray-500 font-medium">Homework</th>
+@@ -48,50 +66,63 @@ export default function AttendanceTable({
+           </tr>
+         </thead>
+         <tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+-          {attendances.map((a) => (
+-            <tr key={a.id}>
+-              <td className="py-3 pr-4 text-gray-800 dark:text-white/90">
+-                {formatDateOnly(a.date)}
+-              </td>
+-              <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
+-                {a.class_type}
+-              </td>
+-              <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
+-                {isStudentView
+-                  ? a.coach
+-                    ? `${a.coach.first_name} ${a.coach.last_name}`
+-                    : a.coach_id
+-                  : a.student
+-                  ? `${a.student.first_name} ${a.student.last_name}`
+-                  : a.student_id}
+-              </td>
+-              <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
+-                {a.is_verified ? "Yes" : "No"}
+-              </td>
+-              <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
+-                {a.class_highlights || "-"}
+-              </td>
+-              <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
+-                {a.homework || "-"}
+-              </td>
+-              <td className="py-3 pr-4">
+-                <div className="flex items-center gap-2">
+-                  <button
+-                    onClick={() => onEdit(a)}
+-                    className="text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
++          {studentGroups.map((group) => (
++            <Fragment key={group.studentId}>
++              {!isStudentView && (
++                <tr className="bg-gray-50 dark:bg-white/[0.03]">
++                  <th
++                    colSpan={6}
++                    scope="rowgroup"
++                    className="py-2 pr-4 text-left font-semibold text-gray-800 dark:text-white/90"
+                   >
+-                    Edit
+-                  </button>
+-                  <button
+-                    onClick={() => onDelete(a)}
+-                    disabled={deletingId === a.id}
+-                    className="text-xs font-medium text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50"
+-                  >
+-                    {deletingId === a.id ? "Deleting..." : "Delete"}
+-                  </button>
+-                </div>
+-              </td>
+-            </tr>
++                    {group.label}
++                  </th>
++                </tr>
++              )}
++              {group.records.map((a) => (
++                <tr key={a.id}>
++                  <td className="py-3 pr-4 text-gray-800 dark:text-white/90">
++                    {formatDateOnly(a.date)}
++                  </td>
++                  <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
++                    {a.class_type}
++                  </td>
++                  {isStudentView && (
++                    <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
++                      {a.coach
++                        ? `${a.coach.first_name} ${a.coach.last_name}`
++                        : a.coach_id}
++                    </td>
++                  )}
++                  <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
++                    {a.is_verified ? "Yes" : "No"}
++                  </td>
++                  <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
++                    {a.class_highlights || "-"}
++                  </td>
++                  <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
++                    {a.homework || "-"}
++                  </td>
++                  <td className="py-3 pr-4">
++                    <div className="flex items-center gap-2">
++                      <button
++                        onClick={() => onEdit(a)}
++                        className="text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
++                      >
++                        Edit
++                      </button>
++                      <button
++                        onClick={() => onDelete(a)}
++                        disabled={deletingId === a.id}
++                        className="text-xs font-medium text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50"
++                      >
++                        {deletingId === a.id ? "Deleting..." : "Delete"}
++                      </button>
++                    </div>
++                  </td>
++                </tr>
++              ))}
++            </Fragment>
+           ))}
+         </tbody>
+       </table>
+diff --git a/src/pages/Notes/CreateNoteModal.tsx b/src/pages/Notes/CreateNoteModal.tsx
+index 0f7bd29..0a4bca4 100644
+--- a/src/pages/Notes/CreateNoteModal.tsx
++++ b/src/pages/Notes/CreateNoteModal.tsx
+@@ -19,6 +19,7 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
+     const [title, setTitle] = useState('');
+     const [content, setContent] = useState('');
+     const [type, setType] = useState<NoteType>('note');
++    const [followup, setFollowup] = useState(false);
+     const [visibility, setVisibility] = useState<VisibilityLevel>('L3');
+     const [loading, setLoading] = useState(false);
+     const [error, setError] = useState('');
+@@ -38,6 +39,7 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
+                 setTitle(initialData.title);
+                 setContent(initialData.content);
+                 setType(initialData.type);
++                setFollowup(initialData.followup ?? false);
+                 setVisibility(initialData.visibility_level);
+                 // For editing, we might not allow changing the student, but let's pre-fill it
+                 setSelectedStudentId(initialData.user_id || '');
+@@ -46,6 +48,7 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
+                 setTitle('');
+                 setContent('');
+                 setType('note');
++                setFollowup(false);
+                 // For students, hardcode visibility to L4
+                 setVisibility(isStudent ? 'L4' : 'L3');
+                 // For students, set their own ID; otherwise use prop or empty
+@@ -99,6 +102,7 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
+                     content,
+                     visibility_level: finalVisibility,
+                     type,
++                    followup: type === 'note' && followup,
+                     studentId: targetStudentId
+                 });
+             } else {
+@@ -107,6 +111,7 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
+                     content,
+                     visibility_level: finalVisibility,
+                     type,
++                    followup: type === 'note' && followup,
+                     studentId: targetStudentId
+                 });
+             }
+@@ -184,6 +189,18 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
+                         />
+                     </div>
+ 
++                    {type === 'note' && (
++                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
++                            <input
++                                type="checkbox"
++                                checked={followup}
++                                onChange={(e) => setFollowup(e.target.checked)}
++                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
++                            />
++                            Follow-up required
++                        </label>
++                    )}
++
+                     {/* Visibility Level - hidden for students */}
+                     {!isStudent && (
+                         <div>
+diff --git a/src/pages/Notes/NoteCard.tsx b/src/pages/Notes/NoteCard.tsx
+index 583efe2..88aec35 100644
+--- a/src/pages/Notes/NoteCard.tsx
++++ b/src/pages/Notes/NoteCard.tsx
+@@ -93,6 +93,11 @@ export default function NoteCard({ note, userRole, onEdit, onDelete, userId, les
+                                 {note.visibility_level}
+                             </span>
+                         )}
++                        {note.followup && !isLessonPlan && (
++                            <span className="inline-flex items-center rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
++                                Follow-up
++                            </span>
++                        )}
+                     </div>
+                     {renderContent()}
+                 </div>
+diff --git a/src/pages/Notes/Notes.tsx b/src/pages/Notes/Notes.tsx
+index 6ae73e7..c6ec7f2 100644
+--- a/src/pages/Notes/Notes.tsx
++++ b/src/pages/Notes/Notes.tsx
+@@ -63,6 +63,7 @@ export default function Notes() {
+                         user_id: string;
+                         created_by_name?: string;
+                         created_by?: string;
++                        additional_info?: { followup?: boolean };
+                     }) => ({
+                         id: item.id,
+                         title: item.title,
+@@ -71,6 +72,7 @@ export default function Notes() {
+                         created_at: item.created_at,
+                         updated_at: item.updated_at,
+                         type: 'note' as const,
++                        followup: item.additional_info?.followup === true,
+                         user_id: item.user_id,
+                         created_by: item.created_by_name || item.created_by
+                     })) : [];
+@@ -85,6 +87,7 @@ export default function Notes() {
+                         created_at: lesson_plan.created_at,
+                         updated_at: lesson_plan.updated_at,
+                         type: 'lesson_plan',
++                        followup: false,
+                         user_id: lesson_plan.user_id,
+                         created_by: lesson_plan.created_by_name || lesson_plan.created_by
+                     };
+diff --git a/src/pages/Notes/types.ts b/src/pages/Notes/types.ts
+index 6f55450..a7c1b7d 100644
+--- a/src/pages/Notes/types.ts
++++ b/src/pages/Notes/types.ts
+@@ -9,6 +9,7 @@ export interface Note {
+     created_at: string;
+     updated_at?: string;
+     type: NoteType;
++    followup: boolean;
+     user_id?: string;
+     created_by?: string;
+ }
+diff --git a/src/pages/Students/StudentCard.tsx b/src/pages/Students/StudentCard.tsx
+index c3f6701..8ebe9a4 100644
+--- a/src/pages/Students/StudentCard.tsx
++++ b/src/pages/Students/StudentCard.tsx
+@@ -7,6 +7,7 @@ interface StudentCardProps {
+   lessonPlanTitle?: string;
+   lessonPlanBody?: string;
+   latestNoteTitle?: string;
++  latestNoteFollowup?: boolean;
+   isLoading?: boolean;
+ }
+ 
+@@ -17,6 +18,7 @@ export default function StudentCard({
+   lessonPlanTitle,
+   lessonPlanBody,
+   latestNoteTitle,
++  latestNoteFollowup,
+   isLoading,
+ }: StudentCardProps) {
+   const navigate = useNavigate();
+@@ -82,14 +84,21 @@ export default function StudentCard({
+           <div className="border-t border-gray-100 dark:border-gray-700"></div>
+ 
+           {/* Latest Note */}
+-          <div>
++          <div className={latestNoteFollowup ? "rounded-md border border-amber-400 bg-amber-50 p-2 dark:border-amber-600 dark:bg-amber-900/20" : ""}>
+             <span className="inline-block text-[10px] font-semibold uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-0.5">
+               Latest Note
+             </span>
+             {latestNoteTitle ? (
+-              <p className="text-sm text-gray-700 dark:text-gray-300 leading-snug">
+-                {latestNoteTitle}
+-              </p>
++              <>
++                {latestNoteFollowup && (
++                  <span className="mb-1 block text-xs font-semibold text-amber-800 dark:text-amber-200">
++                    Follow-up required
++                  </span>
++                )}
++                <p className="text-sm text-gray-700 dark:text-gray-300 leading-snug">
++                  {latestNoteTitle}
++                </p>
++              </>
+             ) : (
+               <p className="text-xs text-gray-400 dark:text-gray-500 italic">
+                 No notes
+diff --git a/src/pages/Students/StudentsPage.tsx b/src/pages/Students/StudentsPage.tsx
+index 4261bec..597cf08 100644
+--- a/src/pages/Students/StudentsPage.tsx
++++ b/src/pages/Students/StudentsPage.tsx
+@@ -85,6 +85,7 @@ export default function StudentsPage() {
+         lessonPlanTitle={summary?.lessonPlanTitle}
+         lessonPlanBody={summary?.lessonPlanBody}
+         latestNoteTitle={summary?.latestNoteTitle}
++        latestNoteFollowup={summary?.latestNoteFollowup}
+         isLoading={notesLoading}
+       />
+     );
+

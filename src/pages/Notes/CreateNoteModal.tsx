@@ -19,6 +19,7 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [type, setType] = useState<NoteType>('note');
+    const [followup, setFollowup] = useState(false);
     const [visibility, setVisibility] = useState<VisibilityLevel>('L3');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -38,6 +39,7 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
                 setTitle(initialData.title);
                 setContent(initialData.content);
                 setType(initialData.type);
+                setFollowup(initialData.followup ?? false);
                 setVisibility(initialData.visibility_level);
                 // For editing, we might not allow changing the student, but let's pre-fill it
                 setSelectedStudentId(initialData.user_id || '');
@@ -46,6 +48,7 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
                 setTitle('');
                 setContent('');
                 setType('note');
+                setFollowup(false);
                 // For students, hardcode visibility to L4
                 setVisibility(isStudent ? 'L4' : 'L3');
                 // For students, set their own ID; otherwise use prop or empty
@@ -99,6 +102,7 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
                     content,
                     visibility_level: finalVisibility,
                     type,
+                    followup: type === 'note' && followup,
                     studentId: targetStudentId
                 });
             } else {
@@ -107,6 +111,7 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
                     content,
                     visibility_level: finalVisibility,
                     type,
+                    followup: type === 'note' && followup,
                     studentId: targetStudentId
                 });
             }
@@ -183,6 +188,18 @@ export default function CreateNoteModal({ isOpen, onClose, onSuccess, studentId,
                             placeholder="Enter title"
                         />
                     </div>
+
+                    {type === 'note' && (
+                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <input
+                                type="checkbox"
+                                checked={followup}
+                                onChange={(e) => setFollowup(e.target.checked)}
+                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            />
+                            Follow-up required
+                        </label>
+                    )}
 
                     {/* Visibility Level - hidden for students */}
                     {!isStudent && (

@@ -63,6 +63,7 @@ export default function Notes() {
                         user_id: string;
                         created_by_name?: string;
                         created_by?: string;
+                        additional_info?: { followup?: boolean };
                     }) => ({
                         id: item.id,
                         title: item.title,
@@ -71,6 +72,7 @@ export default function Notes() {
                         created_at: item.created_at,
                         updated_at: item.updated_at,
                         type: 'note' as const,
+                        followup: item.additional_info?.followup === true,
                         user_id: item.user_id,
                         created_by: item.created_by_name || item.created_by
                     })) : [];
@@ -85,6 +87,7 @@ export default function Notes() {
                         created_at: lesson_plan.created_at,
                         updated_at: lesson_plan.updated_at,
                         type: 'lesson_plan',
+                        followup: false,
                         user_id: lesson_plan.user_id,
                         created_by: lesson_plan.created_by_name || lesson_plan.created_by
                     };
