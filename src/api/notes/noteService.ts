@@ -7,6 +7,7 @@ export interface CreateNotePayload {
     content: string;
     visibility_level: string;
     type: string;
+    followup: boolean;
     studentId?: string;
 }
 
@@ -39,7 +40,8 @@ export const createNote = async (note: CreateNotePayload): Promise<Note> => {
         tags: [],
         visibility: mapVisibilityToInt(note.visibility_level),
         additional_info: {
-            created_type: note.type // Store original type if needed
+            created_type: note.type,
+            followup: note.followup,
         }
     };
 
@@ -55,7 +57,8 @@ export const updateNote = async (id: string, note: CreateNotePayload): Promise<N
         primary_tag: note.type === 'lesson_plan' ? 'Lesson Plan' : 'General',
         visibility: mapVisibilityToInt(note.visibility_level),
         additional_info: {
-            created_type: note.type
+            created_type: note.type,
+            followup: note.followup,
         }
     };
     const response = await api.patch(`/notes/${id}`, payload);

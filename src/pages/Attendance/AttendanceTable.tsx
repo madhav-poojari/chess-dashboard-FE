@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { Attendance } from "../../api/attendance/service";
 
 interface AttendanceTableProps {
@@ -30,6 +31,23 @@ export default function AttendanceTable({
   }
 
   const isStudentView = viewType === "student_overview";
+  const studentGroups = isStudentView
+    ? [{ studentId: "all", label: "", records: attendances }]
+    : Array.from(
+        attendances.reduce((groups, attendance) => {
+          const records = groups.get(attendance.student_id) ?? [];
+          records.push(attendance);
+          groups.set(attendance.student_id, records);
+          return groups;
+        }, new Map<string, Attendance[]>()),
+        ([studentId, records]) => ({
+          studentId,
+          label: records[0].student
+            ? `${records[0].student.first_name} ${records[0].student.last_name}`
+            : studentId,
+          records,
+        }),
+      );
 
   return (
     <div className="overflow-x-auto">
@@ -38,9 +56,9 @@ export default function AttendanceTable({
           <tr>
             <th className="text-left py-2 pr-4 text-gray-500 font-medium">Date</th>
             <th className="text-left py-2 pr-4 text-gray-500 font-medium">Type</th>
-            <th className="text-left py-2 pr-4 text-gray-500 font-medium">
-              {isStudentView ? "Coach" : "Student"}
-            </th>
+            {isStudentView && (
+              <th className="text-left py-2 pr-4 text-gray-500 font-medium">Coach</th>
+            )}
             <th className="text-left py-2 pr-4 text-gray-500 font-medium">Verified</th>
             <th className="text-left py-2 pr-4 text-gray-500 font-medium">Highlights</th>
             <th className="text-left py-2 pr-4 text-gray-500 font-medium">Homework</th>
@@ -48,50 +66,63 @@ export default function AttendanceTable({
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-          {attendances.map((a) => (
-            <tr key={a.id}>
-              <td className="py-3 pr-4 text-gray-800 dark:text-white/90">
-                {formatDateOnly(a.date)}
-              </td>
-              <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
-                {a.class_type}
-              </td>
-              <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
-                {isStudentView
-                  ? a.coach
-                    ? `${a.coach.first_name} ${a.coach.last_name}`
-                    : a.coach_id
-                  : a.student
-                  ? `${a.student.first_name} ${a.student.last_name}`
-                  : a.student_id}
-              </td>
-              <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
-                {a.is_verified ? "Yes" : "No"}
-              </td>
-              <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
-                {a.class_highlights || "-"}
-              </td>
-              <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
-                {a.homework || "-"}
-              </td>
-              <td className="py-3 pr-4">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => onEdit(a)}
-                    className="text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+          {studentGroups.map((group) => (
+            <Fragment key={group.studentId}>
+              {!isStudentView && (
+                <tr className="bg-gray-50 dark:bg-white/[0.03]">
+                  <th
+                    colSpan={6}
+                    scope="rowgroup"
+                    className="py-2 pr-4 text-left font-semibold text-gray-800 dark:text-white/90"
                   >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => onDelete(a)}
-                    disabled={deletingId === a.id}
-                    className="text-xs font-medium text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50"
-                  >
-                    {deletingId === a.id ? "Deleting..." : "Delete"}
-                  </button>
-                </div>
-              </td>
-            </tr>
+                    {group.label}
+                  </th>
+                </tr>
+              )}
+              {group.records.map((a) => (
+                <tr key={a.id}>
+                  <td className="py-3 pr-4 text-gray-800 dark:text-white/90">
+                    {formatDateOnly(a.date)}
+                  </td>
+                  <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
+                    {a.class_type}
+                  </td>
+                  {isStudentView && (
+                    <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
+                      {a.coach
+                        ? `${a.coach.first_name} ${a.coach.last_name}`
+                        : a.coach_id}
+                    </td>
+                  )}
+                  <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
+                    {a.is_verified ? "Yes" : "No"}
+                  </td>
+                  <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
+                    {a.class_highlights || "-"}
+                  </td>
+                  <td className="py-3 pr-4 text-gray-700 dark:text-gray-200">
+                    {a.homework || "-"}
+                  </td>
+                  <td className="py-3 pr-4">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => onEdit(a)}
+                        className="text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => onDelete(a)}
+                        disabled={deletingId === a.id}
+                        className="text-xs font-medium text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50"
+                      >
+                        {deletingId === a.id ? "Deleting..." : "Delete"}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </Fragment>
           ))}
         </tbody>
       </table>

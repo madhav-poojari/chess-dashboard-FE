@@ -9,6 +9,7 @@ export interface Note {
     created_at: string;
     updated_at?: string;
     type: NoteType;
+    followup: boolean;
     user_id?: string;
     created_by?: string;
 }

@@ -14,10 +14,13 @@ import { queryKeys } from "../../constants/queryKeys";
 
 type TabType = "student_overview" | "coach_overview";
 
-function monthInputDefault(): string {
+function monthInputDefault(usePreviousMonth: boolean): string {
   const d = new Date();
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const date = usePreviousMonth
+    ? new Date(d.getFullYear(), d.getMonth() - 1, 1)
+    : d;
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
   return `${yyyy}-${mm}`;
 }
 
@@ -37,7 +40,9 @@ export default function AttendancePage() {
   const canSeeOthers = role === UserRole.COACH;
 
   const [activeTab, setActiveTab] = useState<TabType>("student_overview");
-  const [monthValue, setMonthValue] = useState<string>(monthInputDefault());
+  const [monthValue, setMonthValue] = useState<string>(
+    monthInputDefault(role === UserRole.ADMIN),
+  );
 
   const [selectedStudentId, setSelectedStudentId] = useState<string>("");
   const [selectedCoachId, setSelectedCoachId] = useState<string>("");

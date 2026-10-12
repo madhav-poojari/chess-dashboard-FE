@@ -7,6 +7,7 @@ interface StudentCardProps {
   lessonPlanTitle?: string;
   lessonPlanBody?: string;
   latestNoteTitle?: string;
+  latestNoteFollowup?: boolean;
   isLoading?: boolean;
 }
 
@@ -17,6 +18,7 @@ export default function StudentCard({
   lessonPlanTitle,
   lessonPlanBody,
   latestNoteTitle,
+  latestNoteFollowup,
   isLoading,
 }: StudentCardProps) {
   const navigate = useNavigate();
@@ -82,14 +84,21 @@ export default function StudentCard({
           <div className="border-t border-gray-100 dark:border-gray-700"></div>
 
           {/* Latest Note */}
-          <div>
+          <div className={latestNoteFollowup ? "rounded-md border border-amber-400 bg-amber-50 p-2 dark:border-amber-600 dark:bg-amber-900/20" : ""}>
             <span className="inline-block text-[10px] font-semibold uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-0.5">
               Latest Note
             </span>
             {latestNoteTitle ? (
-              <p className="text-sm text-gray-700 dark:text-gray-300 leading-snug">
-                {latestNoteTitle}
-              </p>
+              <>
+                {latestNoteFollowup && (
+                  <span className="mb-1 block text-xs font-semibold text-amber-800 dark:text-amber-200">
+                    Follow-up required
+                  </span>
+                )}
+                <p className="text-sm text-gray-700 dark:text-gray-300 leading-snug">
+                  {latestNoteTitle}
+                </p>
+              </>
             ) : (
               <p className="text-xs text-gray-400 dark:text-gray-500 italic">
                 No notes
